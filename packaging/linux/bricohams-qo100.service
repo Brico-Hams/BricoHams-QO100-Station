@@ -1,0 +1,33 @@
+[Unit]
+Description=BricoHams QO-100 Station
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bricohams
+Group=bricohams
+WorkingDirectory=/var/lib/bricohams-qo100
+EnvironmentFile=/etc/bricohams-qo100/env
+Environment=BRICOHAMS_CONFIG=/etc/bricohams-qo100/config.json
+ExecStart=/opt/bricohams-qo100/node/bin/node /opt/bricohams-qo100/src/server/index.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=false
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ReadWritePaths=/var/lib/bricohams-qo100
+ReadOnlyPaths=/etc/bricohams-qo100
+
+[Install]
+WantedBy=multi-user.target

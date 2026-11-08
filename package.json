@@ -5,18 +5,57 @@
   "license": "GPL-3.0-or-later",
   "author": "BricoHams",
   "type": "module",
-  "main": "src/server/index.js",
+  "main": "electron/main.js",
   "engines": {
     "node": ">=24"
   },
   "scripts": {
     "start": "node src/server/index.js",
+    "desktop": "electron .",
+    "dist:win": "electron-builder --win --x64 --publish never",
+    "dist:linux": "electron-builder --linux AppImage --x64 --arm64 --publish never",
     "test": "node --test \"test/**/*.test.js\"",
     "test:unit": "node --test \"test/unit/*.test.js\"",
     "test:functional": "node --test \"test/functional/*.test.js\""
   },
+  "build": {
+    "appId": "com.bricohams.qo100station",
+    "productName": "BricoHams QO-100 Station",
+    "files": [
+      "src/**",
+      "electron/**",
+      "plugins/**",
+      "docs/help/**",
+      "config.example.json",
+      "package.json",
+      "NOTICE.md",
+      "LICENSE"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "docs/help/**",
+      "config.example.json"
+    ],
+    "directories": { "output": "dist" },
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "linux": {
+      "target": [{ "target": "AppImage", "arch": ["x64", "arm64"] }],
+      "category": "HamRadio"
+    }
+  },
   "dependencies": {
     "openid-client": "6.8.9",
     "ws": "8.22.1"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
   }
 }

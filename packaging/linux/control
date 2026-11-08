@@ -1,0 +1,13 @@
+Package: bricohams-qo100
+Version: @VERSION@
+Section: hamradio
+Priority: optional
+Architecture: @ARCH@
+Depends: libc6
+Recommends: sdrangel, tqsl
+Maintainer: BricoHams <noreply@bricohams.invalid>
+Homepage: https://github.com/BricoHams/BricoHams-QO100-Station
+Description: BricoHams QO-100 station (headless server)
+ Remote TX/RX web control for a QO-100 station on top of SDRangel.
+ Bundles its own Node.js runtime. Transmission stays disabled until
+ the station owner enables it in /etc/bricohams-qo100/config.json.

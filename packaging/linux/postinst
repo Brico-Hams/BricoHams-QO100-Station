@@ -1,0 +1,38 @@
+#!/bin/sh
+set -e
+
+APP=/opt/bricohams-qo100
+CONF_DIR=/etc/bricohams-qo100
+DATA_DIR=/var/lib/bricohams-qo100
+
+if [ "$1" = "configure" ]; then
+  if ! getent passwd bricohams >/dev/null; then
+    adduser --system --group --home "$DATA_DIR" --no-create-home --shell /usr/sbin/nologin bricohams
+  fi
+
+  mkdir -p "$CONF_DIR" "$DATA_DIR"
+  chown bricohams:bricohams "$DATA_DIR"
+  chmod 0750 "$DATA_DIR"
+  chown root:bricohams "$CONF_DIR"
+  chmod 0750 "$CONF_DIR"
+
+  if [ ! -f "$CONF_DIR/config.json" ]; then
+    cp "$APP/config.example.json" "$CONF_DIR/config.json"
+  fi
+  chown root:bricohams "$CONF_DIR/config.json"
+  chmod 0640 "$CONF_DIR/config.json"
+
+  # Secrets live only here (GOOGLE_CLIENT_SECRET, BRICOHAMS_SECRETS_KEY); the owner fills them in.
+  if [ ! -f "$CONF_DIR/env" ]; then
+    : > "$CONF_DIR/env"
+  fi
+  chown root:bricohams "$CONF_DIR/env"
+  chmod 0600 "$CONF_DIR/env"
+
+  systemctl daemon-reload >/dev/null 2>&1 || true
+  # Enable only; the service is started by the owner after editing the configuration.
+  systemctl enable bricohams-qo100.service >/dev/null 2>&1 || true
+  echo "BricoHams QO-100: edit $CONF_DIR/config.json and $CONF_DIR/env, then start the bricohams-qo100 service manually."
+fi
+
+exit 0
