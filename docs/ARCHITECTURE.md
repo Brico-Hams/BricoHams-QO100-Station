@@ -13,7 +13,7 @@ SDRangel does all DSP and talks to the SDR hardware; BricoHams adds authenticati
 | `src/auth/` | Google OIDC login (`oidc.js`), flow + CSRF + roles (`index.js`), sessions (`sessions.js`), cookies (`cookies.js`) |
 | `src/ptt/` | PTT state machine (`index.js`), JSON-lines audit log (`audit.js`) |
 | `src/sdrangel/` | REST client (`client.js`), PTT driver (`ptt-driver.js`), in-process mock (`mock-server.js`) |
-| `src/modes/` | Frequency maths, band plan, `station.js` (tune/mode/correction), decoder interface and stubs |
+| `src/modes/` | Frequency maths, band plan, `station.js` (tune/mode/correction), decoders: `cw-decoder.js` (CW), `ft8-*.js` (FT8/FT4 decode, encode, synth), `slot-decoder.js`, `decode-service.js` (RX audio tap to WebSocket `decode` messages) |
 | `src/beacon/` | Beacon peak estimator, filter and controller |
 | `src/webrtc/` | (historical name, **no WebRTC**) RX/TX audio over WSS, spectrum source/feed, binary frames |
 | `src/log/` | SQLite logbook, ADIF, LoTW (TQSL), QRZ, secret box, HTTP routes |
@@ -54,7 +54,7 @@ stateDiagram-v2
   TX_ON --> TX_OFF: heartbeat watchdog / TOT / disconnect
   TX_ON --> LOCKOUT: driver error or unconfirmed off
   ARMED --> LOCKOUT: fault
-  LOCKOUT --> TX_OFF: ownerReset (owner, loopback client)
+  LOCKOUT --> TX_OFF: ownerReset (owner + one-time code)
 ```
 
 The carrier is cut before state, audit and events are updated. Details: [ADR 0005](adr/0005-ptt-fail-safe-state-machine.md).
@@ -172,6 +172,7 @@ File path: `BRICOHAMS_CONFIG` (default `./config.json`). Source of truth: `src/s
 | `audio.txUdp` | `127.0.0.1:9999` | - | UDP address of the SSBMod audio input |
 | `audio.spectrumUrl` | `ws://127.0.0.1:8887` | - | SDRangel spectrum WS; `ws:` only on loopback, else `wss:` |
 | `auditLogPath` | `./data/audit.log` | - | PTT audit file |
+| `resetCodePath` | `<dir of auditLogPath>/ptt-reset-code` | - | One-time LOCKOUT reset code file (mode 0600) |
 | `logbook.path` | `./data/logbook.db` | - | SQLite file |
 | `logbook.lotw.tqslPath` / `stationLocation` | unset | - | Enables LoTW; location must not start with `-` |
 
@@ -189,7 +190,7 @@ All JSON. Bodies max 4096 bytes with `Content-Type: application/json`. State-cha
 | `POST /auth/logout` | session + CSRF | End session, close its sockets (code 4401) |
 | `GET /api/me` | any role | `{user, csrfToken}` |
 | `GET /api/ptt` | any role | PTT snapshot |
-| `POST /api/ptt/reset` | owner + CSRF + loopback client | Clear LOCKOUT |
+| `POST /api/ptt/reset` | owner + CSRF + one-time code `{code}` | Clear LOCKOUT (code in `resetCodePath`, rotated on each LOCKOUT) |
 | `GET /api/status` | any role | `{station, beacon, ptt}` |
 | `GET /api/beacon` | any role | Beacon status |
 | `POST /api/tune` | operator + CSRF | `{downlinkHz}` |

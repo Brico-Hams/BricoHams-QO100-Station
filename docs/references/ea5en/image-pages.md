@@ -1,0 +1,8 @@
+Descriptions (written by the supervisor) of the PDF pages that contain only images:
+- p35 "Definición Converter SDRconsole": SDR Console radio definitions with an RTL Dongle; "Converter selection" enabled and a down-converter defined with the LNB LO (9750 MHz offset) so the dial shows 10 GHz downlink instead of the ~739 MHz IF.
+- p36: SDR Console receiving the IF at 739.870.750 MHz; spectrum + waterfall of the NB transponder with the beacons visible.
+- p37 "RX + AIRSPY SDR": Airspy SDR software (SDR#-style) tuned at IF 739.771 MHz, and a second capture showing 10.489.750.000 after setting the converter offset; CW/digital traces in the waterfall.
+- p39 "Telemetría QO-100 AO40Rcv": AO40Rcv v2.04 decoding the QO-100 (AMSAT-DL) telemetry beacon: main status frames, receivers/transmitters, voltages, temperatures, CRC sync and FEC block counters.
+- p40 "Esquema sencillo para Rx QO-100": dish -> LNB (e.g. Bullseye, 10 GHz in) -> 75 ohm TV coax -> bias-T (+12 V for SSB/NB vertical, +18 V for DATV/horizontal) -> SDR (RTL-SDR class) -> USB -> PC, IF ~739 MHz. Indicative costs on slide: SDR $30-300, bias-T $5-15, Bullseye LNB $30, dish $80-120 (recommended min 80 cm, >1 m better on weak signals), stand $30-120.
+- p45 "Sistemas completos": rooftop offset dish with 2.4 GHz feed at the focus, and an outdoor weatherproof box housing ADALM-Pluto, PA and power supply.
+- p47: photos of real station boxes: ADALM-Pluto, HackRF One, heatsinked 2.4 GHz PA, mini amplifier, up-converter, PC power supply; labelled box: main switch, power supply, bias injector, air outlet fan, attenuator, amplifier, air inlet fan, up-converter.

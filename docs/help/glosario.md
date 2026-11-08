@@ -18,7 +18,7 @@
 | **Heartbeat** | Latido: mensaje cada 500 ms que demuestra que sigues conectado; si falta, se corta la portadora. |
 | **Watchdog** | Vigilante que corta la transmisión si falta el latido. |
 | **TOT** | Temporizador de transmisión máxima (600 s por defecto). |
-| **LOCKOUT** | Bloqueo de seguridad tras un fallo; solo un `owner` local lo quita. |
+| **LOCKOUT** | Bloqueo de seguridad tras un fallo; solo un `owner` con el código local de un solo uso lo quita. |
 | **Carga ficticia** | Resistencia 50 Ω que disipa la potencia sin radiar. |
 | **Allowlist** | Lista de correos permitidos con indicativo y rol. |
 | **Rol** | `listener`, `operator` o `owner`. |

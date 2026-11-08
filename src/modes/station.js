@@ -1,6 +1,6 @@
 import { BEACON_DOWNLINK_HZ, DEFAULT_LNB_LO_HZ, downlinkToIf, downlinkToUplink } from './frequencies.js';
 import { BAND_PLAN, DEFAULT_DIAL_HZ, segmentFor } from './bandplan.js';
-import { createDecoderRegistry } from './decoders.js';
+import { createDefaultDecoderRegistry } from './decoders.js';
 
 /** Supported operating modes. */
 export const MODES = Object.freeze(['USB', 'CW', 'FT8', 'FT4']);
@@ -43,7 +43,7 @@ export class StationError extends Error {
  */
 export function createStation({
   client, rxDeviceSet = 0, txDeviceSet = 1, lnbLoHz = DEFAULT_LNB_LO_HZ, applyToTx = true,
-  isTxActive = () => false, decoders = createDecoderRegistry(), logger = console,
+  isTxActive = () => false, decoders = createDefaultDecoderRegistry(), logger = console,
 }) {
   const state = { mode: null, downlinkHz: null, correctionHz: 0, correctionSource: 'none' };
   const channels = { rx: null, tx: null };

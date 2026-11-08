@@ -21,7 +21,7 @@ const MAX_DATAGRAM = 65_535;
  *   highWaterBytes?: number, createSocket?: () => import('node:dgram').Socket, logger?: {error: Function}}} [opts]
  * `channels: 2` takes the left channel of interleaved stereo (SDRangel can send stereo UDP audio).
  * @returns {{start(): Promise<{port: number}>, stop(): Promise<void>, addListener(l: AudioListener): () => void,
- *   ingest(datagram: Uint8Array): void, stats(): object}}
+ *   addTap(fn: (samples: Int16Array) => void): () => void, ingest(datagram: Uint8Array): void, stats(): object}}
  */
 export function createRxAudio({
   host = '127.0.0.1', port = 9998, inRate = 48_000, outRate = 12_000, channels = 1, frameSamples = 240,
@@ -29,12 +29,21 @@ export function createRxAudio({
 } = {}) {
   const resampler = new Resampler(inRate, outRate);
   const listeners = new Set();
+  const taps = new Set();
   const counters = { datagrams: 0, badDatagrams: 0, frames: 0, sent: 0, dropped: 0 };
   let pending = [];
   let seq = 0;
   let socket = null;
 
   function emit(samples) {
+    for (const tap of taps) {
+      try {
+        tap(samples);
+      } catch (err) {
+        logger.error('rx-audio: tap failed:', err.message);
+      }
+    }
+    if (listeners.size === 0) return;
     const frame = encodeAudioFrame(FrameKind.RX_AUDIO, seq++, outRate, samples);
     counters.frames++;
     for (const l of listeners) {
@@ -59,7 +68,7 @@ export function createRxAudio({
     }
     counters.datagrams++;
     // Nobody is listening: skip the filter work, but keep the resampler state consistent by resetting it.
-    if (listeners.size === 0) {
+    if (listeners.size === 0 && taps.size === 0) {
       resampler.reset();
       pending = [];
       return;
@@ -113,6 +122,15 @@ export function createRxAudio({
     addListener(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
+    },
+    /**
+     * Subscribe a local consumer (decoders) to the resampled stream; it keeps the pipeline running without listeners.
+     * @param {(samples: Int16Array) => void} fn Called with each 12 kHz s16 mono frame (240 samples by default). Must not block.
+     * @returns {() => void} Remove function.
+     */
+    addTap(fn) {
+      taps.add(fn);
+      return () => taps.delete(fn);
     },
     ingest,
     /** @returns {{datagrams: number, badDatagrams: number, frames: number, sent: number, dropped: number, listeners: number}} */

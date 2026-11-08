@@ -51,18 +51,22 @@ export class Ptt extends EventEmitter {
   #txStartedAt = null;
   #timers = { watchdog: null, armed: null, tot: null };
   #lockoutReason = null;
+  #resetCode;
 
   /**
    * @param {{tx: {enabled: boolean, totSeconds: number, heartbeatTimeoutMs: number, armedTimeoutSeconds?: number},
-   *   driver: PttDriver, audit?: {record(e: object): void}, clock?: object, logger?: {error(...a: unknown[]): void}}} opts
+   *   driver: PttDriver, audit?: {record(e: object): void}, clock?: object, logger?: {error(...a: unknown[]): void},
+   *   resetCode?: {rotate(): unknown, check(code: unknown): boolean, consume(): void}}} opts
+   * `resetCode` (see reset-code.js) is rotated on every LOCKOUT; without it a LOCKOUT can only be cleared by restarting.
    */
-  constructor({ tx, driver, audit = { record() {} }, clock = realClock, logger = console }) {
+  constructor({ tx, driver, audit = { record() {} }, clock = realClock, logger = console, resetCode = null }) {
     super();
     this.#tx = { armedTimeoutSeconds: 120, ...tx };
     this.#driver = driver;
     this.#audit = audit;
     this.#clock = clock;
     this.#logger = logger;
+    this.#resetCode = resetCode;
   }
 
   /** @returns {string} Current state. */
@@ -202,19 +206,27 @@ export class Ptt extends EventEmitter {
   }
 
   /**
-   * Clear LOCKOUT. Only an owner acting from the local machine may do this.
+   * Clear LOCKOUT. Needs an owner AND the one-time code written to the server's data directory when the LOCKOUT began
+   * (proof of local access; the peer address is deliberately not used, a same-host reverse proxy makes every request local).
    * @param {Actor} actor
-   * @param {{local: boolean}} ctx `local` must be true only for loopback requests.
-   * @returns {Promise<{ok: boolean, reason?: string}>}
+   * @param {{code?: unknown}} [ctx] The code typed by the owner.
+   * @returns {Promise<{ok: boolean, reason?: 'not_locked'|'forbidden'|'reset_unavailable'|'bad_code'|'driver_error'}>}
    */
-  async ownerReset(actor, { local }) {
+  async ownerReset(actor, { code } = {}) {
     if (this.#state !== PttState.LOCKOUT) return { ok: false, reason: 'not_locked' };
     if (actor?.role !== 'owner') return { ok: false, reason: 'forbidden' };
-    if (local !== true) return { ok: false, reason: 'not_local' };
+    if (!this.#resetCode) return { ok: false, reason: 'reset_unavailable' };
+    if (!this.#resetCode.check(code)) {
+      this.#record({ event: 'lockout_reset_denied', reason: 'bad_code', email: actor.email, callsign: actor.callsign });
+      return { ok: false, reason: 'bad_code' };
+    }
+    // Consume before the first await so concurrent requests cannot reuse the same code.
+    this.#resetCode.consume();
     try {
       await this.#driver.setTx(false);
     } catch (err) {
       this.#logger.error('ptt: driver off failed during reset:', err.message);
+      this.#rotateResetCode();
       return { ok: false, reason: 'driver_error' };
     }
     this.#lockoutReason = null;
@@ -244,6 +256,14 @@ export class Ptt extends EventEmitter {
       this.#audit.record(entry);
     } catch (err) {
       this.#logger.error('ptt: audit write failed:', err.message);
+    }
+  }
+
+  #rotateResetCode() {
+    try {
+      this.#resetCode?.rotate();
+    } catch (err) {
+      this.#logger.error('ptt: reset code rotation failed:', err.message);
     }
   }
 
@@ -294,6 +314,7 @@ export class Ptt extends EventEmitter {
     this.#holder = null;
     if (lockout) {
       this.#lockoutReason = reason;
+      this.#rotateResetCode();
       this.#record({ event: 'lockout', reason, durationMs, ...who });
       this.#setState(PttState.LOCKOUT, reason);
     } else {
@@ -310,6 +331,7 @@ export class Ptt extends EventEmitter {
     this.dispose();
     this.#holder = null;
     this.#lockoutReason = reason;
+    this.#rotateResetCode();
     this.#record({ event: 'lockout', reason });
     this.#setState(PttState.LOCKOUT, reason);
   }

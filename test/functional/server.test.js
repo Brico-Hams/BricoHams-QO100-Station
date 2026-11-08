@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { WebSocket } from 'ws';
@@ -35,7 +35,7 @@ async function start() {
     audit: createFileAudit({ path: config.auditLogPath }),
   });
   const { port, url } = await app.listen();
-  return { app, oidc, driver, base: url, port };
+  return { app, oidc, driver, base: url, port, config };
 }
 
 function statusWithHost(ctx, host) {
@@ -232,16 +232,29 @@ test('malformed WebSocket messages are rejected without affecting state', () => 
   ws.close();
 }));
 
-test('LOCKOUT reset over HTTP needs owner role, CSRF and a local request', () => withApp(async (ctx) => {
+test('LOCKOUT reset over HTTP needs owner, CSRF and the one-time local code (proxy-style requests included)', () => withApp(async (ctx) => {
   await ctx.app.ptt.fault('test');
   const op = await loggedIn(ctx, 'op1@example.org');
   const own = await loggedIn(ctx, 'owner@example.org');
-  const post = (s, csrf = true) => fetch(`${ctx.base}/api/ptt/reset`, {
-    method: 'POST', headers: { cookie: s.cookie, ...(csrf ? { 'x-csrf-token': s.csrf } : {}) },
+  const post = (s, body, csrf = true) => fetch(`${ctx.base}/api/ptt/reset`, {
+    method: 'POST',
+    headers: { cookie: s.cookie, 'content-type': 'application/json', ...(csrf ? { 'x-csrf-token': s.csrf } : {}) },
+    body: JSON.stringify(body),
   });
-  assert.equal((await post(op)).status, 403);
-  assert.equal((await post(own, false)).status, 403);
+  const code = readFileSync(ctx.config.resetCodePath, 'utf8').trim();
+  assert.match(code, /^\d{8}$/);
+  assert.equal((await post(op, { code })).status, 403);
+  assert.equal((await post(own, { code }, false)).status, 403);
+  // Every request here comes from 127.0.0.1, like behind a same-host reverse proxy: without the code it must fail.
+  assert.equal((await post(own, {})).status, 400);
+  const wrong = code === '00000000' ? '00000001' : '00000000';
+  assert.equal((await post(own, { code: wrong })).status, 403);
   assert.equal(ctx.app.ptt.state, 'LOCKOUT');
-  assert.deepEqual(await (await post(own)).json(), { ok: true });
+  assert.deepEqual(await (await post(own, { code })).json(), { ok: true });
   assert.equal(ctx.app.ptt.state, 'TX_OFF');
+  // Single use: a new LOCKOUT rotates the code and the old one is dead.
+  await ctx.app.ptt.fault('again');
+  assert.equal((await post(own, { code })).status, 403);
+  const next = readFileSync(ctx.config.resetCodePath, 'utf8').trim();
+  assert.equal((await post(own, { code: next })).status, 200);
 }));

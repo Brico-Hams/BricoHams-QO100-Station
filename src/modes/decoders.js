@@ -1,3 +1,6 @@
+import { createCwDecoder } from './cw-decoder.js';
+import { createInlineExecutor, createSlotDecoder, createWorkerExecutor } from './slot-decoder.js';
+
 /** Raised by the stub decoders so callers can show "decoder not available" instead of silent nothing. */
 export class DecoderUnavailableError extends Error {
   /** @param {string} mode */
@@ -13,8 +16,11 @@ export class DecoderUnavailableError extends Error {
  * @typedef {object} Decoder
  * @property {string} mode FT8, FT4 or CW.
  * @property {boolean} available False for the stub.
- * @property {(pcmFrame: Float32Array|Int16Array, utcSlot: {index: number, startMs: number}) => Array<{text: string, snrDb?: number, dtSec?: number, freqHz?: number}>} decode
- *   Decode one audio frame (mono, 12 kHz for FT8/FT4) belonging to a UTC slot. Returns decoded messages, possibly none.
+ * @property {(pcmFrame: Float32Array|Int16Array, utcSlot: {index: number, startMs: number}, nowMs?: number) => Array<object>|Promise<Array<object>>} decode
+ *   Feed one audio frame (mono, 12 kHz). CW returns new text chunks `{text, wpm, freqHz}`; FT8/FT4 return the
+ *   messages `{text, type, snrDb, dtSec, freqHz}` of a slot when it is decoded, otherwise an empty array.
+ * @property {() => Array<object>|Promise<Array<object>>} [flush] Force pending output.
+ * @property {() => Promise<void>|void} [close] Release workers.
  */
 
 /**
@@ -49,7 +55,7 @@ export function utcSlot(mode, nowMs = Date.now()) {
 
 /**
  * Registry of decoders by mode; unregistered modes get the unavailable stub.
- * @returns {{register(decoder: Decoder): void, get(mode: string): Decoder}}
+ * @returns {{register(decoder: Decoder): void, get(mode: string): Decoder, close(): Promise<void>}}
  */
 export function createDecoderRegistry() {
   const map = new Map();
@@ -61,5 +67,24 @@ export function createDecoderRegistry() {
     get(mode) {
       return map.get(mode) ?? createUnavailableDecoder(mode);
     },
+    async close() {
+      await Promise.all([...map.values()].map((d) => d.close?.()));
+    },
   };
 }
+
+/**
+ * Registry with the real decoders: CW (stream), FT8 and FT4 (UTC slots).
+ * @param {{useWorkers?: boolean}} [opts] `useWorkers` runs FT8/FT4 decoding in a worker thread (production);
+ *   the default decodes inline, which blocks the event loop for about a second per slot.
+ * @returns {ReturnType<typeof createDecoderRegistry>}
+ */
+export function createDefaultDecoderRegistry({ useWorkers = false } = {}) {
+  const registry = createDecoderRegistry();
+  registry.register(createCwDecoder());
+  for (const mode of ['FT8', 'FT4']) {
+    registry.register(createSlotDecoder({ mode, executor: useWorkers ? createWorkerExecutor() : createInlineExecutor() }));
+  }
+  return registry;
+}
+

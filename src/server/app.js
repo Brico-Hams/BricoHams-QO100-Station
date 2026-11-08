@@ -10,17 +10,17 @@ import {
   AuthError, LOGIN_COOKIE, SESSION_COOKIE, createAuth, createGoogleOidc, serializeCookie, parseCookies,
 } from '../auth/index.js';
 import { createPtt } from '../ptt/index.js';
+import { createResetCode } from '../ptt/reset-code.js';
 import { createFileAudit } from '../ptt/audit.js';
 import { createSdrangelClient, SdrangelError } from '../sdrangel/client.js';
 import { createSdrangelPttDriver } from '../sdrangel/ptt-driver.js';
-import { createStation, StationError } from '../modes/index.js';
+import { createStation, StationError, createDefaultDecoderRegistry, createDecodeService } from '../modes/index.js';
 import { createBeaconController } from '../beacon/index.js';
 import { LogError, createLogStore } from '../log/store.js';
 import { createLotwUploader } from '../log/lotw.js';
 import { createQrzClient } from '../log/qrz.js';
 import { createSecretBox } from '../log/secrets.js';
 import { createLogApi } from '../log/routes.js';
-import { isLoopbackHost } from './config.js';
 import { createRxAudio } from '../webrtc/rx-audio.js';
 import { createTxAudio, createUdpTxSink } from '../webrtc/tx-audio.js';
 import { createSpectrumFeed, createSpectrumSource } from '../webrtc/spectrum.js';
@@ -91,10 +91,6 @@ function sendHtml(res, status, html, extra = {}) {
   res.end(html);
 }
 
-function isLocalRequest(req) {
-  return isLoopbackHost(req.socket.remoteAddress ?? '');
-}
-
 const MAX_JSON_BYTES = 4096;
 
 class BadRequest extends Error {}
@@ -123,7 +119,7 @@ async function readJson(req) {
  * @param {Readonly<object>} config Validated config (see config.js).
  * @param {{oidc?: object, driver?: object, audit?: object, clock?: object, publicDir?: string, sdrangel?: object,
  *   spectrumSource?: () => Promise<{powersDb: ArrayLike<number>, centerHz: number, binHz: number}|null>, beaconAutoStart?: boolean,
- *   rxAudio?: object, txSink?: object, spectrum?: object,
+ *   rxAudio?: object, txSink?: object, spectrum?: object, resetCode?: object, decoders?: object, decodeNow?: () => number,
  *   logStore?: object, lotwUploader?: object, qrz?: object, qrzFetch?: typeof fetch,
  *   logger?: {error: Function, info?: Function}, tlsCredentials?: {cert: Buffer, key: Buffer}}} [deps] Injectable collaborators for tests.
  * @returns {{server: import('node:http').Server, ptt: object, auth: object, station: object, beacon: object|null, listen: () => Promise<{port: number, url: string}>, close: () => Promise<void>}}
@@ -137,13 +133,16 @@ export function createApp(config, deps = {}) {
   const oidc = deps.oidc ?? createGoogleOidc(config.google);
   const audit = deps.audit ?? createFileAudit({ path: config.auditLogPath });
   const sdr = deps.sdrangel ?? createSdrangelClient({ baseUrl: config.sdrangel.baseUrl });
+  const resetCode = deps.resetCode ?? createResetCode({ path: config.resetCodePath, logger });
   const ptt = createPtt({
     tx: config.tx,
     driver: deps.driver ?? createSdrangelPttDriver({ client: sdr, txDeviceSet: config.station.txDeviceSet }),
     audit,
     clock: deps.clock,
     logger,
+    resetCode,
   });
+  const decoders = deps.decoders ?? createDefaultDecoderRegistry({ useWorkers: true });
   const station = createStation({
     client: sdr,
     rxDeviceSet: config.station.rxDeviceSet,
@@ -151,12 +150,16 @@ export function createApp(config, deps = {}) {
     lnbLoHz: config.station.lnbLoHz,
     applyToTx: config.station.applyCorrectionToTx,
     isTxActive: () => ptt.state === 'TX_ON',
+    decoders,
     logger,
   });
   const sourceEnabled = config.audio.enabled;
   const rxAudio = deps.rxAudio ?? (sourceEnabled
     ? createRxAudio({ host: config.audio.rxUdp.host, port: config.audio.rxUdp.port, logger })
     : null);
+  const decodeService = createDecodeService({
+    rxAudio, station, decoders, publish: (msg) => broadcast(msg), now: deps.decodeNow, logger,
+  });
   const spectrum = deps.spectrum ?? (sourceEnabled
     ? createSpectrumSource({ url: config.audio.spectrumUrl, logger })
     : null);
@@ -251,8 +254,11 @@ export function createApp(config, deps = {}) {
       }
       if (pathname === '/api/ptt/reset' && req.method === 'POST') {
         const s = auth.requireAuth(req, { minRole: 'owner', csrf: true });
-        const actor = { id: 'http', ...s.user };
-        return sendJson(res, 200, await ptt.ownerReset(actor, { local: isLocalRequest(req) }));
+        const body = await readJson(req);
+        if (typeof body.code !== 'string' || !/^\d{8}$/.test(body.code)) throw new BadRequest('code');
+        const result = await ptt.ownerReset({ id: 'http', ...s.user }, { code: body.code });
+        const failure = { bad_code: 403, forbidden: 403, not_locked: 409, reset_unavailable: 409, driver_error: 502 };
+        return sendJson(res, result.ok ? 200 : (failure[result.reason] ?? 400), result);
       }
       if (pathname === '/api/status' && req.method === 'GET') {
         auth.requireAuth(req);
@@ -533,6 +539,8 @@ export function createApp(config, deps = {}) {
     async close() {
       clearInterval(sweeper);
       clearInterval(beaconTimer);
+      decodeService.stop();
+      await decoders.close?.();
       const holder = ptt.holderId;
       if (holder) await ptt.release(holder, 'shutdown');
       ptt.dispose();

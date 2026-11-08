@@ -19,7 +19,8 @@ JSON file at `BRICOHAMS_CONFIG` (default `./config.json`, see `config.example.js
 
 ## Endpoints
 `GET /api/health`, `GET /auth/login`, `GET /auth/callback`, `POST /auth/logout` (CSRF), `GET /api/me`, `GET /api/ptt`,
-`POST /api/ptt/reset` (owner + CSRF + loopback client), WebSocket `/ws/control`, everything else is static from `src/web/public`.
+`POST /api/ptt/reset` (owner + CSRF + JSON `{code}` with the one-time 8-digit code from `resetCodePath`; 403 wrong code, 409 not locked, 502 driver error; the client address is not used), WebSocket `/ws/control`, everything else is static from `src/web/public`.
+CLI: `node src/server/cli.js reset-lockout [--show]` prints how to reset and where the code file is (`--show` prints the code; local file access is the proof of presence).
 Station (phase 2): `GET /api/status` and `GET /api/beacon` (any role); `POST /api/tune` `{downlinkHz}` and
 `POST /api/mode` `{mode}` (operator, CSRF, JSON body; mode change is refused with 409 while TX_ON).
 Invalid input gives 400, an unreachable SDRangel gives 502 `{error:'sdrangel_unavailable', kind}`.
@@ -36,6 +37,7 @@ Invalid input gives 400, an unreachable SDRangel gives 502 `{error:'sdrangel_una
 | S→C | `{type:'caps', rxAudio, spectrum, txAudio, totSeconds}` | Sent on connect. |
 | S→C | `{type:'state', state, txEnabled, holder, isHolder, lockoutReason}` | PTT state. |
 | S→C | `{type:'beacon', status, offsetHz, appliedHz, snrDb, reason}` | Beacon lock. |
+| S→C | `{type:'decode', mode, slotStartMs, messages:[{text, snrDb, dtSec, freqHz, to?, from?, grid?, report?, wpm?}]}` | Decoded FT8/FT4 slot, or CW text chunk (`mode:'CW'`, `wpm`). `slotStartMs` is the UTC slot start (CW: chunk time). Only sent when something was decoded. |
 | S→C | `{type:'result', op, ok, reason?}`, `{type:'error', error}` | Replies. |
 | S→C | binary kind 2 (RX_AUDIO), 3 (SPECTRUM) | Only to subscribed sockets; formats in `src/webrtc/README.md`. |
 

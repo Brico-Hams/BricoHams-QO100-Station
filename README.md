@@ -16,7 +16,7 @@ a single-operator turn with a fail-safe PTT, beacon-based frequency correction, 
 |---|---|---|---|
 | 1 | Duplex SDR engine | SDRangel device sets: RX through the LNB IF (about 740 MHz), TX on 2400.000-2400.500 MHz. Target hardware: RTL-SDR, SDRplay, Airspy, ADALM-Pluto, USRP B200mini, Hermes Lite 2 with transverter. | SDRangel API paths are **unverified** against a real server |
 | 2 | Frequency correction | Locks on the NB BPSK beacon (10489.750 MHz), filters the drift (median + EMA) and corrects the RX centre. TX correction is opt-in (`station.applyCorrectionToTx`). | Tested with synthetic spectra only |
-| 3 | Modes | USB, CW, FT8, FT4 channel setup and band plan. Built-in FT8/FT4/CW **decoders are not plugged in yet** (stub with a clear "not available" state). | Partial |
+| 3 | Modes | USB, CW, FT8, FT4 channel setup and band plan. Built-in pure-JavaScript **CW, FT8 and FT4 decoders** (plus an FT8/FT4 encoder/synthesizer) fed from the RX audio path; decodes are broadcast over WebSocket and listed in the PWA, where a click prefills the log form. | Done |
 | 4 | Log | SQLite logbook, ADIF 3.1.4 export/import with `PROP_MODE=SAT`, `SAT_NAME=QO-100`, `BAND=13CM`, `BAND_RX=3CM`, LoTW upload through TQSL, QRZ Logbook upload with an encrypted API key. | Tested with fakes |
 | 5 | Remote web | HTML5 PWA: spectrum, waterfall, RX audio, browser microphone for TX, installable. | Tested statically |
 | 6 | Multi-user, one operator | Google sign-in (OIDC + PKCE), allowlist `email -> callsign + role` (`listener`, `operator`, `owner`), exclusive TX turn. | Tested with a fake IdP |

@@ -2,3 +2,6 @@ node_modules
 dist
 graphify-out/cache
 *.env
+
+# Third-party course text (EA5EN): local reference only, copyrighted
+docs/references/ea5en/qo100-course-extract.txt

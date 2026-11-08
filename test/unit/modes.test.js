@@ -69,7 +69,7 @@ test('setMode creates channels once, configures them and moves to the dial frequ
   assert.equal(st.mode, 'FT8');
   assert.equal(st.downlinkHz, DEFAULT_DIAL_HZ.FT8);
   assert.equal(st.segment, 'digital');
-  assert.equal(st.decoder.available, false);
+  assert.equal(st.decoder.available, true);
   assert.equal(rx(mock).channels.length, 1);
   assert.equal(tx(mock).channels.length, 1);
   assert.equal(rx(mock).channels[0].settings.rfBandwidth, 3000);

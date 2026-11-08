@@ -18,7 +18,7 @@
 | «busy» | Otro operador tiene el turno. |
 | «forbidden» | Tu rol es `listener`. |
 | «audit_failed» | No se puede escribir `auditLogPath`. Revisa permisos. |
-| Estado LOCKOUT | Un fallo al apagar o confirmar la portadora. Revisa SDRangel y el amplificador, luego un `owner` desbloquea **desde la máquina local**. |
+| Estado LOCKOUT | Un fallo al apagar o confirmar la portadora. Revisa SDRangel y el amplificador, luego un `owner` desbloquea con el código de `ptt-reset-code` (ver [acceso-remoto.md](acceso-remoto.md)). |
 | No puedo cambiar de modo | Mientras TX_ON el cambio se rechaza («tx_active»). |
 | QRZ: no se puede guardar la clave (503) | Falta `BRICOHAMS_SECRETS_KEY`. |
 | LoTW «cancelled» | TQSL pidió contraseña de certificado; usa uno sin contraseña. |

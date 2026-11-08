@@ -29,7 +29,7 @@ Out of scope: a compromised host OS or SDRangel, physical access to the station,
 | **Remote TX abuse** (unauthenticated or unauthorised keying, two operators at once) | TX disabled unless `tx.enabled` (or `BRICOHAMS_TX_ENABLED`); only roles `operator`/`owner` can take the turn; one holder at a time; every WS command is bound to a server-side connection id; listeners cannot reach TX | `src/ptt/index.js` (`requestTurn`, `TX_ROLES`), `src/server/config.js` |
 | **Carrier left on** (connection lost, hung client, bug) | Heartbeat watchdog fires at 75 % of `heartbeatTimeoutMs` (max allowed 2000 ms, so cut < 2 s); closing the WebSocket releases the turn; TOT (default 600 s); armed-without-TX timeout; "off" must be confirmed by SDRangel or the machine enters LOCKOUT; carrier is dropped before any state or audit update; `close()` cuts TX first | `src/ptt/index.js`, `src/sdrangel/ptt-driver.js`, `src/server/app.js` (`ws.on('close')`, `close()`) |
 | **No audit trail** | Each turn, denial, TX on/off, lockout and reset is appended to a JSON-lines audit log (mode 0600); if the `tx_on` record cannot be written, TX is refused | `src/ptt/audit.js`, `src/ptt/index.js` (`keyDown`) |
-| **LOCKOUT cleared remotely** | Only an `owner` request from a loopback client with CSRF token can reset it (see the reverse-proxy caveat below) | `src/ptt/index.js` (`ownerReset`), `src/server/app.js` (`isLocalRequest`) |
+| **LOCKOUT cleared remotely** | A reset needs an `owner` session with CSRF token **and** a one-time 8-digit code that the server writes to a file in its data directory (mode 0600) each time it enters LOCKOUT; only "reset code written to <path>" is logged. The code is compared in constant time, works once, rotates on every LOCKOUT and after 5 wrong attempts. The client address is not trusted for this | `src/ptt/reset-code.js`, `src/ptt/index.js` (`ownerReset`), `src/server/app.js`, `src/server/cli.js` |
 | **Hot microphone / overdrive** | Mic frames are accepted only from the turn holder while state is `TX_ON`, checked per frame; sample-rate whitelist; 100 ms frame cap; peak limiter at 0.8 full scale with hard clamp; browser opens the mic only after the turn is granted and closes it when the turn ends; key-up on blur/hidden | `src/webrtc/tx-audio.js`, `src/web/public/app.js` |
 | **Session hijack / fixation** | Google OIDC code flow with PKCE (S256), `state` (single use, 10 min, bound to the browser by the `bh_login` cookie) and `nonce`; claims re-checked (`exp`, `sub`, `email_verified`, allowlist); 256-bit random session ids; session cookie `HttpOnly; Secure; SameSite=Strict`, 12 h; logout destroys the session and closes its sockets; sessions in memory only | `src/auth/index.js`, `src/auth/sessions.js`, `src/auth/cookies.js`, `src/auth/oidc.js` |
 | **CSRF / cross-site WebSocket** | `X-CSRF-Token` required on every state-changing HTTP request (constant-time compare); WS handshake requires `Origin` equal to `publicUrl` and a valid session cookie; `SameSite=Strict` | `src/auth/index.js` (`requireAuth`), `src/server/app.js` (`upgrade`) |
@@ -46,9 +46,9 @@ Out of scope: a compromised host OS or SDRangel, physical access to the station,
 
 ### Known limitations and caveats
 
-- **Reverse proxy and LOCKOUT reset.** The "local" check uses the TCP peer address. Behind a reverse proxy on the same machine every
-  request looks local, so any `owner` session could reset a LOCKOUT remotely. Block `POST /api/ptt/reset` in the proxy (see
-  [docs/help/acceso-remoto.md](docs/help/acceso-remoto.md)) or terminate TLS in BricoHams itself.
+- **LOCKOUT reset and reverse proxies.** The reset does not depend on the client address, so a same-host reverse proxy does not weaken it:
+  a remote owner session still needs the one-time code, which can only be read on the machine (see `node src/server/cli.js reset-lockout`).
+  Anyone who can read the data directory (and owns an owner session) can reset; keep it readable only by the service user.
 - Sessions are in memory: restarting the server signs everybody out (intentional). There is no login rate limiting beyond Google's own.
 - The Windows installer is not code-signed (SmartScreen warning). Verify the published SHA-256.
 - The allowlist is the only authorisation list; removing a user takes effect at the next restart (the file is read at startup).

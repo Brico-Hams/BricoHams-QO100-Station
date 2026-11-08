@@ -91,6 +91,15 @@
         </div>
       </div>
 
+      <div class="card decodes">
+        <div class="decodes-head">
+          <span id="decodes-label" class="label">Decoded</span>
+          <button type="button" id="decodes-clear" class="btn">Clear</button>
+        </div>
+        <ul id="decode-list" class="decode-list" aria-labelledby="decodes-label"></ul>
+        <p id="decode-empty" class="hint">Select FT8, FT4 or CW and press Listen. Click a decoded message to start a log entry.</p>
+      </div>
+
       <div class="card ptt">
         <div class="ptt-status">
           <div id="tx-state" class="txstate off" role="status" aria-live="assertive" aria-atomic="true">TX OFF</div>

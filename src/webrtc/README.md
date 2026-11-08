@@ -7,7 +7,7 @@ existing authenticated WSS (TLS), so no extra ports, ICE or TURN are needed.
 
 | Export | Purpose |
 |---|---|
-| `createRxAudio(opts)` | UDP in (SDRangel "copy audio to UDP", 48 kHz s16le) -> 12 kHz -> fan-out to listeners. `addListener(ws)`, `stats()`, `start()`, `stop()`. |
+| `createRxAudio(opts)` | UDP in (SDRangel "copy audio to UDP", 48 kHz s16le) -> 12 kHz -> fan-out to listeners. `addListener(ws)`, `addTap(fn)` (local consumers such as the decoders receive each 12 kHz `Int16Array` frame and keep the pipeline running with no listeners), `stats()`, `start()`, `stop()`. |
 | `createTxAudio({ptt, sink, ...})` | `handleFrame(connId, buf)` gates, validates, limits and forwards mic frames. `stats()`. |
 | `createUdpTxSink(opts)` | `TxAudioSink` that sends s16le 48 kHz UDP to SDRangel's SSB modulator. |
 | `createSpectrumSource` / `SpectrumSource` | WS client of SDRangel's spectrum server; `getSpectrum()` returns `{centerHz, binHz, power[]}` or null when stale. |

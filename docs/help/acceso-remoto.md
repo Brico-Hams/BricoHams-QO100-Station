@@ -21,7 +21,7 @@ BricoHams escucha en local y el proxy da el HTTPS. Reglas clave:
 
 - `publicUrl` debe ser la dirección **externa** (`https://...`). Si BricoHams escucha sin TLS en `127.0.0.1`, `publicUrl` tendrá que ser `http://localhost:puerto`, así que para un proxy lo más sencillo es la opción A, o activar TLS interno también.
 - El proxy debe pasar el encabezado `Host` original y permitir WebSocket (`/ws/control`).
-- **Bloquea desde el proxy** la ruta `POST /api/ptt/reset`: desde un proxy local todo parece local y cualquier `owner` podría desbloquear a distancia.
+- Desbloquear un LOCKOUT necesita sesión `owner` **y** un código de un solo uso que el servidor escribe en un fichero local (ver abajo), así que un proxy en la misma máquina no lo debilita; no hace falta bloquear `POST /api/ptt/reset`.
 
 ## Dominio y puertos
 
@@ -35,7 +35,11 @@ Crea un registro DNS hacia tu IP (o un DNS dinámico), abre en el router solo el
 |---|---|
 | `listener` | escuchar, ver espectro |
 | `operator` | además sintonizar, cambiar de modo, tomar el turno de TX, usar el registro |
-| `owner` | todo, y desbloquear (LOCKOUT) desde la máquina local |
+| `owner` | todo, y desbloquear (LOCKOUT) con el código local de un solo uso |
+
+## Desbloquear un LOCKOUT
+
+Al entrar en LOCKOUT el servidor escribe un código de 8 cifras en `ptt-reset-code` (junto al `audit.log`, o en `resetCodePath`). Léelo en la máquina (`node src/server/cli.js reset-lockout --show`), inicia sesión como `owner` e introdúcelo en la aplicación (o `POST /api/ptt/reset` con `{"code":"12345678"}`). Sirve una vez y cambia en cada LOCKOUT.
 
 ## Turnos
 

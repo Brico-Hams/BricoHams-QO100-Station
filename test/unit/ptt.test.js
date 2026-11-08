@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { PttState, createPtt } from '../../src/ptt/index.js';
+import { createResetCode } from '../../src/ptt/reset-code.js';
 import { createFileAudit } from '../../src/ptt/audit.js';
 import { FakeClock, FakeDriver, silentLogger, tick } from '../fixtures/fakes.js';
 
@@ -18,13 +19,15 @@ function setup(tx = {}, auditImpl) {
   const driver = new FakeDriver(clock);
   const records = [];
   const audit = auditImpl ?? { record: (e) => records.push(e) };
+  const codePath = join(mkdtempSync(join(tmpdir(), 'bricohams-reset-')), 'reset-code');
+  const resetCode = createResetCode({ path: codePath, logger: silentLogger });
   const ptt = createPtt({
     tx: { enabled: true, totSeconds: 600, heartbeatTimeoutMs: HB, armedTimeoutSeconds: 120, ...tx },
-    driver, audit, clock, logger: silentLogger,
+    driver, audit, clock, logger: silentLogger, resetCode,
   });
   const states = [];
   ptt.on('state', (s) => states.push(s.state));
-  return { clock, driver, ptt, records, states };
+  return { clock, driver, ptt, records, states, codePath };
 }
 
 async function keyed(ctx, actor = op1) {
@@ -172,22 +175,69 @@ test('failure to switch TX off enters LOCKOUT', async () => {
   assert.equal(ctx.ptt.snapshot().lockoutReason, 'driver_error');
 });
 
-test('LOCKOUT is cleared only by an owner acting locally', async () => {
+test('LOCKOUT is cleared only by an owner presenting the one-time code', async () => {
   const ctx = setup();
+  const readCode = () => readFileSync(ctx.codePath, 'utf8').trim();
   await ctx.ptt.fault('external_fault');
   assert.equal(ctx.ptt.state, PttState.LOCKOUT);
-  assert.deepEqual(await ctx.ptt.ownerReset(op1, { local: true }), { ok: false, reason: 'forbidden' });
-  assert.deepEqual(await ctx.ptt.ownerReset(owner, { local: false }), { ok: false, reason: 'not_local' });
+  const code = readCode();
+  assert.match(code, /^\d{8}$/);
+  assert.deepEqual(await ctx.ptt.ownerReset(op1, { code }), { ok: false, reason: 'forbidden' });
+  assert.deepEqual(await ctx.ptt.ownerReset(owner, {}), { ok: false, reason: 'bad_code' });
+  assert.deepEqual(await ctx.ptt.ownerReset(owner, { code: 12345678 }), { ok: false, reason: 'bad_code' });
   assert.equal(ctx.ptt.state, PttState.LOCKOUT);
   ctx.clock.advance(3_600_000);
   assert.equal(ctx.ptt.state, PttState.LOCKOUT, 'time never clears LOCKOUT');
   ctx.driver.failOn = 'off';
-  assert.deepEqual(await ctx.ptt.ownerReset(owner, { local: true }), { ok: false, reason: 'driver_error' });
+  assert.deepEqual(await ctx.ptt.ownerReset(owner, { code }), { ok: false, reason: 'driver_error' });
+  const code2 = readCode();
+  assert.notEqual(code2, code, 'a failed attempt that consumed the code rotates it');
   ctx.driver.failOn = null;
-  assert.deepEqual(await ctx.ptt.ownerReset(owner, { local: true }), { ok: true });
+  assert.deepEqual(await ctx.ptt.ownerReset(owner, { code: code2 }), { ok: true });
   assert.equal(ctx.ptt.state, PttState.TX_OFF);
-  assert.deepEqual(await ctx.ptt.ownerReset(owner, { local: true }), { ok: false, reason: 'not_locked' });
+  assert.deepEqual(await ctx.ptt.ownerReset(owner, { code: code2 }), { ok: false, reason: 'not_locked' });
   assert.ok(ctx.ptt.requestTurn(op1).ok);
+});
+
+test('reset code is single use and rotates on every LOCKOUT', async () => {
+  const ctx = setup();
+  await ctx.ptt.fault('one');
+  const first = readFileSync(ctx.codePath, 'utf8').trim();
+  assert.ok((await ctx.ptt.ownerReset(owner, { code: first })).ok);
+  await ctx.ptt.fault('two');
+  assert.deepEqual(await ctx.ptt.ownerReset(owner, { code: first }), { ok: false, reason: 'bad_code' });
+  const second = readFileSync(ctx.codePath, 'utf8').trim();
+  assert.ok((await ctx.ptt.ownerReset(owner, { code: second })).ok);
+});
+
+test('repeated wrong codes rotate the code', async () => {
+  const ctx = setup();
+  await ctx.ptt.fault('x');
+  const before = readFileSync(ctx.codePath, 'utf8').trim();
+  const wrong = before === '00000000' ? '00000001' : '00000000';
+  for (let i = 0; i < 5; i++) assert.equal((await ctx.ptt.ownerReset(owner, { code: wrong })).ok, false);
+  assert.notEqual(readFileSync(ctx.codePath, 'utf8').trim(), before);
+});
+
+test('without a reset code store LOCKOUT cannot be cleared at runtime', async () => {
+  const ptt = createPtt({
+    tx: { enabled: true, totSeconds: 600, heartbeatTimeoutMs: HB }, driver: new FakeDriver(), logger: silentLogger,
+  });
+  await ptt.fault('x');
+  assert.deepEqual(await ptt.ownerReset(owner, { code: '12345678' }), { ok: false, reason: 'reset_unavailable' });
+});
+
+test('reset code file is private and the log line never contains the code', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'bricohams-rc-'));
+  const lines = [];
+  const rc = createResetCode({ path: join(dir, 'c'), logger: { error: (...a) => lines.push(a.join(' ')), info: (...a) => lines.push(a.join(' ')) } });
+  rc.rotate();
+  const code = readFileSync(join(dir, 'c'), 'utf8').trim();
+  assert.ok(lines.length > 0 && lines.every((l) => !l.includes(code)));
+  if (process.platform !== 'win32') assert.equal(statSync(join(dir, 'c')).mode & 0o777, 0o600);
+  assert.equal(rc.check(code), true);
+  rc.consume();
+  assert.equal(rc.check(code), false);
 });
 
 test('fault during TX cuts the carrier and locks out', async () => {

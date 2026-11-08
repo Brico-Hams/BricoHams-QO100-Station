@@ -1,0 +1,136 @@
+{
+ "receiver": {
+  "name": "EA5EN",
+  "gps": {
+   "lat": 38.244,
+   "lon": -1.427
+  },
+  "asl": 74,
+  "location": "CHURRA-MURCIA"
+ },
+ "max_clients": 9,
+ "version": "v1.2.117",
+ "sdrs": [
+  {
+   "name": "SDRPlay",
+   "type": "SdrplaySource",
+   "profiles": [
+    {
+     "name": "70cm Repeaters",
+     "center_freq": 443500000,
+     "sample_rate": 4000000
+    },
+    {
+     "name": "QO100",
+     "center_freq": 739800000,
+     "sample_rate": 1000000
+    },
+    {
+     "name": "2m",
+     "center_freq": 146000000,
+     "sample_rate": 4000000
+    },
+    {
+     "name": "6m",
+     "center_freq": 52000000,
+     "sample_rate": 4000000
+    },
+    {
+     "name": "10m",
+     "center_freq": 28850000,
+     "sample_rate": 2000000
+    },
+    {
+     "name": "11m CB",
+     "center_freq": 27000000,
+     "sample_rate": 2000000
+    },
+    {
+     "name": "12m",
+     "center_freq": 24940000,
+     "sample_rate": 250000
+    },
+    {
+     "name": "15m",
+     "center_freq": 21225000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "17m",
+     "center_freq": 18118000,
+     "sample_rate": 250000
+    },
+    {
+     "name": "20m",
+     "center_freq": 14175000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "30m",
+     "center_freq": 10125000,
+     "sample_rate": 250000
+    },
+    {
+     "name": "40m",
+     "center_freq": 7150000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "60m",
+     "center_freq": 5350000,
+     "sample_rate": 250000
+    },
+    {
+     "name": "80m",
+     "center_freq": 3750000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "160m",
+     "center_freq": 1900000,
+     "sample_rate": 250000
+    },
+    {
+     "name": "AM Broadcast",
+     "center_freq": 1100000,
+     "sample_rate": 1000000
+    },
+    {
+     "name": "49m Broadcast",
+     "center_freq": 6050000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "41m Broadcast",
+     "center_freq": 7325000,
+     "sample_rate": 250000
+    },
+    {
+     "name": "31m Broadcast",
+     "center_freq": 9650000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "25m Broadcast",
+     "center_freq": 11850000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "22m Broadcast",
+     "center_freq": 13720000,
+     "sample_rate": 500000
+    },
+    {
+     "name": "433MHz ISM",
+     "center_freq": 433000000,
+     "sample_rate": 2000000
+    },
+    {
+     "name": "1090MHz ADSB",
+     "center_freq": 1090000000,
+     "sample_rate": 4000000
+    }
+   ]
+  }
+ ]
+}

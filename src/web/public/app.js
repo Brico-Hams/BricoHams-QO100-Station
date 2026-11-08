@@ -23,7 +23,7 @@
     tx_disabled: 'Transmit is disabled on this station.',
     forbidden: 'Your account is not allowed to transmit.',
     busy: 'Another operator holds the turn.',
-    lockout: 'Station is in LOCKOUT. The owner must reset it locally.',
+    lockout: 'Station is in LOCKOUT. The owner must reset it with the local reset code.',
     no_turn: 'You do not hold the turn.',
     not_armed: 'Arm TX first.',
     audit_failed: 'Cannot key: audit log is not writable.',
@@ -221,6 +221,7 @@
     switch (msg.type) {
       case 'state': updatePtt(msg); break;
       case 'beacon': app.beacon = msg; renderBeacon(); break;
+      case 'decode': onDecode(msg); break;
       case 'caps': Object.assign(app.caps, msg); $('btn-listen').disabled = !app.caps.rxAudio; break;
       case 'result': onResult(msg); break;
       case 'error': $('ptt-msg').textContent = msgFor(msg.error); break;
@@ -698,6 +699,63 @@
     tune(app.station.downlinkHz + dir * snap() * (e.shiftKey ? 10 : 1));
   }
 
+  // ---- decodes ----
+  const MAX_DECODES = 200;
+  const CW_LINE_MS = 30_000;
+  const cwLine = { li: null, at: 0 };
+
+  function fmtUtc(ms) {
+    return new Date(ms).toISOString().slice(11, 19);
+  }
+
+  function addDecodeRow(mode, time, text, detail, fields) {
+    const btn = el('button', { type: 'button', class: 'decode-row' });
+    btn.append(el('span', { class: 'mono dt', text: time }), el('span', { class: 'dm', text: mode }),
+      el('span', { class: 'mono dtext', text }), el('span', { class: 'hint ddetail', text: detail }));
+    btn.addEventListener('click', () => prefillQso(mode, fields));
+    const li = el('li');
+    li.append(btn);
+    const list = $('decode-list');
+    list.prepend(li);
+    while (list.children.length > MAX_DECODES) list.lastChild.remove();
+    $('decode-empty').hidden = true;
+    return li;
+  }
+
+  function onDecode(msg) {
+    if (!Array.isArray(msg.messages)) return;
+    const time = fmtUtc(Number(msg.slotStartMs) || Date.now());
+    for (const m of msg.messages) {
+      if (typeof m.text !== 'string') continue;
+      if (msg.mode === 'CW') {
+        const now = Date.now();
+        if (cwLine.li && now - cwLine.at < CW_LINE_MS && cwLine.li.isConnected) {
+          const t = cwLine.li.querySelector('.dtext');
+          t.textContent = (t.textContent + m.text).slice(-300);
+          cwLine.li.querySelector('.ddetail').textContent = `${m.wpm || '?'} WPM ${Math.round(m.freqHz || 0)} Hz`;
+          cwLine.at = now;
+          continue;
+        }
+        cwLine.li = addDecodeRow('CW', time, m.text, `${m.wpm || '?'} WPM ${Math.round(m.freqHz || 0)} Hz`, {});
+        cwLine.at = now;
+      } else {
+        const detail = `${m.snrDb ?? '?'} dB  ${Number(m.dtSec ?? 0).toFixed(1)} s  ${Math.round(m.freqHz || 0)} Hz`;
+        addDecodeRow(msg.mode, time, m.text, detail, m);
+      }
+    }
+  }
+
+  function prefillQso(mode, f) {
+    showView('log');
+    if (mode !== 'CW') {
+      const call = f.from && f.from !== '<...>' ? f.from : f.to;
+      if (call) $('q-call').value = call.replace(/[<>]/g, '');
+      if (f.grid) $('q-grid').value = f.grid;
+      if (f.report) $('q-rst-r').value = f.report.replace(/^R/, '');
+    }
+    $('q-call').focus();
+  }
+
   // ---- log ----
   const FIELD_IDS = {
     call: 'q-call', mode: 'q-mode', qso_date: 'q-date', time_on: 'q-time', freq: 'q-freq', freq_rx: 'q-freq-rx',
@@ -924,6 +982,11 @@
 
     $('qso-form').addEventListener('submit', submitQso);
     $('q-now').addEventListener('click', fillQso);
+    $('decodes-clear').addEventListener('click', () => {
+      $('decode-list').replaceChildren();
+      $('decode-empty').hidden = false;
+      cwLine.li = null;
+    });
     $('btn-lotw').addEventListener('click', () => upload('lotw'));
     $('btn-qrz').addEventListener('click', () => upload('qrz'));
     $('qrz-form').addEventListener('submit', saveQrz);

@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 /** Thrown for any invalid or unreadable configuration. The message never contains secret values. */
 export class ConfigError extends Error {
@@ -201,6 +202,8 @@ export function validateConfig(raw, env = process.env) {
 
   const auditLogPath = raw.auditLogPath ?? './data/audit.log';
   if (typeof auditLogPath !== 'string' || !auditLogPath) problems.push('auditLogPath must be a non-empty string');
+  const resetCodePath = raw.resetCodePath ?? (typeof auditLogPath === 'string' && auditLogPath ? join(dirname(auditLogPath), 'ptt-reset-code') : '');
+  if (typeof resetCodePath !== 'string' || !resetCodePath) problems.push('resetCodePath must be a non-empty string');
 
   const lbRaw = raw.logbook ?? {};
   const logbookPath = lbRaw.path ?? './data/logbook.db';
@@ -232,6 +235,7 @@ export function validateConfig(raw, env = process.env) {
     audio,
     secretsKey,
     auditLogPath,
+    resetCodePath,
   };
   config.allowlist.forEach(Object.freeze);
   return Object.freeze({

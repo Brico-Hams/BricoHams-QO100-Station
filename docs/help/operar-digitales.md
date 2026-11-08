@@ -4,7 +4,7 @@
 
 ## Estado
 
-BricoHams ajusta el canal, la sintonía y las ranuras UTC (FT8: 15 s; FT4: 7,5 s), pero **el decodificador de FT8/FT4 aún no está integrado**: el sistema indica «decoder not available» y no muestra mensajes decodificados. Por ahora puedes usar un programa externo (WSJT-X) con el audio, o contribuir con un decodificador (ver [DEVELOPER.md](../DEVELOPER.md)).
+BricoHams ajusta el canal, la sintonía y las ranuras UTC (FT8: 15 s; FT4: 7,5 s) y **decodifica FT8 y FT4 en el propio servidor** (JavaScript puro, sin WSJT-X). Los mensajes aparecen en la lista **Decoded** de la pantalla de radio unos instantes antes de terminar cada ranura, con SNR (estimado), desviación de tiempo y frecuencia. **Pulsa un mensaje** para abrir el registro con indicativo, locátor e informe ya rellenados. Soporta los mensajes estándar, de texto libre y no estándar; los tipos especiales (DXpedition, concursos ARRL/EU VHF, telemetría avanzada) se ignoran. Necesitas el reloj del equipo en hora (NTP).
 
 ## Frecuencias
 

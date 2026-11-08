@@ -14,7 +14,7 @@
 | `src/auth/` | `oidc.js` (openid-client v6 wrapper), `index.js` (login flow, `requireAuth`), `sessions.js`, `cookies.js` |
 | `src/ptt/` | `index.js` state machine, `audit.js` file audit |
 | `src/sdrangel/` | `client.js` (REST client + `ENDPOINTS`, `DEVICE_SETTINGS_KEYS`, `CHANNEL_SETTINGS_KEYS`), `ptt-driver.js`, `mock-server.js` |
-| `src/modes/` | `frequencies.js`, `bandplan.js`, `station.js` (`MODE_PROFILES`, tuning), `decoders.js` |
+| `src/modes/` | `frequencies.js`, `bandplan.js`, `station.js` (`MODE_PROFILES`, tuning), `decoders.js`, `cw-decoder.js`, `ft8-*.js`, `slot-decoder.js`, `decode-service.js` |
 | `src/beacon/index.js` | `estimateBeaconOffset`, `createBeaconFilter`, `createBeaconController` |
 | `src/webrtc/` | `rx-audio.js`, `tx-audio.js`, `spectrum.js`, `frames.js`, `index.js` |
 | `src/log/` | `store.js`, `adif.js`, `lotw.js`, `qrz.js`, `secrets.js`, `routes.js` |
@@ -88,8 +88,8 @@ Write a test for every change; see [CONTRIBUTING.md](../CONTRIBUTING.md).
 3. Add UI buttons in `src/web/public/` and tests in `test/unit/modes.test.js`.
 
 ### A new decoder
-Implement `{mode, available:true, decode(pcmFrame, utcSlot) -> [{text, snrDb, dtSec, freqHz}]}`, register it with `registry.register(decoder)` and pass the registry to `createStation`.
-Options (see `src/modes/README.md`): ft8_lib via WASM/native addon, ggmorse for CW, or SDRangel's own demod channel reading its report. Until a decoder is registered the stub throws `DecoderUnavailableError`. The UI does not yet display decoded text.
+Implement `{mode, available:true, decode(pcmFrame, utcSlot, nowMs)}` (returns an array, or a Promise of one), register it with `registry.register(decoder)` (see `createDefaultDecoderRegistry` in `src/modes/decoders.js`) and pass the registry to `createStation` / `createApp({decoders})`.
+The built-in CW, FT8 and FT4 decoders are pure JavaScript; see `src/modes/README.md`. `decode-service.js` taps the RX audio, runs the decoder of the current mode and broadcasts WebSocket `decode` messages that the PWA lists.
 
 ## Debugging common failures
 
@@ -140,4 +140,4 @@ Everything below was written without access to the real system and must be check
 | `electron/README.md` | `electron/tray.png` is empty; Electron 45's Node must support `node:sqlite` |
 | `packaging/linux/build-deb.sh:7` | Bundled Node version `24.20.0` exists and is current |
 | Spec §12 | arm64 SDRangel device support and Raspberry Pi CPU load |
-| `src/modes/decoders.js` | FT8, FT4 and CW decoders are stubs |
+| `src/modes/ft8-*.js`, `cw-decoder.js` | Decoders are untested on real off-air audio (only synthesized signals); SNR and dt values are estimates |
