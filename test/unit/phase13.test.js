@@ -4,7 +4,7 @@ import { EventEmitter } from 'node:events';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import vm from 'node:vm';
-import { parseNotch, DEFAULT_NOTCH, notchToChannelSettings } from '../../src/modes/notch.js';
+import { parseNotch, DEFAULT_NOTCH } from '../../src/modes/notch.js';
 import { backoffDelay, createClusterClient } from '../../src/cluster/client.js';
 import { parseQo100Spot, parseSpotLine, toQo100Downlink } from '../../src/cluster/parser.js';
 import { parseIcs, upcoming } from '../../src/cluster/ics.js';
@@ -28,7 +28,6 @@ test('parseNotch validates and merges', () => {
   assert.equal(parseNotch({ enabled: 'yes' }).code, 'bad_notch');
   assert.equal(parseNotch({ evil: 1 }).code, 'bad_notch');
   assert.equal(parseNotch(null).code, 'bad_notch');
-  assert.equal(notchToChannelSettings({ enabled: true, offsetHz: 1000, widthHz: 50, auto: false }).notchFrequency, 1000);
 });
 
 // ---- DX cluster ----
@@ -358,7 +357,8 @@ test('new features are disabled by default and validated', () => {
   assert.equal(c.calendar.enabled, false);
   assert.equal(c.webhooks.enabled, false);
   assert.deepEqual([...c.plugins.enabled], []);
-  assert.equal(c.station.notchEngine, 'client');
+  assert.equal(c.beacon.engine, 'bricohams');
+  assert.match(c.iq.dir, /iq/);
   const ex = validateConfig(baseConfig(), ENV);
   assert.equal(ex.cluster.enabled, false);
   assert.equal(ex.iq.enabled, false);
@@ -375,7 +375,8 @@ test('config rejects unsafe plugin names, missing webhook secrets and bad cluste
   bad((r) => { r.webhooks.endpoints[0].url = 'http://hooks.example.org/x'; });
   bad((r) => { r.cluster.enabled = true; r.cluster.callsign = 'no good'; });
   bad((r) => { r.calendar.url = 'file:///etc/passwd'; });
-  bad((r) => { r.station = { notchEngine: 'magic' }; });
+  bad((r) => { r.beacon = { engine: 'magic' }; });
+  bad((r) => { r.iq.dir = ''; });
   const raw = baseConfig();
   raw.webhooks.enabled = true;
   const c = validateConfig(raw, { ...ENV, BRICOHAMS_WEBHOOK_SECRET_1: 'a-long-enough-secret' });

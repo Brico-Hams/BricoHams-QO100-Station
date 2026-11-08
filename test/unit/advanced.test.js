@@ -122,7 +122,7 @@ test('filter presets change the RX passband only and reset on mode change', () =
   assert.equal(st.filter.name, 'narrow');
   assert.deepEqual(st.filter.available, Object.keys(FILTER_PRESETS.CW));
   assert.equal(rx(mock).channels[0].settings.rfBandwidth, FILTER_PRESETS.CW.narrow.rfBandwidth);
-  assert.equal(tx(mock).channels[0].settings.bandwidth, 850, 'TX filter untouched');
+  assert.equal(tx(mock).channels[0].settings.rfBandwidth, 850, 'TX filter untouched');
   await assert.rejects(station.setFilter('bogus'), (e) => e.code === 'unknown_filter');
   await station.setMode('USB');
   assert.equal(station.status().filter.name, 'normal');
@@ -131,23 +131,24 @@ test('filter presets change the RX passband only and reset on mode change', () =
 
 test('RX DSP settings are validated, mapped to the channel and kept across mode changes', () => withStation(async ({ station, mock }) => {
   await station.setMode('USB');
-  assert.equal('dnr' in rx(mock).channels[0].settings, false, 'no DSP keys until configured');
-  await station.setRxDsp({ agc: 'fast', squelchDb: -60, noiseReduction: true });
-  assert.equal(rx(mock).channels[0].settings.dnr, true);
-  assert.equal(rx(mock).channels[0].settings.agcPowerThreshold, -60);
+  assert.equal('squelchEnabled' in rx(mock).channels[0].settings, false, 'no DSP keys until configured');
+  await station.setRxDsp({ agc: 'fast', squelchDb: -60 });
+  assert.equal(rx(mock).channels[0].settings.agc, 1);
+  assert.equal(rx(mock).channels[0].settings.squelchEnabled, 1);
+  assert.equal(rx(mock).channels[0].settings.squelchDB, -60);
   await station.setMode('CW');
-  assert.equal(rx(mock).channels[0].settings.dnr, true);
-  assert.deepEqual(station.status().rxDsp, { agc: 'fast', squelchDb: -60, noiseReduction: true });
-  for (const [input, code] of [[{ agc: 'turbo' }, 'bad_agc'], [{ squelchDb: 5 }, 'bad_squelch'], [{ noiseReduction: 'x' }, 'bad_noise_reduction'], [{}, 'bad_dsp'], [{ foo: 1 }, 'bad_dsp'], [null, 'bad_dsp']]) {
+  assert.equal(rx(mock).channels[0].settings.squelchEnabled, 1);
+  assert.deepEqual(station.status().rxDsp, { agc: 'fast', squelchDb: -60, noiseReduction: false });
+  for (const [input, code] of [[{ agc: 'turbo' }, 'bad_agc'], [{ squelchDb: 5 }, 'bad_squelch'], [{ noiseReduction: 'x' }, 'bad_noise_reduction'], [{ noiseReduction: true }, 'dnr_unavailable'], [{}, 'bad_dsp'], [{ foo: 1 }, 'bad_dsp'], [null, 'bad_dsp']]) {
     await assert.rejects(station.setRxDsp(input), (e) => e.code === code, JSON.stringify(input));
   }
-  assert.equal(tx(mock).channels[0].settings.dnr, undefined, 'DSP never touches the TX channel');
+  assert.equal(tx(mock).channels[0].settings.squelchDB, undefined, 'DSP never touches the TX channel');
 }));
 
 test('parseRxDsp and toChannelSettings map the documented values', () => {
   assert.equal(parseRxDsp({ agc: 'off' }).ok, true);
-  assert.deepEqual(toChannelSettings({ agc: 'off' }), { agc: false });
-  assert.equal(toChannelSettings({ squelchDb: null }).agcThresholdGate, 0);
+  assert.deepEqual(toChannelSettings({ agc: 'off' }), { agc: 0 });
+  assert.equal(toChannelSettings({ squelchDb: null }).squelchEnabled, 0);
   assert.deepEqual(toChannelSettings({}), {});
 });
 

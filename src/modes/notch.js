@@ -4,9 +4,8 @@ export const DEFAULT_NOTCH = Object.freeze({ enabled: false, offsetHz: 1000, wid
 /** Audio-frequency range (Hz) a notch may sit in; the RX audio is 12 kHz sampled so 6 kHz is Nyquist. */
 export const NOTCH_RANGE = Object.freeze({ minHz: 20, maxHz: 5900, minWidthHz: 10, maxWidthHz: 1000 });
 
-// verify against SDRangel swagger: stock SSBDemod has no notch; these names only apply to builds/plugins that do.
-/** SSBDemod channel keys used when `station.notchEngine` is `sdrangel`. */
-export const SDRANGEL_NOTCH_KEYS = Object.freeze({ enabled: 'notchFilterEnabled', offsetHz: 'notchFrequency', widthHz: 'notchBandwidth', auto: 'autoNotch' });
+// NOT IN SDRangel API: SSBDemodSettings has no notch and the RX audio path (UDPSink) has none either, so the notch is
+// always applied client-side by the PWA; the server only keeps and shares its state.
 
 /**
  * Validate a (partial) notch request and merge it over the current state.
@@ -36,15 +35,4 @@ export function parseNotch(partial, current = DEFAULT_NOTCH) {
     next.widthHz = v;
   }
   return { ok: true, value: next };
-}
-
-/**
- * Map a notch state to SSBDemod channel settings (only meaningful with the `sdrangel` engine).
- * @param {{enabled: boolean, offsetHz: number, widthHz: number, auto: boolean}} notch
- * @returns {object}
- */
-export function notchToChannelSettings(notch) {
-  const out = {};
-  for (const [k, key] of Object.entries(SDRANGEL_NOTCH_KEYS)) out[key] = notch[k];
-  return out;
 }

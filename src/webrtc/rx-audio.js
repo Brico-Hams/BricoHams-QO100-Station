@@ -13,7 +13,8 @@ const MAX_DATAGRAM = 65_535;
  */
 
 /**
- * Receive RX audio from SDRangel ("copy audio to UDP" of the SSB demodulator), resample it and fan it out.
+ * Receive RX audio from SDRangel's UDPSink channel (USBMono, 48 kHz s16le mono; provisioned by `station.provision()`),
+ * resample it and fan it out.
  *
  * Invariant: this module never blocks and never queues. A listener whose socket buffer is above `highWaterBytes`
  * simply misses the frame (counted in `stats().dropped`), so one slow phone cannot delay the others or grow memory.

@@ -22,5 +22,9 @@ Measures the QO-100 NB BPSK beacon (10489.750 MHz) in the receiver's IF spectrum
 SDRangel's REST API does not stream FFT data. With `audio.enabled: true`, `createApp` reads frames from SDRangel's spectrum
 WebSocket (`audio.spectrumUrl`, see `src/webrtc/spectrum.js`) and passes them to the controller; tests inject `spectrumSource`.
 
+## Engines (`beacon.engine`)
+- `bricohams` (default): the spectrum-based controller above.
+- `sdrangel-freqtracker` (`freqtracker.js`, `createFreqTrackerBeacon({client, station, rxDeviceSet, ...})`): ensures a FreqTracker channel on the RX device set (offset 0, `tracking: 1`), reads `FreqTrackerReport.trackingDeltaFrequency` (valid while `squelch` is set), adds the already applied correction, filters with `createBeaconFilter` and calls `station.setCorrection`. Same `{step(), status()}` interface. Report wrapper name is inferred (ChannelReport.yaml not in the reference copy).
+
 ## Testing
-`node --test test/unit/beacon.test.js`
+`node --test test/unit/beacon.test.js test/unit/sdrangel-alignment.test.js`

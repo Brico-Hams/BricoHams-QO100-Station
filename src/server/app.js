@@ -20,6 +20,7 @@ import { createClusterClient, createSpotStore, createCalendar, createClusterApi 
 import { createWebhookDispatcher, resolvePluginFile } from '../plugins/index.js';
 import { createStation, StationError, createDefaultDecoderRegistry, createDecodeService, openStationDb, createMemoryStore, MemoryError, createStationApi } from '../modes/index.js';
 import { createBeaconController } from '../beacon/index.js';
+import { createFreqTrackerBeacon } from '../beacon/freqtracker.js';
 import { LogError, createLogStore } from '../log/store.js';
 import { createLotwUploader } from '../log/lotw.js';
 import { createQrzClient } from '../log/qrz.js';
@@ -156,7 +157,7 @@ export function createApp(config, deps = {}) {
     applyToTx: config.station.applyCorrectionToTx,
     isTxActive: () => ptt.state === 'TX_ON',
     decoders,
-    notchEngine: config.station.notchEngine,
+    audio: { rxUdp: config.audio.rxUdp, txUdp: config.audio.txUdp },
     logger,
   });
   // Outgoing events exist only when the owner enabled webhooks and listed endpoints; the feed is read-only.
@@ -209,15 +210,18 @@ export function createApp(config, deps = {}) {
   const txAudio = txSink ? createTxAudio({ ptt, sink: txSink }) : null;
 
   const spectrumGetter = deps.spectrumSource ?? (spectrum ? () => spectrum.getSpectrum() : null);
-  const beacon = spectrumGetter
-    ? createBeaconController({
-      getSpectrum: spectrumGetter,
-      station,
-      lnbLoHz: config.station.lnbLoHz,
-      onStatus: (s) => broadcast({ type: 'beacon', ...publicBeacon(s) }),
-      logger,
-    })
-    : null;
+  const beaconStatusListener = (s) => broadcast({ type: 'beacon', ...publicBeacon(s) });
+  const beacon = config.beacon.engine === 'sdrangel-freqtracker'
+    ? createFreqTrackerBeacon({ client: sdr, station, rxDeviceSet: config.station.rxDeviceSet, onStatus: beaconStatusListener, logger })
+    : spectrumGetter
+      ? createBeaconController({
+        getSpectrum: spectrumGetter,
+        station,
+        lnbLoHz: config.station.lnbLoHz,
+        onStatus: beaconStatusListener,
+        logger,
+      })
+      : null;
   const publicBeacon = (s) => ({
     status: s.status, offsetHz: s.offsetHz, appliedHz: s.appliedHz, snrDb: s.snrDb, reason: s.reason,
   });
@@ -286,6 +290,7 @@ export function createApp(config, deps = {}) {
     iq ??= createIqManager({
       db: getStationDb(),
       client: sdr,
+      dir: config.iq.dir,
       rxDeviceSet: config.station.rxDeviceSet,
       enabled: config.iq.enabled,
       maxUserMb: config.iq.maxUserMb,
@@ -632,8 +637,12 @@ export function createApp(config, deps = {}) {
     beaconTimer.unref();
   }
 
+  let provisioning = Promise.resolve();
+
   return {
     server,
+    /** Settles when the startup SDRangel provisioning attempt has finished (it never rejects). */
+    whenProvisioned: () => provisioning,
     ptt,
     station,
     beacon,
@@ -658,6 +667,8 @@ export function createApp(config, deps = {}) {
             publicUrl = new URL(publicUrl.origin.replace(/:\d+$/, '') + `:${port}`);
           }
           startBeaconLoop();
+          // Best effort: the station may start before SDRangel; setMode provisions again when needed.
+          provisioning = station.provision().catch((err) => logger.error('SDRangel provisioning failed:', err?.message));
           if (!deps.rxAudio) {
             rxAudio?.start().catch((err) => logger.error('rx audio disabled:', err.message));
           }

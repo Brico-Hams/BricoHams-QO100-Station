@@ -49,7 +49,8 @@ function httpUrl(value, name, problems, { requireHttps = false } = {}) {
  */
 export function parseExtraConfig(raw, env, problems) {
   const iqRaw = raw.iq ?? {};
-  const iq = { enabled: bool(iqRaw.enabled ?? false, 'iq.enabled', problems), maxUserMb: iqRaw.maxUserMb ?? 2000, maxSeconds: iqRaw.maxSeconds ?? 600 };
+  const iq = { enabled: bool(iqRaw.enabled ?? false, 'iq.enabled', problems), maxUserMb: iqRaw.maxUserMb ?? 2000, maxSeconds: iqRaw.maxSeconds ?? 600, dir: iqRaw.dir ?? './data/iq' };
+  if (typeof iq.dir !== 'string' || !iq.dir) problems.push('iq.dir must be a non-empty string');
   if (!isInt(iq.maxUserMb, 1, 1_000_000)) problems.push('iq.maxUserMb must be an integer between 1 and 1000000');
   if (!isInt(iq.maxSeconds, 10, 86_400)) problems.push('iq.maxSeconds must be an integer between 10 and 86400');
 

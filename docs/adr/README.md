@@ -25,5 +25,6 @@ Español: las decisiones afectan a los contribuidores; la ayuda de usuario está
 | [0019](0019-notch-auto-notch.md) | Notch and auto-notch in the RX audio path | Accepted |
 | [0020](0020-iq-recording-via-sdrangel.md) | I/Q recording and playback delegated to SDRangel | Accepted |
 | [0021](0021-cluster-calendar-memory-io.md) | DX cluster, activity calendar and memory import/export | Accepted |
+| [0022](0022-sdrangel-api-alignment.md) | SDRangel API alignment: UDPSource/UDPSink, strict mock, reference copy | Accepted |
 
 Format: Title, Status, Date, Context, Decision, Alternatives considered, Consequences. To change a decision, add a new ADR that supersedes the old one.

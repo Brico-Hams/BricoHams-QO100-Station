@@ -17,10 +17,9 @@ const UDP_CHUNK_SAMPLES = 640;
  */
 
 /**
- * Sink sending s16le mono datagrams to the SDRangel SSB modulator's UDP audio input.
- * Target is an SDRangel UDPSource channel on the TX device set (sampleFormat=3 FormatUSB, inputSampleRate=48000, s16le mono);
- * SSBMod has NO UDP audio input (ref: docs/references/sdrangel-swagger/source/udpsourcesettings.h). Channel provisioning
- * for UDPSource is still to be done in src/modes/station.js.
+ * Sink sending s16le mono datagrams to the SDRangel UDPSource channel of the TX device set
+ * (sampleFormat=3 FormatUSB, inputSampleRate=48000; provisioned by `station.provision()`).
+ * SSBMod has NO UDP audio input (ref: docs/references/sdrangel-swagger/source/udpsourcesettings.h).
  * @param {{host?: string, port?: number, socket?: import('node:dgram').Socket}} [opts]
  * @returns {TxAudioSink}
  */

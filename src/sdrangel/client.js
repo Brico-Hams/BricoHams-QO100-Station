@@ -1,55 +1,92 @@
 /**
  * REST client for SDRangel's `sdrangelsrv` API.
- * Every endpoint path and settings key lives in the tables below so that a single place needs fixing
- * once they are checked against the real server.
+ * Every endpoint path and settings key lives in the tables below. Each entry carries `ref: <file>:<line>` pointing into the
+ * reference copy in docs/references/sdrangel-swagger (paths relative to that folder; `include/` files are the nested schemas)
+ * or is marked NOT IN SDRangel API.
  */
 
-// verify against SDRangel swagger (sdrangel/swagger/sdrangel/api/swagger/swagger.yaml)
 export const ENDPOINTS = Object.freeze({
-  instance: () => '/sdrangel',
-  deviceSets: () => '/sdrangel/devicesets',
-  deviceSet: (ds) => `/sdrangel/deviceset/${ds}`,
-  deviceSettings: (ds) => `/sdrangel/deviceset/${ds}/device/settings`,
-  deviceRun: (ds) => `/sdrangel/deviceset/${ds}/device/run`,
-  channels: (ds) => `/sdrangel/deviceset/${ds}/channel`,
-  channelSettings: (ds, ch) => `/sdrangel/deviceset/${ds}/channel/${ch}/settings`,
-  channelReport: (ds, ch) => `/sdrangel/deviceset/${ds}/channel/${ch}/report`,
-  spectrumSettings: (ds) => `/sdrangel/deviceset/${ds}/spectrum/settings`,
-  // verify against SDRangel swagger: switching the device of a set (PUT with deviceHwType) is how a FileInput gets selected.
-  device: (ds) => `/sdrangel/deviceset/${ds}/device`,
-  // verify against SDRangel swagger: stock SDRangel has no file-listing/deleting REST endpoint; these two paths assume a
-  // helper (or a future API) exposing the recordings directory. Without it list/delete only act on the station's own table.
-  iqFiles: () => '/sdrangel/iq/files',
-  iqFile: (name) => `/sdrangel/iq/files/${encodeURIComponent(name)}`,
+  instance: () => '/sdrangel', // ref: swagger.yaml (path /sdrangel)
+  deviceSets: () => '/sdrangel/devicesets', // ref: swagger.yaml (path /sdrangel/devicesets)
+  deviceSet: (ds) => `/sdrangel/deviceset/${ds}`, // ref: swagger.yaml (path /sdrangel/deviceset/{deviceSetIndex})
+  deviceSettings: (ds) => `/sdrangel/deviceset/${ds}/device/settings`, // ref: swagger.yaml (GET/PUT/PATCH)
+  deviceRun: (ds) => `/sdrangel/deviceset/${ds}/device/run`, // ref: swagger.yaml (GET state, POST start, DELETE stop)
+  channels: (ds) => `/sdrangel/deviceset/${ds}/channel`, // ref: swagger.yaml (POST {channelType, direction} -> 202 SuccessResponse)
+  channelSettings: (ds, ch) => `/sdrangel/deviceset/${ds}/channel/${ch}/settings`, // ref: swagger.yaml
+  channelReport: (ds, ch) => `/sdrangel/deviceset/${ds}/channel/${ch}/report`, // ref: swagger.yaml
+  channelActions: (ds, ch) => `/sdrangel/deviceset/${ds}/channel/${ch}/actions`, // ref: swagger.yaml (POST ChannelActions -> 202)
+  spectrumSettings: (ds) => `/sdrangel/deviceset/${ds}/spectrum/settings`, // ref: swagger.yaml (GET/PUT/PATCH GLSpectrum)
+  spectrumServer: (ds) => `/sdrangel/deviceset/${ds}/spectrum/server`, // ref: swagger.yaml (GET SpectrumServer, POST start, DELETE stop)
+  device: (ds) => `/sdrangel/deviceset/${ds}/device`, // ref: swagger.yaml (PUT DeviceListItem selects the hardware of a set)
 });
 
-// verify against SDRangel swagger (sdrangel/swagger/sdrangel/api/swagger/swagger.yaml)
-/** Key under which each device hardware type nests its settings object. */
-export const DEVICE_SETTINGS_KEYS = Object.freeze({
-  RTLSDR: 'rtlSdrSettings',
-  SDRplay1: 'sdrPlayV3Settings',
-  SDRplayV3: 'sdrPlayV3Settings',
-  Airspy: 'airspySettings',
-  AirspyHF: 'airspyHFSettings',
-  PlutoSDR: 'plutoSdrInputSettings',
-  PlutoSDROutput: 'plutoSdrOutputSettings',
-  USRP: 'usrpInputSettings',
-  USRPOutput: 'usrpOutputSettings',
-  HackRF: 'hackRFInputSettings',
-  LimeSDR: 'limeSdrInputSettings',
-  TestSource: 'testSourceSettings',
-  TestSink: 'testSinkSettings',
-  FileSource: 'fileSourceSettings',
-  FileInput: 'fileInputSettings',
+/**
+ * Settings of the supported device types. `hwType` is the string SDRangel reports in `deviceHwType` (line 2 of each include file);
+ * input and output hardware share it and are told apart by `direction` (0 Rx, 1 Tx).
+ * `lo` describes the reference-error key: `ppm` = integer ppm, `tenths` = integer tenths of ppm, null = NOT IN SDRangel API.
+ * `transverter` is true when the file defines `transverterMode` (integer 0/1) and `transverterDeltaFrequency`.
+ * `centerFrequency` is false for FileInput (NOT IN SDRangel API: FileInputSettings has no centre frequency).
+ */
+export const DEVICE_TABLE = Object.freeze({
+  RTLSDR: { in: { key: 'rtlSdrSettings', ref: 'include/DeviceSettings.yaml:103' }, centerFrequency: true, lo: { key: 'loPpmCorrection', unit: 'ppm' }, transverter: true, ref: 'include/RtlSdr.yaml:18,28,67,72' },
+  SDRplay1: { in: { key: 'sdrPlaySettings', ref: 'include/DeviceSettings.yaml:115' }, centerFrequency: true, lo: { key: 'LOppmTenths', unit: 'tenths' }, transverter: false, ref: 'include/SDRPlay.yaml:7,14 (no transverter keys)' },
+  SDRplayV3: { in: { key: 'sdrPlayV3Settings', ref: 'include/DeviceSettings.yaml:118' }, centerFrequency: true, lo: { key: 'LOppmTenths', unit: 'tenths' }, transverter: true, ref: 'include/SDRPlayV3.yaml:7,11,71,76' },
+  Airspy: { in: { key: 'airspySettings', ref: 'include/DeviceSettings.yaml:19' }, centerFrequency: true, lo: { key: 'LOppmTenths', unit: 'tenths' }, transverter: true, ref: 'include/Airspy.yaml:7,11,63,68' },
+  AirspyHF: { in: { key: 'airspyHFSettings', ref: 'include/DeviceSettings.yaml:22' }, centerFrequency: true, lo: { key: 'LOppmTenths', unit: 'tenths' }, transverter: true, ref: 'include/AirspyHF.yaml:7,11,22,27' },
+  PlutoSDR: {
+    in: { key: 'plutoSdrInputSettings', ref: 'include/DeviceSettings.yaml:94' },
+    out: { key: 'plutoSdrOutputSettings', ref: 'include/DeviceSettings.yaml:97' },
+    centerFrequency: true, lo: { key: 'LOppmTenths', unit: 'tenths' }, transverter: true, ref: 'include/PlutoSdr.yaml:7,14,78,83 (Rx); :118,125,156,161 (Tx)',
+  },
+  HackRF: {
+    in: { key: 'hackRFInputSettings', ref: 'include/DeviceSettings.yaml:64' },
+    out: { key: 'hackRFOutputSettings', ref: 'include/DeviceSettings.yaml:67' },
+    centerFrequency: true, lo: { key: 'LOppmTenths', unit: 'tenths' }, transverter: true, ref: 'include/HackRF.yaml:7,11,52,57 (Rx); :92,96,124,129 (Tx)',
+  },
+  USRP: {
+    in: { key: 'usrpInputSettings', ref: 'include/DeviceSettings.yaml:139' },
+    out: { key: 'usrpOutputSettings', ref: 'include/DeviceSettings.yaml:142' },
+    centerFrequency: true, lo: null, transverter: true, ref: 'include/USRP.yaml:7,47,52 (Rx); :90,115,120 (Tx); LO ppm: NOT IN SDRangel API',
+  },
+  FileInput: { in: { key: 'fileInputSettings', ref: 'include/DeviceSettings.yaml:58' }, centerFrequency: false, lo: null, transverter: false, ref: 'include/FileInput.yaml (fileName, accelerationFactor, loop)' },
+});
+// HL2/Metis (metisMISOSettings, include/DeviceSettings.yaml:88), LimeSDR and TestSource are not in DEVICE_TABLE: their
+// include files are not part of the reference copy, so their keys cannot be verified.
+
+/**
+ * Settings key of a device type for a direction.
+ * @param {string} hwType `deviceHwType` as reported by SDRangel.
+ * @param {number} direction 0 Rx, 1 Tx.
+ * @returns {string|null} Wrapper key inside `DeviceSettings`, or null when unsupported.
+ */
+export function deviceSettingsKey(hwType, direction) {
+  const d = Object.hasOwn(DEVICE_TABLE, hwType) ? DEVICE_TABLE[hwType] : null;
+  if (!d) return null;
+  return (direction === 1 ? d.out : d.in)?.key ?? null;
+}
+
+/**
+ * Channel types the station uses. `key` is the (capitalised) wrapper in `ChannelSettings`, `actions` the wrapper in `ChannelActions`,
+ * `report` the wrapper of the report. Report wrapper names follow the `<Type>Report` convention; ChannelReport.yaml is not in the
+ * reference copy, so they are inferred (marked below).
+ */
+export const CHANNEL_TABLE = Object.freeze({
+  SSBMod: { key: 'SSBModSettings', def: 'SSBModSettings', direction: 1, report: 'SSBModReport', ref: 'include/ChannelSettings.yaml:217' },
+  SSBDemod: { key: 'SSBDemodSettings', def: 'SSBDemodSettings', direction: 0, report: 'SSBDemodReport', ref: 'include/ChannelSettings.yaml:220' },
+  UDPSource: { key: 'UDPSourceSettings', def: 'UDPSourceSettings', direction: 1, report: 'UDPSourceReport', ref: 'include/ChannelSettings.yaml:223' },
+  UDPSink: { key: 'UDPSinkSettings', def: 'UDPSinkSettings', direction: 0, report: 'UDPSinkReport', ref: 'include/ChannelSettings.yaml:226' },
+  FileSink: { key: 'FileSinkSettings', def: 'FileSinkSettings', direction: 0, report: 'FileSinkReport', actions: 'FileSinkActions', ref: 'include/ChannelSettings.yaml:101; actions include/ChannelActions.yaml:37' },
+  FreqTracker: { key: 'FreqTrackerSettings', def: 'FreqTrackerSettings', direction: 0, report: 'FreqTrackerReport', ref: 'include/ChannelSettings.yaml:116' },
+  ChannelAnalyzer: { key: 'ChannelAnalyzerSettings', def: 'ChannelAnalyzerSettings', direction: 0, report: 'ChannelAnalyzerReport', ref: 'include/ChannelSettings.yaml:60' },
 });
 
-// verify against SDRangel swagger (sdrangel/swagger/sdrangel/api/swagger/swagger.yaml)
-/** Key under which each channel type nests its settings (and report) object. */
-export const CHANNEL_SETTINGS_KEYS = Object.freeze({
-  SSBDemod: 'ssbDemodSettings',
-  SSBMod: 'ssbModSettings',
-  ChannelAnalyzer: 'channelAnalyzerSettings',
-  FileSink: 'fileSinkSettings',
+/** Settings that exist in no SDRangel schema and must therefore never be sent (kept so reviews see the decision). */
+export const NOT_IN_SDRANGEL_API = Object.freeze({
+  'SSBMod UDP audio input': 'SSBModSettings has no UDP input; TX audio goes through UDPSource (include/UDPSource.yaml)',
+  'SSBDemod notch / auto-notch': 'SSBDemodSettings has agc and dnr but no notch; notch runs client-side',
+  'SSBDemod UDP output': 'SSBDemod only feeds a local audio device; RX audio comes from UDPSink (include/UDPSink.yaml)',
+  'FileSink record switch': 'FileSinkSettings has no record key; recording is started by the FileSinkActions.record action',
+  'I/Q file list/delete': 'no REST endpoint; BricoHams manages the recordings directory itself',
 });
 
 const DEFAULT_TIMEOUT_MS = 5000;
@@ -137,8 +174,8 @@ export function createSdrangelClient({ baseUrl = 'http://127.0.0.1:8091', timeou
     checkIndex(deviceSet, 'deviceSet');
     // SDRangel needs the hardware type in the PATCH body to pick the settings schema.
     const current = await getDeviceSettings(deviceSet);
-    const key = DEVICE_SETTINGS_KEYS[current?.deviceHwType];
-    if (!key) throw new SdrangelError('invalid', `unsupported device type ${String(current?.deviceHwType)}`);
+    const key = deviceSettingsKey(current?.deviceHwType, current?.direction);
+    if (!key) throw new SdrangelError('invalid', `unsupported device type ${String(current?.deviceHwType)} (direction ${String(current?.direction)})`);
     return request('PATCH', ENDPOINTS.deviceSettings(deviceSet), {
       deviceHwType: current.deviceHwType,
       direction: current.direction,
@@ -148,6 +185,16 @@ export function createSdrangelClient({ baseUrl = 'http://127.0.0.1:8091', timeou
 
   async function getChannelSettings(deviceSet, channel) {
     return request('GET', ENDPOINTS.channelSettings(checkIndex(deviceSet, 'deviceSet'), checkIndex(channel, 'channel')));
+  }
+
+  /** Capability lookup of the device behind a set; throws `invalid` for unsupported hardware. */
+  async function deviceInfo(deviceSet) {
+    const current = await getDeviceSettings(deviceSet);
+    const entry = Object.hasOwn(DEVICE_TABLE, current?.deviceHwType) ? DEVICE_TABLE[current.deviceHwType] : null;
+    if (!entry || !deviceSettingsKey(current.deviceHwType, current.direction)) {
+      throw new SdrangelError('invalid', `unsupported device type ${String(current?.deviceHwType)}`);
+    }
+    return entry;
   }
 
   const api = {
@@ -180,17 +227,24 @@ export function createSdrangelClient({ baseUrl = 'http://127.0.0.1:8091', timeou
      * @param {number} hz
      * @returns {Promise<object>}
      */
-    setCenterFrequency: (deviceSet, hz) => patchDeviceSettings(deviceSet, { centerFrequency: checkHz(hz, 'centerFrequency') }),
+    async setCenterFrequency(deviceSet, hz) {
+      const value = checkHz(hz, 'centerFrequency');
+      if (!(await deviceInfo(deviceSet)).centerFrequency) throw new SdrangelError('invalid', 'device has no centre frequency');
+      return patchDeviceSettings(deviceSet, { centerFrequency: value });
+    },
 
     /**
-     * Set the LO correction in ppm (device reference error).
+     * Set the LO correction in ppm (device reference error), converted to the unit of the device
+     * (integer ppm for RTL-SDR, integer tenths of ppm for the others). Devices without such a key reject with `invalid`.
      * @param {number} deviceSet
      * @param {number} ppm
      * @returns {Promise<object>}
      */
-    setLoPpm(deviceSet, ppm) {
+    async setLoPpm(deviceSet, ppm) {
       if (!Number.isFinite(ppm) || Math.abs(ppm) > 1000) throw new SdrangelError('invalid', 'ppm out of range');
-      return patchDeviceSettings(deviceSet, { loPpmCorrection: ppm });
+      const { lo } = await deviceInfo(deviceSet);
+      if (!lo) throw new SdrangelError('invalid', 'device has no LO ppm setting in the SDRangel API');
+      return patchDeviceSettings(deviceSet, { [lo.key]: Math.round(lo.unit === 'tenths' ? ppm * 10 : ppm) });
     },
 
     /**
@@ -200,34 +254,35 @@ export function createSdrangelClient({ baseUrl = 'http://127.0.0.1:8091', timeou
      * @param {boolean} [enabled]
      * @returns {Promise<object>}
      */
-    setTransverter(deviceSet, hz, enabled = true) {
+    async setTransverter(deviceSet, hz, enabled = true) {
       if (!Number.isFinite(hz) || Math.abs(hz) > 1e12) throw new SdrangelError('invalid', 'transverter delta out of range');
-      return patchDeviceSettings(deviceSet, { transverterMode: Boolean(enabled), transverterDeltaFrequency: Math.round(hz) });
+      if (!(await deviceInfo(deviceSet)).transverter) throw new SdrangelError('invalid', 'device has no transverter setting in the SDRangel API');
+      return patchDeviceSettings(deviceSet, { transverterMode: enabled ? 1 : 0, transverterDeltaFrequency: Math.round(hz) });
     },
 
     /**
      * Start or stop the device run (for a TX device set this keys/unkeys the transmitter).
      * @param {number} deviceSet
      * @param {boolean} running
-     * @returns {Promise<object>}
+     * @returns {Promise<{state?: string}>} Run state as returned by SDRangel (the swagger says: state before the change).
      */
     setRunning: (deviceSet, running) => request(running ? 'POST' : 'DELETE', ENDPOINTS.deviceRun(checkIndex(deviceSet, 'deviceSet'))),
 
     /**
      * @param {number} deviceSet
-     * @returns {Promise<{state?: string}>} Run state of the device.
+     * @returns {Promise<{state?: string}>} Run state of the device (notStarted, idle, ready, running, error).
      */
     getRunning: (deviceSet) => request('GET', ENDPOINTS.deviceRun(checkIndex(deviceSet, 'deviceSet'))),
 
     /**
-     * Add a channel to a device set.
+     * Add a channel to a device set. SDRangel answers 202 with a message only; look the new index up with `getDeviceSet`.
      * @param {number} deviceSet
-     * @param {string} channelType e.g. SSBDemod or SSBMod.
+     * @param {string} channelType Key of CHANNEL_TABLE.
      * @param {0|1} direction 0 = Rx, 1 = Tx.
-     * @returns {Promise<object>}
+     * @returns {Promise<{message?: string}>}
      */
     addChannel(deviceSet, channelType, direction) {
-      if (!Object.hasOwn(CHANNEL_SETTINGS_KEYS, channelType)) throw new SdrangelError('invalid', `unsupported channel type ${String(channelType)}`);
+      if (!Object.hasOwn(CHANNEL_TABLE, channelType)) throw new SdrangelError('invalid', `unsupported channel type ${String(channelType)}`);
       if (direction !== 0 && direction !== 1) throw new SdrangelError('invalid', 'direction must be 0 or 1');
       return request('POST', ENDPOINTS.channels(checkIndex(deviceSet, 'deviceSet')), { channelType, direction });
     },
@@ -243,21 +298,38 @@ export function createSdrangelClient({ baseUrl = 'http://127.0.0.1:8091', timeou
      */
     async patchChannelSettings(deviceSet, channel, partial) {
       const current = await getChannelSettings(deviceSet, channel);
-      const key = CHANNEL_SETTINGS_KEYS[current?.channelType];
-      if (!key) throw new SdrangelError('invalid', `unsupported channel type ${String(current?.channelType)}`);
+      const entry = Object.hasOwn(CHANNEL_TABLE, current?.channelType) ? CHANNEL_TABLE[current.channelType] : null;
+      if (!entry) throw new SdrangelError('invalid', `unsupported channel type ${String(current?.channelType)}`);
       return request('PATCH', ENDPOINTS.channelSettings(deviceSet, channel), {
         channelType: current.channelType,
         direction: current.direction,
-        [key]: partial,
+        [entry.key]: partial,
       });
     },
 
     /**
      * @param {number} deviceSet
      * @param {number} channel
-     * @returns {Promise<object>} Channel report (signal level, etc.).
+     * @returns {Promise<object>} Channel report: `{channelType, direction, <Type>Report: {...}}`.
      */
     getChannelReport: (deviceSet, channel) => request('GET', ENDPOINTS.channelReport(checkIndex(deviceSet, 'deviceSet'), checkIndex(channel, 'channel'))),
+
+    /**
+     * Start or stop a FileSink recording through `FileSinkActions.record` (FileSinkSettings has no record key).
+     * @param {number} deviceSet
+     * @param {number} channel Index of a FileSink channel.
+     * @param {boolean} on
+     * @returns {Promise<object>}
+     */
+    async setRecording(deviceSet, channel, on) {
+      const current = await getChannelSettings(deviceSet, channel);
+      if (current?.channelType !== 'FileSink') throw new SdrangelError('invalid', 'channel is not a FileSink');
+      return request('POST', ENDPOINTS.channelActions(deviceSet, channel), {
+        channelType: 'FileSink',
+        direction: current.direction,
+        FileSinkActions: { record: on ? 1 : 0 },
+      });
+    },
 
     /**
      * @param {number} deviceSet
@@ -273,28 +345,33 @@ export function createSdrangelClient({ baseUrl = 'http://127.0.0.1:8091', timeou
     patchSpectrumSettings: (deviceSet, settings) => request('PATCH', ENDPOINTS.spectrumSettings(checkIndex(deviceSet, 'deviceSet')), settings),
 
     /**
-     * Replace the hardware of a device set (e.g. RTLSDR -> FileInput for I/Q playback, and back).
      * @param {number} deviceSet
-     * @param {string} hwType Key of DEVICE_SETTINGS_KEYS.
-     * @param {0|1} direction
-     * @returns {Promise<object>}
+     * @returns {Promise<{run?: number, listeningAddress?: string, listeningPort?: number, clients?: number}>} Spectrum websocket server state.
      */
-    switchDevice(deviceSet, hwType, direction) {
-      if (!Object.hasOwn(DEVICE_SETTINGS_KEYS, hwType)) throw new SdrangelError('invalid', `unsupported device type ${String(hwType)}`);
-      if (direction !== 0 && direction !== 1) throw new SdrangelError('invalid', 'direction must be 0 or 1');
-      return request('PUT', ENDPOINTS.device(checkIndex(deviceSet, 'deviceSet')), { deviceHwType: hwType, direction });
-    },
-
-    /** @returns {Promise<{files: Array<{name: string, bytes: number}>}>} I/Q files known to SDRangel's host. */
-    listIqFiles: () => request('GET', ENDPOINTS.iqFiles()),
+    getSpectrumServer: (deviceSet) => request('GET', ENDPOINTS.spectrumServer(checkIndex(deviceSet, 'deviceSet'))),
 
     /**
-     * @param {string} name File name previously returned by `listIqFiles` (no path separators).
+     * Start (`true`) or stop (`false`) the spectrum websocket server of a device set.
+     * @param {number} deviceSet
+     * @param {boolean} [on]
      * @returns {Promise<object>}
      */
-    deleteIqFile(name) {
-      if (typeof name !== 'string' || !/^[\w.-]{1,120}$/.test(name)) throw new SdrangelError('invalid', 'bad I/Q file name');
-      return request('DELETE', ENDPOINTS.iqFile(name));
+    setSpectrumServer: (deviceSet, on = true) => request(on ? 'POST' : 'DELETE', ENDPOINTS.spectrumServer(checkIndex(deviceSet, 'deviceSet'))),
+
+    /**
+     * Replace the hardware of a device set (e.g. RTLSDR -> FileInput for I/Q playback, and back).
+     * @param {number} deviceSet
+     * @param {string} hwType Key of DEVICE_TABLE.
+     * @param {0|1} direction
+     * @param {{serial?: string, sequence?: number}} [pick] Which physical device to select.
+     * @returns {Promise<object>}
+     */
+    switchDevice(deviceSet, hwType, direction, { serial, sequence = 0 } = {}) {
+      if (!Object.hasOwn(DEVICE_TABLE, hwType)) throw new SdrangelError('invalid', `unsupported device type ${String(hwType)}`);
+      if (direction !== 0 && direction !== 1) throw new SdrangelError('invalid', 'direction must be 0 or 1');
+      const body = { hwType, direction, sequence };
+      if (serial !== undefined) body.serial = String(serial);
+      return request('PUT', ENDPOINTS.device(checkIndex(deviceSet, 'deviceSet')), body);
     },
   };
 

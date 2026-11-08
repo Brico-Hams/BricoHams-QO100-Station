@@ -86,9 +86,9 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   subgraph RX
-    D1[SDRangel SSBDemod] -- UDP s16 48 kHz --> R[rx-audio: resample to 12 kHz, 240-sample frames]
+    D1[SDRangel UDPSink USBMono] -- UDP s16 48 kHz --> R[rx-audio: resample to 12 kHz, 240-sample frames]
     R -- WS binary kind 2 --> P[rx-player AudioWorklet]
-    D1 -- spectrum WS --> SP[spectrum feed: 512 bins, 10 fps] -- WS kind 3 --> C[canvas spectrum + waterfall]
+    D1 -. spectrum WS .-> SP[spectrum feed: 512 bins, 10 fps] -- WS kind 3 --> C[canvas spectrum + waterfall]
   end
 ```
 
@@ -96,10 +96,10 @@ flowchart LR
 flowchart LR
   M[Mic] --> W[mic-capture AudioWorklet 12 kHz] -- WS kind 1 --> G{holder and TX_ON?}
   G -- no --> X[drop + count]
-  G -- yes --> Lm[limiter 0.8 FS] --> Rs[resample to 48 kHz] --> U[UDP sink] --> D2[SDRangel SSBMod] --> HW[TX SDR]
+  G -- yes --> Lm[limiter 0.8 FS] --> Rs[resample to 48 kHz] --> U[UDP sink] --> D2[SDRangel UDPSource FormatUSB] --> HW[TX SDR]
 ```
 
-The SSBMod UDP input format is **unverified** (see DEVELOPER.md). Fallback: loopback audio device.
+`station.provision()` creates the UDPSink (RX set) and UDPSource (TX set); SSBMod is only used for CW (CWTone). The spectrum comes from the spectrum server of the RX device set. See ADR 0022. Fallback: loopback audio device.
 
 ## Beacon correction loop
 
@@ -172,8 +172,8 @@ File path: `BRICOHAMS_CONFIG` (default `./config.json`). Source of truth: `src/s
 | `station.applyCorrectionToTx` | `false` | - | Apply beacon correction to TX (needs a shared reference) |
 | `station.beaconIntervalMs` | `1000` | - | Beacon loop period, 100-60000 |
 | `audio.enabled` | `false` | - | Enable RX/TX audio, spectrum and beacon loop |
-| `audio.rxUdp` | `127.0.0.1:9998` | - | UDP address where SDRangel sends RX audio |
-| `audio.txUdp` | `127.0.0.1:9999` | - | UDP address of the SSBMod audio input |
+| `audio.rxUdp` | `127.0.0.1:9998` | - | UDP address/port of the SDRangel UDPSink (`udpAddress`/`udpPort`) and where BricoHams listens |
+| `audio.txUdp` | `127.0.0.1:9999` | - | UDP address/port of the SDRangel UDPSource (FormatUSB, 48 kHz) |
 | `audio.spectrumUrl` | `ws://127.0.0.1:8887` | - | SDRangel spectrum WS; `ws:` only on loopback, else `wss:` |
 | `auditLogPath` | `./data/audit.log` | - | PTT audit file |
 | `resetCodePath` | `<dir of auditLogPath>/ptt-reset-code` | - | One-time LOCKOUT reset code file (mode 0600) |
@@ -182,8 +182,8 @@ File path: `BRICOHAMS_CONFIG` (default `./config.json`). Source of truth: `src/s
 | `recording.dir` | `./data/recordings` | - | WAV directory |
 | `recording.maxFileMb` / `maxUserMb` | `100` / `1000` | - | Per-file and per-user caps (≥ 1; user cap ≥ file cap) |
 | `logbook.path` | `./data/logbook.db` | - | SQLite file |
-| `station.notchEngine` | `client` | - | `client` (RX AudioWorklet) or `sdrangel` (demod settings, verify) |
-| `iq.enabled` / `maxUserMb` / `maxSeconds` | `false` / `2000` / `600` | - | I/Q via SDRangel master switch and limits |
+| `beacon.engine` | `bricohams` | - | `bricohams` (spectrum based) or `sdrangel-freqtracker` (FreqTracker channel) |
+| `iq.enabled` / `dir` / `maxUserMb` / `maxSeconds` | `false` / `./data/iq` / `2000` / `600` | - | I/Q via SDRangel FileSink: master switch, BricoHams-managed recordings directory, limits |
 | `cluster.enabled` / `host` / `port` / `callsign` / `postSpots` | `false` / - / `7300` / - / `false` | - | DX cluster telnet client (outbound only when enabled) |
 | `calendar.enabled` / `url` / `refreshHours` / `maxKb` | `false` / `null` / `6` / `256` | - | `.ics` activity calendar |
 | `webhooks.enabled`, `webhooks.endpoints[]` | `false`, `[]` | `secretEnv` names | `{url, events, secretEnv}`; secret ≥ 16 chars from env; `https` except loopback |

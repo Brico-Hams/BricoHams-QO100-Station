@@ -7,9 +7,9 @@ existing authenticated WSS (TLS), so no extra ports, ICE or TURN are needed.
 
 | Export | Purpose |
 |---|---|
-| `createRxAudio(opts)` | UDP in (SDRangel "copy audio to UDP", 48 kHz s16le) -> 12 kHz -> fan-out to listeners. `addListener(ws)`, `addTap(fn)` (local consumers such as the decoders receive each 12 kHz `Int16Array` frame and keep the pipeline running with no listeners), `stats()`, `start()`, `stop()`. |
+| `createRxAudio(opts)` | UDP in (SDRangel UDPSink, USBMono, 48 kHz s16le; `audio.rxUdp`) -> 12 kHz -> fan-out to listeners. `addListener(ws)`, `addTap(fn)` (local consumers such as the decoders receive each 12 kHz `Int16Array` frame and keep the pipeline running with no listeners), `stats()`, `start()`, `stop()`. |
 | `createTxAudio({ptt, sink, ...})` | `handleFrame(connId, buf)` gates, validates, limits and forwards mic frames. `stats()`. |
-| `createUdpTxSink(opts)` | `TxAudioSink` that sends s16le 48 kHz UDP to SDRangel's SSB modulator. |
+| `createUdpTxSink(opts)` | `TxAudioSink` that sends s16le 48 kHz UDP to SDRangel's UDPSource channel (`audio.txUdp`, FormatUSB). |
 | `createSpectrumSource` / `SpectrumSource` | WS client of SDRangel's spectrum server; `getSpectrum()` returns `{centerHz, binHz, power[]}` or null when stale. |
 | `createSpectrumFeed({source})` | Downsamples to <= 10 fps / 512 bins for browsers. |
 | `parseSpectrumFrame`, `downsampleSpectrum` | Pure functions. |
@@ -34,15 +34,15 @@ existing authenticated WSS (TLS), so no extra ports, ICE or TURN are needed.
 ## TxAudioSink interface and the fallback (spec §7)
 
 A sink implements `write(Int16Array)` (48 kHz mono), `reset()` and `close()`.
-Implementation 1 is `createUdpTxSink` (SSBMod UDP audio input).
+Implementation 1 is `createUdpTxSink` (SDRangel UDPSource, sampleFormat FormatUSB, 48 kHz s16le mono; SSBMod has no UDP input).
 **Fallback implementation (not built):** if SDRangel's UDP input is unusable, write the PCM to a virtual
-loopback audio device (VB-Cable on Windows, `snd-aloop` on Linux) selected as the SSB modulator's audio input.
+loopback audio device (VB-Cable on Windows, `snd-aloop` on Linux) selected as the modulator's audio input.
 Only a new class with the same three methods is needed.
 
 ## Verify against real SDRangel
 
-- Spectrum frame layout in `parseSpectrumFrame` ("verify against SDRangel sdrbase/websockets spectrum format").
-- SSBMod UDP audio input format, port and sample rate.
+- UDPSink/UDPSource are provisioned by `station.provision()` (ADR 0022). Spectrum frame layout follows `wsspectrum.cpp`; enabling the spectrum server uses `POST /sdrangel/deviceset/{n}/spectrum/server` (swagger), logged and non-fatal if refused.
+- Not verified on hardware: real UDPSink/UDPSource datagram sizing and latency.
 
 ## Recording (ADR 0014)
 

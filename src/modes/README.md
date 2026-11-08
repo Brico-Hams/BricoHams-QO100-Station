@@ -72,7 +72,8 @@ Tests: `node --test test/unit/advanced.test.js test/functional/advanced.test.js`
 
 ## Notch and memory import/export (phase 13)
 
-- `notch.js`: `parseNotch(input)` validates `{enabled, offsetHz, widthHz, auto}`; `notchToChannelSettings` maps it to SDRangel keys (**verify**). `station.setNotch` stores it (`status().notch`).
+- `notch.js`: `parseNotch(input)` validates `{enabled, offsetHz, widthHz, auto}`. The notch is client-side only (NOT IN SDRangel API); `station.setNotch` stores it (`status().notch`, engine `client`).
+- `station.provision()` (ADR 0022): RX `UDPSink` (USBMono, 48 kHz) to `audio.rxUdp`, TX `UDPSource` (USB, 48 kHz) from `audio.txUdp`, `SSBMod` (CWTone) only in CW, and the spectrum server. RX filter presets only change `rfBandwidth`; AGC/squelch map to UDPSink fields; `noiseReduction: true` is refused with `dnr_unavailable`.
 - `memory-io.js`: `exportMemories(items, 'json'|'csv')`, `importMemories({store, user, format, content, dryRun})` (validation, dedupe, dry run, CHIRP-like CSV). Invariant: imported memories are always personal.
 - Test: `node --test test/unit/phase13.test.js test/functional/phase13.test.js`.
 

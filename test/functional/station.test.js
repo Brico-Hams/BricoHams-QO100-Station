@@ -53,6 +53,7 @@ async function start({ beaconOffset = null } = {}) {
     beaconAutoStart: false,
   });
   const { url } = await app.listen();
+  await app.whenProvisioned(); // startup provisioning must not consume faults injected by a test
   return { app, mock, oidc, base: url, state };
 }
 

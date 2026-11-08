@@ -170,9 +170,12 @@ export function validateConfig(raw, env = process.env) {
     txDeviceSet: stRaw.txDeviceSet ?? 1,
     applyCorrectionToTx: stRaw.applyCorrectionToTx ?? false, // beacon offset measures LNB (RX) drift; TX only shares it with a common reference
     beaconIntervalMs: stRaw.beaconIntervalMs ?? 1000,
-    notchEngine: stRaw.notchEngine ?? 'client', // 'client': audio notch in the PWA; 'sdrangel': patch the demod channel
   };
-  if (station.notchEngine !== 'client' && station.notchEngine !== 'sdrangel') problems.push('station.notchEngine must be "client" or "sdrangel"');
+  const bcRaw = raw.beacon ?? {};
+  const beacon = { engine: bcRaw.engine ?? 'bricohams' };
+  if (beacon.engine !== 'bricohams' && beacon.engine !== 'sdrangel-freqtracker') {
+    problems.push('beacon.engine must be "bricohams" or "sdrangel-freqtracker"');
+  }
   if (!Number.isFinite(station.lnbLoHz) || station.lnbLoHz < 1e9 || station.lnbLoHz > 1.2e10) {
     problems.push('station.lnbLoHz must be a frequency in Hz between 1e9 and 1.2e10');
   }
@@ -256,6 +259,7 @@ export function validateConfig(raw, env = process.env) {
     tx,
     sdrangel: { baseUrl: sdrUrl.origin + sdrUrl.pathname.replace(/\/$/, '') },
     station,
+    beacon,
     audio,
     secretsKey,
     auditLogPath,
@@ -269,6 +273,7 @@ export function validateConfig(raw, env = process.env) {
     tx: Object.freeze(config.tx),
     sdrangel: Object.freeze(config.sdrangel),
     station: Object.freeze(config.station),
+    beacon: Object.freeze(config.beacon),
     audio: Object.freeze({
       ...config.audio, rxUdp: Object.freeze(config.audio.rxUdp), txUdp: Object.freeze(config.audio.txUdp),
     }),

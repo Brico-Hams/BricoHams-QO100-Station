@@ -161,8 +161,9 @@ test('rit, txlock, filter and rxdsp: validated and role-checked', () => withApp(
   assert.equal((await op.post('/api/filter', { preset: 'bogus' })).status, 400);
   assert.equal((await op.post('/api/filter', {})).status, 400);
 
-  const dsp = await (await op.post('/api/rxdsp', { agc: 'fast', squelchDb: -60, noiseReduction: true })).json();
-  assert.deepEqual({ ...dsp.rxDsp }, { agc: 'fast', squelchDb: -60, noiseReduction: true });
+  const dsp = await (await op.post('/api/rxdsp', { agc: 'fast', squelchDb: -60 })).json();
+  assert.deepEqual({ ...dsp.rxDsp }, { agc: 'fast', squelchDb: -60, noiseReduction: false });
+  assert.equal((await op.post('/api/rxdsp', { noiseReduction: true })).status, 400, 'DNR is not available on the UDPSink path');
   assert.equal((await op.post('/api/rxdsp', { agc: 'turbo' })).status, 400);
   assert.equal((await op.post('/api/rxdsp', { squelchDb: 5 })).status, 400);
   assert.equal((await op.post('/api/rxdsp', {})).status, 400);

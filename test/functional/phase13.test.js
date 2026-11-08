@@ -31,6 +31,7 @@ async function start(extra = {}, deps = {}) {
     logbook: { path: join(dir, 'logbook.db') },
     stationDbPath: join(dir, 'station.db'),
     ...extra,
+    iq: { dir: join(dir, 'iq'), ...extra.iq },
   }, { GOOGLE_CLIENT_SECRET: 'test-secret', BRICOHAMS_WEBHOOK_SECRET_1: 'a'.repeat(32) });
   const oidc = createFakeOidc();
   const app = createApp(config, {
