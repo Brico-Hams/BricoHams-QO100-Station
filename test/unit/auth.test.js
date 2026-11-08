@@ -16,10 +16,12 @@ function setup() {
   return { oidc, auth };
 }
 
-async function login(ctx, overrides, { loginIdOverride } = {}) {
+async function login(ctx, overrides, opts = {}) {
   const { url, loginId } = await ctx.auth.startLogin();
   const { code, state } = ctx.oidc.issueCode(url, overrides);
-  return ctx.auth.finishLogin({ search: `?code=${code}&state=${state}`, loginId: loginIdOverride ?? loginId });
+  // `in` (not `??`) so that an explicit `undefined` simulates a browser without the login cookie.
+  const bound = 'loginIdOverride' in opts ? opts.loginIdOverride : loginId;
+  return ctx.auth.finishLogin({ search: `?code=${code}&state=${state}`, loginId: bound });
 }
 
 async function rejects(promise, code) {

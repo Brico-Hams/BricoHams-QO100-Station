@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import http from 'node:http';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -35,6 +36,17 @@ async function start() {
   });
   const { port, url } = await app.listen();
   return { app, oidc, driver, base: url, port };
+}
+
+function statusWithHost(ctx, host) {
+  return new Promise((resolve, reject) => {
+    const req = http.request({ host: '127.0.0.1', port: ctx.port, path: '/api/health', headers: { host } }, (res) => {
+      res.resume();
+      resolve(res.statusCode);
+    });
+    req.on('error', reject);
+    req.end();
+  });
 }
 
 function cookieOf(res, name) {
@@ -113,8 +125,9 @@ test('serves static files with security headers, rejects bad hosts and traversal
   assert.equal((await fetch(`${ctx.base}/%2e%2e/%2e%2e/package.json`)).status, 404);
   assert.equal((await fetch(`${ctx.base}/nope.js`)).status, 404);
   assert.equal((await fetch(`${ctx.base}/api/health`)).status, 200);
-  const bad = await fetch(`${ctx.base}/api/health`, { headers: { host: 'evil.example' } }).catch(() => null);
-  if (bad) assert.equal(bad.status, 421);
+  // fetch cannot override Host, so use a raw request.
+  assert.equal(await statusWithHost(ctx, 'evil.example'), 421);
+  assert.equal(await statusWithHost(ctx, `localhost:${ctx.port}`), 200);
 }));
 
 test('API requires a session; logout requires CSRF', () => withApp(async (ctx) => {

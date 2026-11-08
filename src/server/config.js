@@ -161,6 +161,24 @@ export function validateConfig(raw, env = process.env) {
 
   const secretsKey = parseSecretsKey(env.BRICOHAMS_SECRETS_KEY, problems);
 
+  const stRaw = raw.station ?? {};
+  const station = {
+    lnbLoHz: stRaw.lnbLoHz ?? 9_750_000_000,
+    rxDeviceSet: stRaw.rxDeviceSet ?? 0,
+    txDeviceSet: stRaw.txDeviceSet ?? 1,
+    applyCorrectionToTx: stRaw.applyCorrectionToTx ?? false, // beacon offset measures LNB (RX) drift; TX only shares it with a common reference
+    beaconIntervalMs: stRaw.beaconIntervalMs ?? 1000,
+  };
+  if (!Number.isFinite(station.lnbLoHz) || station.lnbLoHz < 1e9 || station.lnbLoHz > 1.2e10) {
+    problems.push('station.lnbLoHz must be a frequency in Hz between 1e9 and 1.2e10');
+  }
+  if (!isInt(station.rxDeviceSet, 0, 99)) problems.push('station.rxDeviceSet must be an integer between 0 and 99');
+  if (!isInt(station.txDeviceSet, 0, 99) || station.txDeviceSet === station.rxDeviceSet) {
+    problems.push('station.txDeviceSet must be an integer between 0 and 99, different from rxDeviceSet');
+  }
+  if (typeof station.applyCorrectionToTx !== 'boolean') problems.push('station.applyCorrectionToTx must be a boolean');
+  if (!isInt(station.beaconIntervalMs, 100, 60_000)) problems.push('station.beaconIntervalMs must be an integer between 100 and 60000');
+
   const auditLogPath = raw.auditLogPath ?? './data/audit.log';
   if (typeof auditLogPath !== 'string' || !auditLogPath) problems.push('auditLogPath must be a non-empty string');
 
@@ -175,6 +193,7 @@ export function validateConfig(raw, env = process.env) {
     allowlist,
     tx,
     sdrangel: { baseUrl: sdrUrl.origin + sdrUrl.pathname.replace(/\/$/, '') },
+    station,
     secretsKey,
     auditLogPath,
   };
@@ -184,6 +203,7 @@ export function validateConfig(raw, env = process.env) {
     google: Object.freeze(config.google),
     tx: Object.freeze(config.tx),
     sdrangel: Object.freeze(config.sdrangel),
+    station: Object.freeze(config.station),
     allowlist: Object.freeze(config.allowlist),
   });
 }

@@ -4,8 +4,9 @@ HTTP(S) server, JSON API, WSS control channel and configuration loading.
 
 ## Public API
 - `config.js`: `loadConfig({env, readFile})`, `validateConfig(raw, env)`, `redactConfig(config)`, `isLoopbackHost(host)`, `ConfigError`.
-- `app.js`: `createApp(config, deps)` returns `{server, ptt, auth, listen(), close()}`; `securityHeaders({https, wsOrigin})`.
-  `deps` (all optional, used by tests): `oidc`, `driver`, `audit`, `clock`, `publicDir`, `logger`, `tlsCredentials`.
+- `app.js`: `createApp(config, deps)` returns `{server, ptt, auth, station, beacon, listen(), close()}`; `securityHeaders({https, wsOrigin})`.
+  `deps` (all optional, used by tests): `oidc`, `driver`, `audit`, `clock`, `publicDir`, `logger`, `tlsCredentials`,
+  `sdrangel` (client), `spectrumSource` (async `() => {powersDb, centerHz, binHz}`; enables the beacon controller), `beaconAutoStart`.
 - `index.js`: `main()`; `npm start`.
 
 ## Configuration
@@ -13,13 +14,19 @@ JSON file at `BRICOHAMS_CONFIG` (default `./config.json`, see `config.example.js
 `BRICOHAMS_PORT`, `BRICOHAMS_HOST`, `BRICOHAMS_PUBLIC_URL`, `BRICOHAMS_TLS_CERT`, `BRICOHAMS_TLS_KEY`,
 `GOOGLE_CLIENT_ID`, `BRICOHAMS_TX_ENABLED`, `BRICOHAMS_SDRANGEL_URL`. Secrets come **only** from the environment:
 `GOOGLE_CLIENT_SECRET` (required) and `BRICOHAMS_SECRETS_KEY` (32 bytes, hex or base64).
+`station` section (all optional): `lnbLoHz` (9750000000), `rxDeviceSet` (0), `txDeviceSet` (1),
+`applyCorrectionToTx` (true), `beaconIntervalMs` (1000).
 
 ## Endpoints
 `GET /api/health`, `GET /auth/login`, `GET /auth/callback`, `POST /auth/logout` (CSRF), `GET /api/me`, `GET /api/ptt`,
 `POST /api/ptt/reset` (owner + CSRF + loopback client), WebSocket `/ws/control`, everything else is static from `src/web/public`.
+Station (phase 2): `GET /api/status` and `GET /api/beacon` (any role); `POST /api/tune` `{downlinkHz}` and
+`POST /api/mode` `{mode}` (operator, CSRF, JSON body; mode change is refused with 409 while TX_ON).
+Invalid input gives 400, an unreachable SDRangel gives 502 `{error:'sdrangel_unavailable', kind}`.
 
 WebSocket messages (client to server): `{type:'heartbeat'|'turn'|'release'}`, `{type:'ptt', down:boolean}`.
 Server to client: `{type:'state', state, txEnabled, holder:{callsign}|null, isHolder, lockoutReason}`,
+`{type:'beacon', status:'locked'|'no-lock', offsetHz, appliedHz, snrDb, reason}`,
 `{type:'result', op, ok, reason?}`, `{type:'error', error}`. Heartbeat must be sent every 500 ms while holding the turn.
 
 ## Invariants
@@ -27,7 +34,8 @@ Server to client: `{type:'state', state, txEnabled, holder:{callsign}|null, isHo
 - The `Host` header must equal `publicUrl`'s host (DNS-rebinding guard); WS `Origin` must equal `publicUrl`'s origin.
 - Closing a control socket always releases the turn (cutting TX). `close()` cuts TX first.
 - With `port: 0` (tests) `publicUrl` is rewritten to the actual port after `listen()`.
-- No default transmitter driver: until the SDRangel module is wired, keying is refused.
+- The default PTT driver starts/stops the SDRangel TX device set (`src/sdrangel/ptt-driver.js`); TX stays disabled unless `tx.enabled`.
+- Without `spectrumSource` there is no beacon controller and `/api/beacon` reports `no-lock` / `no_source`.
 
 ## Testing
-`node --test test/unit/config.test.js test/functional/server.test.js`
+`node --test test/unit/config.test.js test/functional/server.test.js test/functional/station.test.js`

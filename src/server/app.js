@@ -9,8 +9,12 @@ import { WebSocketServer } from 'ws';
 import {
   AuthError, LOGIN_COOKIE, SESSION_COOKIE, createAuth, createGoogleOidc, serializeCookie, parseCookies,
 } from '../auth/index.js';
-import { createPtt, createUnavailableDriver } from '../ptt/index.js';
+import { createPtt } from '../ptt/index.js';
 import { createFileAudit } from '../ptt/audit.js';
+import { createSdrangelClient, SdrangelError } from '../sdrangel/client.js';
+import { createSdrangelPttDriver } from '../sdrangel/ptt-driver.js';
+import { createStation, StationError } from '../modes/index.js';
+import { createBeaconController } from '../beacon/index.js';
 import { isLoopbackHost } from './config.js';
 
 const MIME = {
@@ -83,13 +87,36 @@ function isLocalRequest(req) {
   return isLoopbackHost(req.socket.remoteAddress ?? '');
 }
 
+const MAX_JSON_BYTES = 4096;
+
+class BadRequest extends Error {}
+
+async function readJson(req) {
+  if (!String(req.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) throw new BadRequest('content_type');
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > MAX_JSON_BYTES) throw new BadRequest('too_large');
+    chunks.push(chunk);
+  }
+  try {
+    const body = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    if (body === null || typeof body !== 'object' || Array.isArray(body)) throw new Error('shape');
+    return body;
+  } catch {
+    throw new BadRequest('bad_json');
+  }
+}
+
 /**
  * Create the BricoHams application (HTTP(S) server, JSON API and WSS control channel).
  * Nothing is listening until `listen()` is called.
  * @param {Readonly<object>} config Validated config (see config.js).
- * @param {{oidc?: object, driver?: object, audit?: object, clock?: object, publicDir?: string,
+ * @param {{oidc?: object, driver?: object, audit?: object, clock?: object, publicDir?: string, sdrangel?: object,
+ *   spectrumSource?: () => Promise<{powersDb: ArrayLike<number>, centerHz: number, binHz: number}|null>, beaconAutoStart?: boolean,
  *   logger?: {error: Function, info?: Function}, tlsCredentials?: {cert: Buffer, key: Buffer}}} [deps] Injectable collaborators for tests.
- * @returns {{server: import('node:http').Server, ptt: object, auth: object, listen: () => Promise<{port: number, url: string}>, close: () => Promise<void>}}
+ * @returns {{server: import('node:http').Server, ptt: object, auth: object, station: object, beacon: object|null, listen: () => Promise<{port: number, url: string}>, close: () => Promise<void>}}
  */
 export function createApp(config, deps = {}) {
   const logger = deps.logger ?? console;
@@ -99,13 +126,38 @@ export function createApp(config, deps = {}) {
 
   const oidc = deps.oidc ?? createGoogleOidc(config.google);
   const audit = deps.audit ?? createFileAudit({ path: config.auditLogPath });
+  const sdr = deps.sdrangel ?? createSdrangelClient({ baseUrl: config.sdrangel.baseUrl });
   const ptt = createPtt({
     tx: config.tx,
-    driver: deps.driver ?? createUnavailableDriver(),
+    driver: deps.driver ?? createSdrangelPttDriver({ client: sdr, txDeviceSet: config.station.txDeviceSet }),
     audit,
     clock: deps.clock,
     logger,
   });
+  const station = createStation({
+    client: sdr,
+    rxDeviceSet: config.station.rxDeviceSet,
+    txDeviceSet: config.station.txDeviceSet,
+    lnbLoHz: config.station.lnbLoHz,
+    applyToTx: config.station.applyCorrectionToTx,
+    isTxActive: () => ptt.state === 'TX_ON',
+    logger,
+  });
+  const beacon = deps.spectrumSource
+    ? createBeaconController({
+      getSpectrum: deps.spectrumSource,
+      station,
+      lnbLoHz: config.station.lnbLoHz,
+      onStatus: (s) => broadcast({ type: 'beacon', ...publicBeacon(s) }),
+      logger,
+    })
+    : null;
+  const publicBeacon = (s) => ({
+    status: s.status, offsetHz: s.offsetHz, appliedHz: s.appliedHz, snrDb: s.snrDb, reason: s.reason,
+  });
+  const beaconSnapshot = () => (beacon
+    ? publicBeacon(beacon.status())
+    : { status: 'no-lock', offsetHz: null, appliedHz: 0, snrDb: null, reason: 'no_source' });
   const auth = createAuth({ config, oidc, getRedirectUri: () => `${publicUrl.origin}/auth/callback` });
 
   const wsOrigin = () => `${publicUrl.protocol === 'https:' ? 'wss:' : 'ws:'}//${publicUrl.host}`;
@@ -157,11 +209,39 @@ export function createApp(config, deps = {}) {
         const actor = { id: 'http', ...s.user };
         return sendJson(res, 200, await ptt.ownerReset(actor, { local: isLocalRequest(req) }));
       }
+      if (pathname === '/api/status' && req.method === 'GET') {
+        auth.requireAuth(req);
+        return sendJson(res, 200, { station: station.status(), beacon: beaconSnapshot(), ptt: publicPtt(null) });
+      }
+      if (pathname === '/api/beacon' && req.method === 'GET') {
+        auth.requireAuth(req);
+        return sendJson(res, 200, beaconSnapshot());
+      }
+      if (pathname === '/api/tune' && req.method === 'POST') {
+        auth.requireAuth(req, { minRole: 'operator', csrf: true });
+        const body = await readJson(req);
+        if (typeof body.downlinkHz !== 'number') throw new BadRequest('downlinkHz');
+        return sendJson(res, 200, await station.tune(body.downlinkHz));
+      }
+      if (pathname === '/api/mode' && req.method === 'POST') {
+        auth.requireAuth(req, { minRole: 'operator', csrf: true });
+        const body = await readJson(req);
+        if (typeof body.mode !== 'string') throw new BadRequest('mode');
+        // Reconfiguring the TX channel while the carrier is up could change what is radiated.
+        if (ptt.state === 'TX_ON') return sendJson(res, 409, { error: 'tx_active' });
+        return sendJson(res, 200, await station.setMode(body.mode));
+      }
       if (pathname.startsWith('/api/') || pathname.startsWith('/auth/')) return sendJson(res, 404, { error: 'not_found' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return sendJson(res, 405, { error: 'method_not_allowed' });
       return await serveStatic(req, res, pathname);
     } catch (err) {
       if (err instanceof AuthError) return sendJson(res, err.status, { error: err.code });
+      if (err instanceof BadRequest) return sendJson(res, 400, { error: 'bad_request', detail: err.message });
+      if (err instanceof StationError) return sendJson(res, 400, { error: err.code });
+      if (err instanceof SdrangelError) {
+        logger.error('sdrangel request failed:', err.kind, err.message);
+        return sendJson(res, 502, { error: 'sdrangel_unavailable', kind: err.kind });
+      }
       throw err;
     }
   }
@@ -246,9 +326,14 @@ export function createApp(config, deps = {}) {
     for (const c of sockets.values()) if (c.sessionId === sessionId) c.ws.close(4401, 'logged out');
   }
 
-  ptt.on('state', () => {
+  ptt.on('state', (s) => {
     for (const [connId, c] of sockets) send(c.ws, publicPtt(connId));
+    if (s.state !== 'TX_ON') station.onTxIdle().catch(() => {});
   });
+
+  function broadcast(msg) {
+    for (const c of sockets.values()) send(c.ws, msg);
+  }
 
   server.on('upgrade', (req, socket, head) => {
     const reject = (code, text) => {
@@ -272,6 +357,7 @@ export function createApp(config, deps = {}) {
     const connId = randomBytes(8).toString('hex');
     sockets.set(connId, { ws, sessionId });
     send(ws, publicPtt(connId));
+    send(ws, { type: 'beacon', ...beaconSnapshot() });
 
     ws.on('message', (data, isBinary) => {
       handleMessage(ws, connId, sessionId, data, isBinary).catch((err) => {
@@ -324,10 +410,23 @@ export function createApp(config, deps = {}) {
   const sweeper = setInterval(() => auth.sessions.sweep(), 60_000);
   sweeper.unref();
 
+  let beaconTimer = null;
+  let beaconBusy = false;
+  function startBeaconLoop() {
+    if (!beacon || deps.beaconAutoStart === false || beaconTimer) return;
+    beaconTimer = setInterval(() => {
+      if (beaconBusy) return;
+      beaconBusy = true;
+      beacon.step().catch((err) => logger.error('beacon step failed:', err?.message)).finally(() => { beaconBusy = false; });
+    }, config.station.beaconIntervalMs);
+    beaconTimer.unref();
+  }
+
   return {
     server,
     ptt,
-    auth,
+    station,
+    beacon,
     /**
      * Start listening on the configured host/port.
      * @returns {Promise<{port: number, url: string}>}
@@ -341,6 +440,7 @@ export function createApp(config, deps = {}) {
           if (config.port === 0) {
             publicUrl = new URL(publicUrl.origin.replace(/:\d+$/, '') + `:${port}`);
           }
+          startBeaconLoop();
           resolve({ port, url: publicUrl.origin });
         });
       });
@@ -351,6 +451,7 @@ export function createApp(config, deps = {}) {
      */
     async close() {
       clearInterval(sweeper);
+      clearInterval(beaconTimer);
       const holder = ptt.holderId;
       if (holder) await ptt.release(holder, 'shutdown');
       ptt.dispose();

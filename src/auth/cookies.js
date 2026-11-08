@@ -10,6 +10,7 @@ export function parseCookies(header) {
     const i = part.indexOf('=');
     if (i < 1) continue;
     const name = part.slice(0, i).trim();
+    if (!name) continue;
     if (!(name in out)) out[name] = part.slice(i + 1).trim();
   }
   return out;
