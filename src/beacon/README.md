@@ -19,8 +19,8 @@ Measures the QO-100 NB BPSK beacon (10489.750 MHz) in the receiver's IF spectrum
   beacon uplink - e (TX only when idle; see `src/modes`).
 
 ## Source of spectrum frames
-SDRangel's REST API does not stream FFT data; a frame source (for example its spectrum WebSocket, or a plugin) must be
-supplied as `spectrumSource` to `createApp`. Not implemented yet (phase 2 only defines the interface).
+SDRangel's REST API does not stream FFT data. With `audio.enabled: true`, `createApp` reads frames from SDRangel's spectrum
+WebSocket (`audio.spectrumUrl`, see `src/webrtc/spectrum.js`) and passes them to the controller; tests inject `spectrumSource`.
 
 ## Testing
 `node --test test/unit/beacon.test.js`

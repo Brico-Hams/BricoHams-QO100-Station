@@ -15,7 +15,7 @@ JSON file at `BRICOHAMS_CONFIG` (default `./config.json`, see `config.example.js
 `GOOGLE_CLIENT_ID`, `BRICOHAMS_TX_ENABLED`, `BRICOHAMS_SDRANGEL_URL`. Secrets come **only** from the environment:
 `GOOGLE_CLIENT_SECRET` (required) and `BRICOHAMS_SECRETS_KEY` (32 bytes, hex or base64).
 `station` section (all optional): `lnbLoHz` (9750000000), `rxDeviceSet` (0), `txDeviceSet` (1),
-`applyCorrectionToTx` (true), `beaconIntervalMs` (1000).
+`applyCorrectionToTx` (false: the beacon offset measures LNB drift on RX; enable only with a shared reference), `beaconIntervalMs` (1000).
 
 ## Endpoints
 `GET /api/health`, `GET /auth/login`, `GET /auth/callback`, `POST /auth/logout` (CSRF), `GET /api/me`, `GET /api/ptt`,
