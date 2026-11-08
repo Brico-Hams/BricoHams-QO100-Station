@@ -8,7 +8,7 @@ BricoHams te permite operar tu estación del satélite QO-100 (transpondedor de 
 
 ## Por dónde empezar
 
-0. Si empiezas de cero con QO-100: [fundamentos](qo100-fundamentos.md) (satélite, LNB, apuntado, cadenas RX/TX) y [equipos y programas](equipos-y-programas.md).
+0. Si empiezas de cero con QO-100: [fundamentos](qo100-fundamentos.md) (satélite, LNB, apuntado, cadenas RX/TX) y [equipos y programas](equipos-y-programas.md). ¿Quieres construir tu estación (piezas 3D, antenas, lista de compra)? [construir-tu-estacion.md](construir-tu-estacion.md).
 1. Instala el programa: [Windows](instalacion-windows.md), [Linux](instalacion-linux.md) o [Raspberry Pi](instalacion-raspberry-pi.md).
 2. Crea tu cliente de acceso con Google: [configurar-google.md](configurar-google.md).
 3. Configura SDRangel y la estación: [primera-puesta-en-marcha.md](primera-puesta-en-marcha.md).

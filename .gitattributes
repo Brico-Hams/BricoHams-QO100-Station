@@ -5,3 +5,5 @@ packaging/linux/prerm text eol=lf
 packaging/linux/control text eol=lf
 *.service text eol=lf
 *.png binary
+*.stl binary
+*.scad text eol=lf
