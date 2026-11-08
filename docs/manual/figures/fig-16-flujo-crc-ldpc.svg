@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300" role="img" aria-labelledby="t d">
+<title id="t">Flujo de codificación de un mensaje FT8</title>
+<desc id="d">Un mensaje de 77 bits se amplía con ceros hasta 82 bits, se calcula un CRC de 14 bits y se obtienen 91 bits. El codificador LDPC (174,91) añade 83 bits de paridad para 174 bits. Se agrupan de 3 en 3 en 58 símbolos de datos, y con 21 símbolos Costas forman los 79 símbolos de la transmisión.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="300" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">77 → 91 → 174 bits → 58 + 21 = 79 símbolos</text>
+<rect x="20" y="80" width="130" height="70" class="bx"/><text x="85" y="108" text-anchor="middle" class="b">Mensaje</text><text x="85" y="130" text-anchor="middle" class="s">77 bits</text>
+<rect x="190" y="80" width="130" height="70" class="bo"/><text x="255" y="108" text-anchor="middle" class="b">CRC-14</text><text x="255" y="130" text-anchor="middle" class="s">82 → 91 bits</text>
+<rect x="360" y="80" width="130" height="70" class="bo"/><text x="425" y="108" text-anchor="middle" class="b">LDPC(174,91)</text><text x="425" y="130" text-anchor="middle" class="s">+83 paridad</text>
+<rect x="530" y="80" width="110" height="70" class="bx"/><text x="585" y="108" text-anchor="middle" class="b">3 bits/tono</text><text x="585" y="130" text-anchor="middle" class="s">58 símbolos</text>
+<rect x="675" y="80" width="110" height="70" class="bx"/><text x="730" y="108" text-anchor="middle" class="b">+ Costas</text><text x="730" y="130" text-anchor="middle" class="s">79 símbolos</text>
+<path d="M150 115 H190 M320 115 H360 M490 115 H530 M640 115 H675" class="l" marker-end="url(#a)"/>
+<text x="20" y="200" class="s">El CRC detecta mensajes mal decodificados; el LDPC corrige errores. Un decodificador acepta un mensaje solo si</text>
+<text x="20" y="220" class="s">la comprobación de paridad LDPC y el CRC-14 son correctos a la vez.</text>
+<text x="790" y="292" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

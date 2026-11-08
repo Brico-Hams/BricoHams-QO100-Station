@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-labelledby="t d">
+<title id="t">BER de BPSK frente a Eb/N0 con puntos calculados</title>
+<desc id="d">Curva de la tasa de error de bit de BPSK en canal AWGN en escala logarítmica. Puntos calculados: 0 dB 7,9e-2; 2 dB 3,8e-2; 4 dB 1,3e-2; 6 dB 2,4e-3; 8 dB 1,9e-4; 10 dB 3,9e-6; 12 dB 9e-9. A 9,6 dB la BER es cercana a 1e-5.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.grid{stroke:#d5dbe2;stroke-width:1}.axis{stroke:#12263f;stroke-width:1.5;fill:none}</style>
+<rect width="800" height="400" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">BPSK en AWGN: BER = Q(√(2·Eb/N0))</text>
+<g class="grid"><path d="M90 50 H730 M90 81 H730 M90 112 H730 M90 143 H730 M90 174 H730 M90 205 H730 M90 237 H730 M90 268 H730 M90 299 H730 M90 330 H730 M196.7 50 V330 M303.3 50 V330 M410 50 V330 M516.7 50 V330 M623.3 50 V330"/></g>
+<rect x="90" y="50" width="640" height="280" class="axis"/>
+<g class="s" text-anchor="end"><text x="82" y="54">1</text><text x="82" y="85">1e-1</text><text x="82" y="116">1e-2</text><text x="82" y="147">1e-3</text><text x="82" y="178">1e-4</text><text x="82" y="209">1e-5</text><text x="82" y="241">1e-6</text><text x="82" y="272">1e-7</text><text x="82" y="303">1e-8</text><text x="82" y="334">1e-9</text></g>
+<g class="s" text-anchor="middle"><text x="90" y="348">0</text><text x="196.7" y="348">2</text><text x="303.3" y="348">4</text><text x="410" y="348">6</text><text x="516.7" y="348">8</text><text x="623.3" y="348">10</text><text x="730" y="348">12</text></g>
+<text x="410" y="372" text-anchor="middle">Eb/N0 (dB)</text>
+<polyline fill="none" stroke="#12263f" stroke-width="3" points="90,84.4 196.7,94.4 303.3,109.2 410,131.6 516.7,165.7 623.3,218.4 730,300.3"/>
+<g fill="#12263f"><circle cx="90" cy="84.4" r="4"/><circle cx="196.7" cy="94.4" r="4"/><circle cx="303.3" cy="109.2" r="4"/><circle cx="410" cy="131.6" r="4"/><circle cx="516.7" cy="165.7" r="4"/><circle cx="623.3" cy="218.4" r="4"/><circle cx="730" cy="300.3" r="4"/></g>
+<circle cx="602" cy="205.6" r="6" fill="#e8871e" stroke="#12263f" stroke-width="2"/>
+<text x="612" y="196" class="b">9,6 dB → 1e-5</text>
+<text x="790" y="392" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

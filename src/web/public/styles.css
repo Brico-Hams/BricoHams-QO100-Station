@@ -1,58 +1,74 @@
+/* BricoHams palette. Brand constants are theme-independent; the semantic tokens below map them per theme. */
 :root {
-  --bg: #0b0f14;
-  --panel: #131a22;
-  --panel-2: #1b2530;
-  --text: #f2f5f8;
-  --muted: #a9b6c3;
-  --line: #34424f;
-  --accent: #ffb000;
-  --accent-text: #1a1200;
+  --bh-navy: #12263f;
+  --bh-orange: #e8871e;
+  --bh-grey: #5b6b7b;
+  --bh-charcoal: #22262b;
+  --bh-light: #f7f8fa;
+
+  /* Dark theme: orange accent on navy. */
+  --bg: #0d1c30;
+  --panel: #12263f;
+  --panel-2: #1b3556;
+  --text: #f7f8fa;
+  --muted: #b6c2ce;
+  --line: #3b5473;
+  --accent: #e8871e;
+  --accent-text: #12263f;
+  --wm-brico: #f7f8fa;
+  --wm-hams: #e8871e;
   --ok: #35d07f;
   --warn: #ffd23f;
-  --tx: #ff4d42;
-  --focus: #7cc4ff;
-  --scope-bg: #05080c;
-  --scope-grid: #22303c;
+  --tx: #ff5a4d;
+  --focus: #8fd0ff;
+  --scope-bg: #07111f;
+  --scope-grid: #22405f;
   --scope-trace: #7cf0a6;
-  --scope-mark: #ffb000;
+  --scope-mark: #e8871e;
   --radius: 10px;
   color-scheme: dark;
 }
 
 :root[data-theme="light"] {
-  --bg: #f4f6f8;
+  --bg: #f7f8fa;
   --panel: #ffffff;
-  --panel-2: #e8edf2;
-  --text: #0b0f14;
-  --muted: #45525f;
-  --line: #9aa8b5;
-  --accent: #8a4b00;
+  --panel-2: #eaeef2;
+  --text: #22262b;
+  --muted: #5b6b7b;
+  --line: #a9b4bf;
+  --accent: #a85a00;
   --accent-text: #ffffff;
+  --wm-brico: #22262b;
+  --wm-hams: #c96f0a;
   --ok: #0a7a43;
   --warn: #8a6100;
   --tx: #c4180d;
-  --focus: #0b5cad;
-  --scope-bg: #0b1218;
-  --scope-grid: #2b3b49;
+  --focus: #12263f;
+  --scope-bg: #12263f;
+  --scope-grid: #2a4767;
   --scope-trace: #7cf0a6;
-  --scope-mark: #ffb000;
+  --scope-mark: #e8871e;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg: #f4f6f8;
+    --bg: #f7f8fa;
     --panel: #ffffff;
-    --panel-2: #e8edf2;
-    --text: #0b0f14;
-    --muted: #45525f;
-    --line: #9aa8b5;
-    --accent: #8a4b00;
+    --panel-2: #eaeef2;
+    --text: #22262b;
+    --muted: #5b6b7b;
+    --line: #a9b4bf;
+    --accent: #a85a00;
     --accent-text: #ffffff;
+    --wm-brico: #22262b;
+    --wm-hams: #c96f0a;
     --ok: #0a7a43;
     --warn: #8a6100;
     --tx: #c4180d;
-    --focus: #0b5cad;
+    --focus: #12263f;
+    --scope-bg: #12263f;
+    --scope-grid: #2a4767;
     color-scheme: light;
   }
 }
@@ -107,10 +123,23 @@ a { color: var(--accent); }
   gap: 12px;
   padding: 10px 16px;
   background: var(--panel);
-  border-bottom: 2px solid var(--accent);
+  border-bottom: 3px solid var(--bh-orange);
 }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
 .brand strong { color: var(--accent); }
+.wordmark { font-weight: 800; letter-spacing: 0.01em; font-size: 1.3rem; text-decoration: none; }
+.wordmark .wm-brico { color: var(--wm-brico); }
+.wordmark .wm-hams { color: var(--wm-hams); }
+.tagline { color: var(--muted); font-size: 0.75rem; display: block; line-height: 1.1; }
+.site-footer {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 12px 16px 28px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+.site-footer p { margin: 4px 0; }
 nav { display: flex; gap: 6px; flex: 1; }
 .topbar-right { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
 .who { color: var(--muted); font-size: 0.9rem; }

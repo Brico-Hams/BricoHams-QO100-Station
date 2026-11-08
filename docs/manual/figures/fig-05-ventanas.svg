@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="800" height="400" role="img" aria-labelledby="t d">
+<title id="t">Comparación de ventanas: rectangular, Hann y Blackman</title>
+<desc id="d">Tres formas de ventana en el tiempo y una tabla con el nivel del primer lóbulo lateral y el ancho del lóbulo principal. La rectangular tiene lóbulos laterales a −13 dB y ancho 2 contenedores. Hann: −31 dB y 4 contenedores. Blackman: −58 dB y 6 contenedores.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.l{stroke:#12263f;stroke-width:2;fill:none}.ln{stroke:#12263f;stroke-width:3;fill:none}.o{stroke:#e8871e;stroke-width:3;fill:none}.g{stroke:#5b6b7b;stroke-width:3;fill:none}</style>
+<rect width="800" height="400" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Más supresión de lóbulos laterales = lóbulo principal más ancho</text>
+<g class="l"><path d="M40 160 L240 160 M40 160 L40 70"/></g>
+<polyline class="ln" points="40,160 40,85 240,85 240,160"/>
+<text x="140" y="190" text-anchor="middle" class="b">Rectangular</text>
+<g class="l"><path d="M300 160 L500 160 M300 160 L300 70"/></g>
+<polyline class="o" points="300,160 325,147 350,121 375,98 400,85 425,98 450,121 475,147 500,160"/>
+<text x="400" y="190" text-anchor="middle" class="b">Hann</text>
+<g class="l"><path d="M560 160 L760 160 M560 160 L560 70"/></g>
+<polyline class="g" points="560,160 585,155 610,132 635,100 660,85 685,100 710,132 735,155 760,160"/>
+<text x="660" y="190" text-anchor="middle" class="b">Blackman</text>
+<rect x="60" y="225" width="680" height="130" fill="#fff" stroke="#12263f" stroke-width="2"/>
+<g class="b"><text x="80" y="252">Ventana</text><text x="300" y="252">1.er lóbulo lateral</text><text x="520" y="252">Lóbulo principal</text></g>
+<path d="M60 262 L740 262" class="l"/>
+<text x="80" y="288">Rectangular</text><text x="300" y="288">−13 dB</text><text x="520" y="288">2 contenedores</text>
+<text x="80" y="314">Hann</text><text x="300" y="314">−31 dB</text><text x="520" y="314">4 contenedores</text>
+<text x="80" y="340">Blackman</text><text x="300" y="340">−58 dB</text><text x="520" y="340">6 contenedores</text>
+<text x="790" y="392" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

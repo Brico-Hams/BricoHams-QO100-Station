@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360" role="img" aria-labelledby="t d">
+<title id="t">Deriva del oscilador del LNB y corrección por la baliza</title>
+<desc id="d">Gráfica de frecuencia frente a tiempo. La línea gris discontinua muestra la deriva libre del oscilador local del LNB. La línea naranja, tras el bloqueo a la baliza, permanece cerca de cero con pequeños escalones de corrección.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}</style>
+<rect width="800" height="360" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">La baliza es una referencia absoluta: se resta la deriva del LNB</text>
+<path d="M70 60 V300 H760" fill="none" stroke="#12263f" stroke-width="2"/>
+<path d="M70 180 H760" stroke="#5b6b7b" stroke-width="1" stroke-dasharray="3 4"/>
+<polyline fill="none" stroke="#5b6b7b" stroke-width="3" stroke-dasharray="8 5" points="70,190 180,170 290,140 400,120 510,100 620,85 760,70"/>
+<polyline fill="none" stroke="#e8871e" stroke-width="3" points="400,120 400,150 430,150 430,172 470,172 470,181 520,181 520,178 600,178 600,181 760,181"/>
+<path d="M400 60 V300" stroke="#12263f" stroke-width="1.5" stroke-dasharray="2 4"/>
+<text x="408" y="76" class="b">bloqueo (3 aciertos)</text>
+<text x="76" y="320" class="s">tiempo →</text><text x="12" y="184" class="s">0 Hz</text>
+<text x="500" y="110" class="s">deriva libre (kHz)</text>
+<text x="560" y="205" class="b">con corrección: ±2 Hz</text>
+<text x="790" y="352" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

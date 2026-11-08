@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" width="800" height="440" role="img" aria-labelledby="t d">
+<title id="t">Plano I/Q con constelaciones BPSK y QPSK</title>
+<desc id="d">Plano complejo con eje real I y eje imaginario Q. Los dos puntos de BPSK están en +1 y −1 sobre el eje I. Los cuatro puntos de QPSK están en los ángulos de 45, 135, 225 y 315 grados sobre la circunferencia unidad. Una flecha curva indica que un error de frecuencia hace girar toda la constelación.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e8871e"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.l{stroke:#12263f;stroke-width:2;fill:none}.o{stroke:#e8871e;stroke-width:3;fill:none}.g{stroke:#5b6b7b;stroke-width:1.5;stroke-dasharray:5 4;fill:none}</style>
+<rect width="800" height="440" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Cada muestra compleja es un punto: I (real) y Q (imaginaria)</text>
+<path d="M60 230 L440 230 M250 50 L250 410" class="l"/>
+<text x="446" y="226" class="b">I</text><text x="258" y="60" class="b">Q</text>
+<circle cx="250" cy="230" r="140" class="g"/>
+<circle cx="349" cy="131" r="9" fill="#12263f"/><circle cx="151" cy="131" r="9" fill="#12263f"/><circle cx="151" cy="329" r="9" fill="#12263f"/><circle cx="349" cy="329" r="9" fill="#12263f"/>
+<circle cx="390" cy="230" r="8" fill="#e8871e" stroke="#12263f" stroke-width="2"/><circle cx="110" cy="230" r="8" fill="#e8871e" stroke="#12263f" stroke-width="2"/>
+<path d="M250 230 L349 131" class="o"/>
+<path d="M390 175 A150 150 0 0 0 330 100" class="o" marker-end="url(#a)"/>
+<g class="s"><text x="262" y="246">0</text><text x="396" y="250">+1</text><text x="86" y="250">−1</text></g>
+<text x="500" y="90" class="b">Puntos naranja: BPSK</text><text x="500" y="110" class="s">1 bit por símbolo: fase 0° o 180°.</text>
+<text x="500" y="150" class="b">Puntos navy: QPSK</text><text x="500" y="170" class="s">2 bits por símbolo: 45°, 135°, 225°, 315°.</text>
+<text x="500" y="220" class="b">Flecha curva: error de frecuencia</text><text x="500" y="240" class="s">Un offset de portadora hace girar toda la</text><text x="500" y="258" class="s">constelación a Δf vueltas por segundo.</text>
+<text x="500" y="300" class="b">Amplitud y fase</text><text x="500" y="320" class="s">|z| = √(I² + Q²), fase = atan2(Q, I).</text>
+<text x="500" y="340" class="s">Con I/Q se distinguen +f y −f.</text>
+<text x="790" y="432" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

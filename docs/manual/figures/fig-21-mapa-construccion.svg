@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380" role="img" aria-labelledby="t d">
+<title id="t">Mapa de construcción de la estación QO-100</title>
+<desc id="d">Cadena de hardware desde la parábola con el LNB, el cable coaxial con inyector de polarización, el SDR de recepción y el ordenador de la estación; y la cadena de transmisión desde el SDR o transceptor de 2,4 GHz con amplificador y antena de hélice o parche. La carpeta hardware del repositorio documenta cada bloque.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="380" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Dos cadenas: recepción a 10,489 GHz y transmisión a 2,4 GHz</text>
+<text x="20" y="62" class="b">RX</text>
+<rect x="60" y="45" width="140" height="60" class="bo"/><text x="130" y="70" text-anchor="middle" class="b">Parábola + LNB</text><text x="130" y="90" text-anchor="middle" class="s">≈ 60–90 cm</text>
+<rect x="250" y="45" width="130" height="60" class="bx"/><text x="315" y="70" text-anchor="middle" class="b">Coaxial + bias-T</text><text x="315" y="90" text-anchor="middle" class="s">alimenta el LNB</text>
+<rect x="430" y="45" width="130" height="60" class="bx"/><text x="495" y="70" text-anchor="middle" class="b">SDR RX</text><text x="495" y="90" text-anchor="middle" class="s">TCXO si es posible</text>
+<rect x="610" y="45" width="160" height="60" class="bo"/><text x="690" y="70" text-anchor="middle" class="b">Ordenador</text><text x="690" y="90" text-anchor="middle" class="s">Node + SDRangel</text>
+<path d="M200 75 H250 M380 75 H430 M560 75 H610" class="l" marker-end="url(#a)"/>
+<text x="20" y="182" class="b">TX</text>
+<rect x="60" y="165" width="140" height="60" class="bx"/><text x="130" y="190" text-anchor="middle" class="b">Antena 2,4 GHz</text><text x="130" y="210" text-anchor="middle" class="s">hélice / patch</text>
+<rect x="250" y="165" width="130" height="60" class="bx"/><text x="315" y="190" text-anchor="middle" class="b">PA + filtro</text><text x="315" y="210" text-anchor="middle" class="s">interruptor PTT</text>
+<rect x="430" y="165" width="130" height="60" class="bx"/><text x="495" y="190" text-anchor="middle" class="b">SDR TX</text><text x="495" y="210" text-anchor="middle" class="s">Pluto · Lime · USRP</text>
+<rect x="610" y="165" width="160" height="60" class="bo"/><text x="690" y="190" text-anchor="middle" class="b">PTT seguro</text><text x="690" y="210" text-anchor="middle" class="s">src/ptt</text>
+<path d="M610 195 H560 M430 195 H380 M250 195 H200" class="l" marker-end="url(#a)"/>
+<text x="20" y="290" class="s">Lista de piezas: hardware/bom/components.csv · antenas: hardware/antennas · impresión 3D: hardware/3d</text>
+<text x="790" y="372" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

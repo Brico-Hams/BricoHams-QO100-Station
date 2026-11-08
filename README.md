@@ -1,6 +1,13 @@
+<p align="center">
+  <a href="https://bricohams.org"><img src="branding/bricohams_horizontal.png" alt="BricoHams" width="360"></a>
+</p>
+
+<p align="center"><strong>Radioafición · Hazlo tú mismo</strong> / Amateur radio · Do it yourself<br>
+<a href="https://bricohams.org">bricohams.org</a> · Anatol EA5KAO · Diego EA5JEF · Pedro Roca Molina</p>
+
 # BricoHams QO-100 Station
 
-> Español: la ayuda para usuarios está en [docs/help/index.md](docs/help/index.md) y la lista de pruebas manuales en [docs/testing/CHECKLIST.md](docs/testing/CHECKLIST.md).
+> Español: la ayuda para usuarios está en [docs/help/index.md](docs/help/index.md), la lista de pruebas manuales en [docs/testing/CHECKLIST.md](docs/testing/CHECKLIST.md) y el manual de SDR para radioaficionados en [docs/manual/es/README.md](docs/manual/es/README.md).
 
 One program to operate a QO-100 (Es'hail-2) narrow-band station, receiving and transmitting, from a web browser anywhere.
 The radio engine is [SDRangel](https://github.com/f4exb/sdrangel); BricoHams adds what SDRangel lacks: secure remote access,
@@ -83,6 +90,7 @@ Desktop shell: `npm run desktop`. Developer guide: [docs/DEVELOPER.md](docs/DEVE
 | Audience | Document |
 |---|---|
 | Users (Spanish) | [docs/help/index.md](docs/help/index.md) |
+| SDR manual for radio amateurs (Spanish) | [docs/manual/es/README.md](docs/manual/es/README.md) |
 | Build your own station (Spanish) | [docs/help/construir-tu-estacion.md](docs/help/construir-tu-estacion.md), [hardware/](hardware/README.md) |
 | Testers (Spanish) | [docs/testing/CHECKLIST.md](docs/testing/CHECKLIST.md), [REPORT-TEMPLATE.md](docs/testing/REPORT-TEMPLATE.md) |
 | Contributors | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DEVELOPER.md](docs/DEVELOPER.md), [docs/adr/](docs/adr/README.md), [CONTRIBUTING.md](CONTRIBUTING.md) |
@@ -100,4 +108,5 @@ GPL-3.0-or-later (see [LICENSE](LICENSE)), because the program integrates SDRang
 - AMSAT-DL and the Es'hail-2 / QO-100 team; DJ0ABR's QO-100 WebSDR, SDR++ and OpenWebRX+ as functional references.
 - SDR Console was used as an idea only; no code or assets from proprietary software are included.
 - Curso Iniciación QO-100 y receptor OpenWebRX+ de Mateo EA5EN (see [docs/references/ea5en](docs/references/ea5en/README.md)).
-- BricoHams community.
+- BricoHams community: Anatol EA5KAO, Diego EA5JEF and Pedro Roca Molina ([bricohams.org](https://bricohams.org)).
+- Third-party names (SDRangel, OpenWebRX+, Google, Analog Devices, Raspberry Pi, Lime and others) belong to their owners; none of them endorses BricoHams.

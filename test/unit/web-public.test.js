@@ -26,7 +26,8 @@ test('manifest is valid JSON and SVG icons look like SVG', () => {
 
 test('index.html only references local files and has no inline code', () => {
   const html = readFileSync(join(dir, 'index.html'), 'utf8');
-  assert.doesNotMatch(html, /https?:\/\//);
+  // The BricoHams site link is the only allowed external URL (plain navigation, no loaded resource).
+  assert.doesNotMatch(html.replaceAll('https://bricohams.org', ''), /https?:\/\//);
   assert.doesNotMatch(html, /\sstyle=/);
   assert.doesNotMatch(html, /<script(?![^>]*\ssrc=)[^>]*>\s*\S/);
   for (const [, ref] of html.matchAll(/(?:href|src)="(\/[^"#?]*)"/g)) {

@@ -1,6 +1,6 @@
 # Third-party notices
 
-BricoHams QO-100 Station is GPL-3.0-or-later. It uses or interoperates with:
+BricoHams (Anatol EA5KAO, Diego EA5JEF, Pedro Roca Molina; <https://bricohams.org>; *Radioafición · Hazlo tú mismo*) QO-100 Station is GPL-3.0-or-later. The BricoHams name and logo (`branding/bricohams_horizontal.png`) identify the project; the GPL does not grant trademark rights over them. The manual in `docs/manual/` is licensed CC BY-SA 4.0. Third-party names below are used only to identify the components; none of their owners endorses BricoHams. The program uses or interoperates with:
 
 | Component | License | Use |
 |---|---|---|

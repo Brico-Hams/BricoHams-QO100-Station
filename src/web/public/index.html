@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b0f14">
+  <meta name="theme-color" content="#12263f">
   <title>BricoHams QO-100 Station</title>
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -16,7 +16,11 @@
   <header class="topbar">
     <div class="brand">
       <img src="/icon.svg" alt="" width="32" height="32">
-      <span>BricoHams <strong>QO-100</strong></span>
+      <span>
+        <a class="wordmark" href="https://bricohams.org" target="_blank" rel="noopener" aria-label="BricoHams, bricohams.org"><span class="wm-brico">brico</span><span class="wm-hams">hams</span></a>
+        <strong>QO-100</strong>
+        <span class="tagline">Amateur radio · Do it yourself</span>
+      </span>
     </div>
     <nav id="nav" aria-label="Main" hidden>
       <button type="button" class="tab" data-view="radio" aria-pressed="true">Radio</button>
@@ -239,9 +243,16 @@
       <div class="card">
         <h2>About</h2>
         <p>BricoHams QO-100 Station, GPL-3.0-or-later. Radio engine: SDRangel. See <a href="/help.html" target="_blank" rel="noopener">help</a>.</p>
+        <p>By BricoHams: Anatol EA5KAO, Diego EA5JEF and Pedro Roca Molina. Amateur radio · Do it yourself. <a href="https://bricohams.org" target="_blank" rel="noopener">bricohams.org</a></p>
+        <p class="hint">SDRangel, OpenWebRX+, Google and other third-party names belong to their owners and do not endorse BricoHams.</p>
       </div>
     </section>
   </main>
+
+  <footer class="site-footer">
+    <p><strong>BricoHams</strong> · Amateur radio · Do it yourself · <a href="https://bricohams.org" target="_blank" rel="noopener">bricohams.org</a></p>
+    <p>Anatol EA5KAO · Diego EA5JEF · Pedro Roca Molina</p>
+  </footer>
 
   <script src="/scope-math.js" defer></script>
   <script src="/shortcuts.js" defer></script>

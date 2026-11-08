@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360" role="img" aria-labelledby="t d">
+<title id="t">Cascada de ruido de Friis en la línea del LNB</title>
+<desc id="d">Cuatro etapas: LNB con 0,6 dB de figura de ruido y 55 dB de ganancia, cable coaxial con 3 dB de pérdida, inyector con 0,3 dB y receptor SDR con 6 dB de figura de ruido. La contribución de cada etapa a la figura de ruido total es 0,1482 para el LNB y menos de 0,00003 para las demás. La figura de ruido total es 0,60 dB.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="360" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">F = F1 + (F2−1)/G1 + (F3−1)/(G1·G2) + …: la primera etapa manda</text>
+<rect x="20" y="70" width="150" height="80" class="bo"/><text x="95" y="96" text-anchor="middle" class="b">LNB</text><text x="95" y="116" text-anchor="middle" class="s">NF 0,6 dB</text><text x="95" y="134" text-anchor="middle" class="s">G +55 dB</text>
+<rect x="225" y="70" width="150" height="80" class="bx"/><text x="300" y="96" text-anchor="middle" class="b">Coaxial 15 m</text><text x="300" y="116" text-anchor="middle" class="s">NF 3 dB</text><text x="300" y="134" text-anchor="middle" class="s">G −3 dB</text>
+<rect x="430" y="70" width="150" height="80" class="bx"/><text x="505" y="96" text-anchor="middle" class="b">Inyector</text><text x="505" y="116" text-anchor="middle" class="s">NF 0,3 dB</text><text x="505" y="134" text-anchor="middle" class="s">G −0,3 dB</text>
+<rect x="635" y="70" width="145" height="80" class="bx"/><text x="707" y="96" text-anchor="middle" class="b">SDR</text><text x="707" y="116" text-anchor="middle" class="s">NF 6 dB</text><text x="707" y="134" text-anchor="middle" class="s">G 0 dB (ref.)</text>
+<path d="M170 110 L225 110 M375 110 L430 110 M580 110 L635 110" class="l" marker-end="url(#a)"/>
+<rect x="20" y="190" width="760" height="120" fill="#fff" stroke="#12263f" stroke-width="2"/>
+<g class="b"><text x="40" y="216">Término</text><text x="200" y="216">Valor</text><text x="360" y="216">Qué significa</text></g>
+<path d="M20 224 L780 224" class="l"/>
+<text x="40" y="246">F1 (LNB)</text><text x="200" y="246" class="b">1,1482</text><text x="360" y="246" class="s">casi todo el ruido viene de aquí</text>
+<text x="40" y="268">(F2−1)/G1</text><text x="200" y="268">0,0000031</text><text x="360" y="268" class="s">el coaxial pesa nada: detrás de 55 dB de ganancia</text>
+<text x="40" y="290">(F3−1)/(G1·G2) y (F4−1)/(G1·G2·G3)</text><text x="360" y="290" class="s">0,0000005 y 0,00002: despreciables</text>
+<text x="20" y="334" class="b">F total = 1,1482 → NF = 0,60 dB, Te ≈ 43 K</text>
+<text x="790" y="352" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" width="800" height="340" role="img" aria-labelledby="t d">
+<title id="t">Máquina de estados de seguridad del PTT</title>
+<desc id="d">Estados TX_OFF, ARMED y TX_ON, más LOCKOUT. requestTurn lleva a ARMED y keyDown a TX_ON; keyUp vuelve a ARMED. Pérdida de latido (cada 500 ms), vigilante al 75 % del tiempo límite, tiempo máximo de transmisión (10 min por defecto) o release llevan a TX_OFF. Un fallo del driver o fault() lleva a LOCKOUT.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="340" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Fallar siempre hacia «sin transmitir»</text>
+<rect x="30" y="110" width="140" height="60" class="bx"/><text x="100" y="146" text-anchor="middle" class="b">TX_OFF</text>
+<rect x="320" y="110" width="140" height="60" class="bx"/><text x="390" y="146" text-anchor="middle" class="b">ARMED</text>
+<rect x="610" y="110" width="140" height="60" class="bo"/><text x="680" y="146" text-anchor="middle" class="b">TX_ON</text>
+<rect x="320" y="250" width="140" height="60" class="bx"/><text x="390" y="286" text-anchor="middle" class="b">LOCKOUT</text>
+<path d="M170 140 H320 M460 140 H610" class="l" marker-end="url(#a)"/>
+<text x="245" y="130" text-anchor="middle" class="s">requestTurn</text><text x="535" y="130" text-anchor="middle" class="s">keyDown</text>
+<path d="M680 170 V210 H100 V172" class="l" marker-end="url(#a)" fill="none"/>
+<path d="M610 162 H460" class="l" marker-end="url(#a)"/><text x="535" y="182" text-anchor="middle" class="s">keyUp</text>
+<text x="390" y="204" text-anchor="middle" class="s">release · latido perdido (&gt; 500 ms) · vigilante 75 % (&lt; 2 s) · TOT 10 min</text>
+<path d="M390 212 V250" class="l" marker-end="url(#a)"/>
+<text x="400" y="240" class="s">fallo del driver / fault()</text>
+<text x="790" y="332" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360" role="img" aria-labelledby="t d">
+<title id="t">Diagrama de bloques de una radio definida por software</title>
+<desc id="d">Cadena de recepción: antena, filtro y amplificador de bajo ruido, mezclador con oscilador local, convertidor analógico-digital, procesado digital en FPGA o DSP y software en el ordenador. La cadena de transmisión recorre el camino inverso con un convertidor digital-analógico y un amplificador de potencia.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e8871e"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}.o{stroke:#e8871e;stroke-width:3;fill:none}</style>
+<rect width="800" height="360" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Una SDR: lo analógico se reduce al mínimo y el resto es software</text>
+<text x="20" y="62" class="s">Recepción (RX)</text>
+<path d="M30 130 L30 90 M14 90 L46 90 M22 76 L38 76 M30 76 L30 90" class="l"/>
+<text x="30" y="150" text-anchor="middle" class="s">antena</text>
+<rect x="70" y="95" width="90" height="50" class="bx"/><text x="115" y="118" text-anchor="middle" class="b">Filtro</text><text x="115" y="136" text-anchor="middle" class="s">+ LNA</text>
+<circle cx="215" cy="120" r="22" class="bx"/><text x="215" y="125" text-anchor="middle" class="b">×</text><text x="215" y="165" text-anchor="middle" class="s">mezclador</text>
+<rect x="190" y="190" width="50" height="28" class="bo"/><text x="215" y="209" text-anchor="middle" class="b">LO</text><path d="M215 190 L215 142" class="o" marker-end="url(#ao)"/>
+<rect x="275" y="95" width="80" height="50" class="bx"/><text x="315" y="118" text-anchor="middle" class="b">ADC</text><text x="315" y="136" text-anchor="middle" class="s">muestrea I/Q</text>
+<rect x="390" y="95" width="130" height="50" class="bo"/><text x="455" y="118" text-anchor="middle" class="b">FPGA / DSP</text><text x="455" y="136" text-anchor="middle" class="s">filtrar y diezmar</text>
+<rect x="555" y="95" width="215" height="50" class="bo"/><text x="662" y="118" text-anchor="middle" class="b">Software (ordenador)</text><text x="662" y="136" text-anchor="middle" class="s">demodular, decodificar, registrar</text>
+<path d="M46 120 L70 120 M160 120 L193 120 M237 120 L275 120 M355 120 L390 120 M520 120 L555 120" class="l" marker-end="url(#a)"/>
+<text x="20" y="252" class="s">Transmisión (TX)</text>
+<rect x="555" y="270" width="215" height="50" class="bo"/><text x="662" y="293" text-anchor="middle" class="b">Software (ordenador)</text><text x="662" y="311" text-anchor="middle" class="s">modular y generar muestras</text>
+<rect x="390" y="270" width="130" height="50" class="bo"/><text x="455" y="293" text-anchor="middle" class="b">FPGA / DSP</text><text x="455" y="311" text-anchor="middle" class="s">interpolar</text>
+<rect x="275" y="270" width="80" height="50" class="bx"/><text x="315" y="293" text-anchor="middle" class="b">DAC</text>
+<circle cx="215" cy="295" r="22" class="bx"/><text x="215" y="300" text-anchor="middle" class="b">×</text>
+<rect x="70" y="270" width="90" height="50" class="bx"/><text x="115" y="293" text-anchor="middle" class="b">PA</text><text x="115" y="311" text-anchor="middle" class="s">+ filtro</text>
+<path d="M555 295 L520 295 M390 295 L355 295 M275 295 L237 295 M193 295 L160 295 M70 295 L46 295" class="l" marker-end="url(#a)"/>
+<path d="M30 295 L30 330 M14 330 L46 330" class="l"/>
+<text x="790" y="352" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

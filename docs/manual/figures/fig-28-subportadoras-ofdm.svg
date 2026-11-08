@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 320" width="800" height="320" role="img" aria-labelledby="t d">
+<title id="t">Subportadoras OFDM ortogonales</title>
+<desc id="d">Cinco subportadoras senoidales cuyos máximos coinciden con los ceros de las demás, separadas por el inverso de la duración del símbolo. Un prefijo cíclico antepone al símbolo una copia de su final para absorber el multitrayecto.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}</style>
+<rect width="800" height="320" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Ortogonalidad: el pico de cada subportadora cae en los ceros de las demás</text>
+<path d="M40 170 H760" stroke="#5b6b7b" stroke-width="1.5"/>
+<g fill="none" stroke-width="3">
+<path d="M80 170 C120 40 160 40 200 170" stroke="#12263f"/>
+<path d="M200 170 C240 40 280 40 320 170" stroke="#e8871e"/>
+<path d="M320 170 C360 40 400 40 440 170" stroke="#12263f"/>
+<path d="M440 170 C480 40 520 40 560 170" stroke="#e8871e"/>
+<path d="M560 170 C600 40 640 40 680 170" stroke="#12263f"/></g>
+<text x="400" y="205" text-anchor="middle" class="s">Δf = 1 / Tsímbolo (aquí se muestra solo el lóbulo principal de cada subportadora)</text>
+<rect x="80" y="240" width="60" height="30" fill="#e8871e"/><rect x="140" y="240" width="300" height="30" fill="#fff" stroke="#12263f" stroke-width="2"/>
+<text x="110" y="260" text-anchor="middle" class="b">CP</text><text x="290" y="260" text-anchor="middle">símbolo útil (N muestras)</text>
+<text x="460" y="260" class="s">CP = copia del final del símbolo</text>
+<text x="790" y="312" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

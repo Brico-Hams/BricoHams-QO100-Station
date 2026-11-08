@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300" role="img" aria-labelledby="t d">
+<title id="t">Receptor de FI cero (conversión directa)</title>
+<desc id="d">La señal de RF pasa por un amplificador de bajo ruido y se multiplica por un oscilador local en dos ramas, una con fase 0 y otra con fase 90 grados. Cada rama pasa por un filtro paso bajo y un convertidor analógico digital, produciendo I y Q.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="300" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Un solo mezclador por rama: el oscilador local cae sobre la portadora</text>
+<rect x="20" y="115" width="70" height="50" class="bx"/><text x="55" y="145" text-anchor="middle" class="b">Antena</text>
+<rect x="120" y="115" width="80" height="50" class="bx"/><text x="160" y="145" text-anchor="middle" class="b">LNA</text>
+<circle cx="290" cy="80" r="22" class="bo"/><text x="290" y="85" text-anchor="middle" class="b">×</text>
+<circle cx="290" cy="200" r="22" class="bo"/><text x="290" y="205" text-anchor="middle" class="b">×</text>
+<rect x="360" y="55" width="90" height="50" class="bx"/><text x="405" y="85" text-anchor="middle">Paso bajo</text>
+<rect x="360" y="175" width="90" height="50" class="bx"/><text x="405" y="205" text-anchor="middle">Paso bajo</text>
+<rect x="490" y="55" width="70" height="50" class="bx"/><text x="525" y="85" text-anchor="middle">ADC</text>
+<rect x="490" y="175" width="70" height="50" class="bx"/><text x="525" y="205" text-anchor="middle">ADC</text>
+<text x="600" y="85" class="b">I</text><text x="600" y="205" class="b">Q</text>
+<rect x="210" y="130" width="60" height="20" class="bo"/><text x="240" y="145" text-anchor="middle" class="s">LO</text>
+<path d="M90 140 H120 M200 140 H240 M240 140 V80 H268 M240 140 V200 H268 M312 80 H360 M312 200 H360 M450 80 H490 M450 200 H490 M560 80 H595 M560 200 H595" class="l" marker-end="url(#a)"/>
+<text x="250" y="60" class="s">0°</text><text x="250" y="180" class="s">−90°</text>
+<text x="790" y="292" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

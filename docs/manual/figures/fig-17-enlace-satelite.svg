@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380" role="img" aria-labelledby="t d">
+<title id="t">Enlace por satélite QO-100: subida, bajada y FI del LNB</title>
+<desc id="d">La estación transmite en 2400,0 a 2400,5 MHz hacia el transpondedor geoestacionario, que traslada 8089,5 MHz y retransmite en 10489,5 a 10490,0 MHz. El LNB con oscilador de 9750 MHz convierte la baliza de 10489,750 MHz a una FI de 739,750 MHz para el SDR.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e8871e"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}</style>
+<rect width="800" height="380" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Un salto de ≈ 36 000 km arriba y otro abajo (satélite ≈ 25,5° E)</text>
+<rect x="320" y="50" width="160" height="70" class="bo"/><text x="400" y="80" text-anchor="middle" class="b">Transpondedor</text><text x="400" y="100" text-anchor="middle" class="s">traslación 8089,5 MHz</text>
+<rect x="30" y="260" width="150" height="70" class="bx"/><text x="105" y="290" text-anchor="middle" class="b">Estación TX</text><text x="105" y="310" text-anchor="middle" class="s">2400,0–2400,5 MHz</text>
+<rect x="620" y="260" width="150" height="70" class="bx"/><text x="695" y="290" text-anchor="middle" class="b">Parábola + LNB</text><text x="695" y="310" text-anchor="middle" class="s">10489,5–10490,0 MHz</text>
+<path d="M140 258 L330 122" stroke="#e8871e" stroke-width="3" marker-end="url(#ao)" fill="none"/>
+<path d="M470 122 L660 258" stroke="#12263f" stroke-width="3" marker-end="url(#a)" fill="none"/>
+<text x="130" y="180" class="b">Subida 2,4 GHz</text><text x="560" y="180" class="b">Bajada 10,489 GHz</text>
+<rect x="300" y="250" width="200" height="90" class="bx"/>
+<text x="400" y="274" text-anchor="middle" class="b">FI tras el LNB</text>
+<text x="400" y="296" text-anchor="middle" class="s">LO 9750 MHz</text>
+<text x="400" y="316" text-anchor="middle">baliza 10489,750 → FI 739,750 MHz</text>
+<path d="M620 300 H502" stroke="#12263f" stroke-width="2" marker-end="url(#a)" fill="none"/>
+<text x="790" y="372" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

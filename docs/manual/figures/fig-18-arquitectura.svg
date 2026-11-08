@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" role="img" aria-labelledby="t d">
+<title id="t">Arquitectura de la estación BricoHams</title>
+<desc id="d">El navegador del usuario habla por HTTPS y WebSocket con el servidor Node de la estación. El servidor contiene los módulos de autenticación, PTT, baliza, modos digitales, registro y puente WebRTC. Se conecta a SDRangel mediante su API REST y WebSocket, y a servicios externos opcionales para log y QRZ.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="420" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Todo el control pasa por el servidor; el navegador no habla con el SDR</text>
+<rect x="20" y="150" width="140" height="80" class="bx"/><text x="90" y="185" text-anchor="middle" class="b">Navegador</text><text x="90" y="205" text-anchor="middle" class="s">PWA · móvil o PC</text>
+<rect x="220" y="60" width="330" height="300" fill="#fff" stroke="#e8871e" stroke-width="3"/>
+<text x="385" y="84" text-anchor="middle" class="b">Servidor Node (src/)</text>
+<g class="bo"><rect x="240" y="100" width="130" height="40"/><rect x="400" y="100" width="130" height="40"/><rect x="240" y="160" width="130" height="40"/><rect x="400" y="160" width="130" height="40"/><rect x="240" y="220" width="130" height="40"/><rect x="400" y="220" width="130" height="40"/><rect x="240" y="280" width="290" height="40"/></g>
+<g text-anchor="middle"><text x="305" y="125">auth</text><text x="465" y="125">ptt</text><text x="305" y="185">beacon</text><text x="465" y="185">modes (FT8/FT4)</text><text x="305" y="245">log</text><text x="465" y="245">webrtc</text><text x="385" y="305">web (HTTP + WebSocket)</text></g>
+<rect x="620" y="90" width="160" height="70" class="bx"/><text x="700" y="120" text-anchor="middle" class="b">SDRangel</text><text x="700" y="140" text-anchor="middle" class="s">API REST + WS</text>
+<rect x="620" y="260" width="160" height="70" class="bx"/><text x="700" y="290" text-anchor="middle" class="b">Servicios externos</text><text x="700" y="310" text-anchor="middle" class="s">LoTW · QRZ (opcional)</text>
+<path d="M160 190 H220 M550 125 H620 M550 295 H620" class="l" marker-end="url(#a)"/>
+<text x="790" y="412" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

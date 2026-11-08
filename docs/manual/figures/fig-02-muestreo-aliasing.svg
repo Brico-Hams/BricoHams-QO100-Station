@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360" role="img" aria-labelledby="t d">
+<title id="t">Muestreo y aliasing en el dominio de la frecuencia</title>
+<desc id="d">Con una frecuencia de muestreo de 48 kHz, la frecuencia de Nyquist es 24 kHz. Una señal de 30 kHz, por encima de Nyquist, se pliega y aparece como una señal falsa de 18 kHz dentro de la banda observable.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e8871e"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.l{stroke:#12263f;stroke-width:2;fill:none}.o{stroke:#e8871e;stroke-width:3;fill:none}.g{stroke:#5b6b7b;stroke-width:1.5;stroke-dasharray:6 4;fill:none}</style>
+<rect width="800" height="360" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">fs = 48 kHz: lo que pasa de 24 kHz se pliega hacia dentro</text>
+<path d="M60 260 L740 260" class="l"/>
+<g class="s" text-anchor="middle"><text x="60" y="282">0</text><text x="230" y="282">12</text><text x="400" y="282">24 (Nyquist)</text><text x="570" y="282">36</text><text x="740" y="282">48 kHz</text></g>
+<path d="M60 255 L60 265 M230 255 L230 265 M400 255 L400 265 M570 255 L570 265 M740 255 L740 265" class="l"/>
+<path d="M400 90 L400 260" class="g"/>
+<rect x="60" y="70" width="340" height="190" fill="#e8871e" opacity="0.10"/>
+<text x="230" y="92" text-anchor="middle" class="s">zona observable (0 a fs/2)</text>
+<path d="M650 260 L650 130" class="o"/><circle cx="650" cy="130" r="5" fill="#e8871e"/>
+<text x="650" y="118" text-anchor="middle" class="b">señal real 30 kHz</text>
+<path d="M310 260 L310 130" class="l"/><circle cx="310" cy="130" r="5" fill="#12263f"/>
+<text x="310" y="118" text-anchor="middle" class="b">alias 18 kHz</text>
+<path d="M640 190 Q480 160 322 190" class="o" marker-end="url(#a)"/>
+<text x="480" y="168" text-anchor="middle" class="s">se pliega alrededor de 24 kHz: 48 − 30 = 18</text>
+<text x="60" y="320" class="s">Solución: filtro antialiasing analógico antes del ADC y muestrear con fs &gt; 2·B.</text>
+<text x="790" y="352" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

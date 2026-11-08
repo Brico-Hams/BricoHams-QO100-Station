@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 340" width="800" height="340" role="img" aria-labelledby="t d">
+<title id="t">Multitrayecto y control automático de ganancia</title>
+<desc id="d">A la izquierda, un transmisor llega al receptor por un camino directo y otro reflejado con retardo; la suma produce desvanecimientos. A la derecha, el control automático de ganancia mantiene la señal del ADC en un nivel objetivo ajustando la ganancia según la potencia medida.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="340" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">En GEO casi no hay multitrayecto; en tierra y en el tren de la FI sí hay ganancia que ajustar</text>
+<circle cx="60" cy="190" r="14" class="bo"/><text x="60" y="230" text-anchor="middle" class="s">TX</text>
+<circle cx="340" cy="190" r="14" class="bx"/><text x="340" y="230" text-anchor="middle" class="s">RX</text>
+<path d="M76 190 H322" class="l" marker-end="url(#a)"/>
+<path d="M70 178 L200 90 L330 178" stroke="#e8871e" stroke-width="3" fill="none" marker-end="url(#a)"/>
+<text x="200" y="80" text-anchor="middle" class="b">reflejo (retardo τ)</text>
+<text x="200" y="176" text-anchor="middle" class="s">camino directo</text>
+<rect x="450" y="120" width="100" height="60" class="bx"/><text x="500" y="156" text-anchor="middle" class="b">Ganancia</text>
+<rect x="610" y="120" width="100" height="60" class="bx"/><text x="660" y="156" text-anchor="middle" class="b">ADC</text>
+<rect x="520" y="230" width="170" height="50" class="bo"/><text x="605" y="260" text-anchor="middle" class="b">Medir potencia</text>
+<path d="M410 150 H450 M550 150 H610 M660 180 V205 H605 V230 M605 280 H500 V182" class="l" marker-end="url(#a)" fill="none"/>
+<text x="790" y="332" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

@@ -1,6 +1,10 @@
+<p align="center"><a href="https://bricohams.org"><img src="../../branding/bricohams_horizontal.png" alt="BricoHams" width="280"></a></p>
+
 # Ayuda de BricoHams QO-100 Station
 
-*English: see the [README](../../README.md).*
+**BricoHams** · Radioafición · Hazlo tú mismo · <https://bricohams.org> · Anatol EA5KAO, Diego EA5JEF, Pedro Roca Molina
+
+*English: see the [README](../../README.md). Manual de SDR: [docs/manual/es](../manual/es/README.md).*
 
 BricoHams te permite operar tu estación del satélite QO-100 (transpondedor de banda estrecha) desde un navegador, de forma segura, usando SDRangel como motor de radio.
 

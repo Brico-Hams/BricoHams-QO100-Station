@@ -5,3 +5,6 @@ graphify-out/cache
 
 # Third-party course text (EA5EN): local reference only, copyrighted
 docs/references/ea5en/qo100-course-extract.txt
+
+# User study guide (Lumo summary closely following a copyrighted book): local reference only
+docs/references/sdr4engineers/guia-estudio-sdr-lumo.md

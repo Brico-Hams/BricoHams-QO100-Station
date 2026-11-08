@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380" role="img" aria-labelledby="t d">
+<title id="t">Rejilla de tonos y tiempo de FT8</title>
+<desc id="d">FT8 usa 8 tonos separados 6,25 Hz y 79 símbolos de 0,16 s. Tres bloques de sincronismo Costas de 7 símbolos ocupan los símbolos 0 a 6, 36 a 42 y 72 a 78; entre ellos van 29 símbolos de datos cada bloque.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.l{stroke:#12263f;stroke-width:1.5;fill:none}</style>
+<rect width="800" height="380" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">79 símbolos × 0,16 s = 12,64 s; 8 tonos × 6,25 Hz = 50 Hz</text>
+<rect x="80" y="60" width="680" height="240" fill="#fff" stroke="#12263f" stroke-width="2"/>
+<g fill="#e8871e"><rect x="80" y="60" width="60" height="240" opacity="0.25"/><rect x="390" y="60" width="60" height="240" opacity="0.25"/><rect x="700" y="60" width="60" height="240" opacity="0.25"/></g>
+<g fill="#12263f"><rect x="80" y="240" width="8" height="30"/><rect x="88" y="150" width="8" height="30"/><rect x="96" y="270" width="8" height="30"/><rect x="104" y="60" width="8" height="30"/><rect x="112" y="210" width="8" height="30"/><rect x="120" y="270" width="8" height="30"/><rect x="128" y="180" width="8" height="30"/><rect x="170" y="120" width="8" height="30"/><rect x="200" y="90" width="8" height="30"/><rect x="230" y="210" width="8" height="30"/><rect x="290" y="150" width="8" height="30"/><rect x="330" y="240" width="8" height="30"/><rect x="480" y="90" width="8" height="30"/><rect x="540" y="180" width="8" height="30"/><rect x="620" y="120" width="8" height="30"/></g>
+<g class="s" text-anchor="end"><text x="74" y="84">tono 7</text><text x="74" y="114">6</text><text x="74" y="144">5</text><text x="74" y="174">4</text><text x="74" y="204">3</text><text x="74" y="234">2</text><text x="74" y="264">1</text><text x="74" y="294">0</text></g>
+<g class="s" text-anchor="middle"><text x="110" y="320">Costas (sím. 0–6)</text><text x="420" y="320">Costas (36–42)</text><text x="730" y="320">Costas (72–78)</text><text x="265" y="320">datos 29</text><text x="575" y="320">datos 29</text></g>
+<text x="790" y="372" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

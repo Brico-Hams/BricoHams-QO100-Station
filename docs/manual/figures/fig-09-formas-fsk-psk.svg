@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380" role="img" aria-labelledby="t d">
+<title id="t">Formas de onda de BFSK y BPSK para los bits 1 0 1 1 0</title>
+<desc id="d">Arriba, los bits 1 0 1 1 0. En el centro, BFSK: el bit 1 usa una frecuencia más alta (tres ciclos) y el bit 0 una más baja (dos ciclos), con fase continua. Abajo, BPSK: la frecuencia es constante y el bit 0 invierte la fase de la portadora.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.l{stroke:#12263f;stroke-width:1.5;fill:none}.g{stroke:#5b6b7b;stroke-width:1;stroke-dasharray:4 4;fill:none}.o{stroke:#e8871e;stroke-width:3;fill:none}.n{stroke:#12263f;stroke-width:3;fill:none}</style>
+<rect width="800" height="380" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">La información va en la frecuencia (FSK) o en la fase (PSK)</text>
+<path d="M100 56 V340 M220 56 V340 M340 56 V340 M460 56 V340 M580 56 V340 M700 56 V340" class="g"/>
+<g class="b" text-anchor="middle"><text x="160" y="62">1</text><text x="280" y="62">0</text><text x="400" y="62">1</text><text x="520" y="62">1</text><text x="640" y="62">0</text></g>
+<text x="20" y="130" class="b">BFSK</text>
+<path class="n" d="M100,130 q10,-40 20,0 q10,40 20,0 q10,-40 20,0 q10,40 20,0 q10,-40 20,0 q10,40 20,0 q15,-40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0 q10,-40 20,0 q10,40 20,0 q10,-40 20,0 q10,40 20,0 q10,-40 20,0 q10,40 20,0 q10,-40 20,0 q10,40 20,0 q10,-40 20,0 q10,40 20,0 q10,-40 20,0 q10,40 20,0 q15,-40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0"/>
+<text x="20" y="150" class="s">f1 &gt; f0</text>
+<text x="20" y="270" class="b">BPSK</text>
+<path class="o" d="M100,270 q15,-40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0 q15,-40 30,0 q15,-40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0 q15,40 30,0 q15,-40 30,0 q15,40 30,0 q15,-40 30,0"/>
+<text x="20" y="290" class="s">fase 0° / 180°</text>
+<text x="400" y="365" text-anchor="middle" class="s">Misma energía por bit; PSK usa la fase y se recupera con una portadora de referencia (capítulo 7).</text>
+<text x="790" y="372" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

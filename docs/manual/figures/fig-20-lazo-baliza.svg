@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300" role="img" aria-labelledby="t d">
+<title id="t">Lazo de corrección por la baliza</title>
+<desc id="d">El espectro del SDR entra en el estimador de la baliza, que busca el pico en más o menos 10 kHz, interpola parabólicamente y exige 10 dB de relación señal a ruido. Un filtro de mediana de 5 más media exponencial de 0,3 suaviza el desvío. Con 3 aciertos se bloquea y se aplica la corrección a la estación si supera la zona muerta de 2 Hz.</desc>
+<defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10z" fill="#12263f"/></marker></defs>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.bx{fill:#fff;stroke:#12263f;stroke-width:2}.bo{fill:#fdeccf;stroke:#e8871e;stroke-width:2.5}.l{stroke:#12263f;stroke-width:2;fill:none}</style>
+<rect width="800" height="300" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Medir el error de la baliza y devolverlo al sintonizador</text>
+<rect x="20" y="90" width="120" height="70" class="bx"/><text x="80" y="120" text-anchor="middle" class="b">Espectro</text><text x="80" y="140" text-anchor="middle" class="s">trama FFT</text>
+<rect x="180" y="90" width="140" height="70" class="bo"/><text x="250" y="116" text-anchor="middle" class="b">Pico ±10 kHz</text><text x="250" y="136" text-anchor="middle" class="s">parábola · SNR ≥ 10 dB</text>
+<rect x="360" y="90" width="140" height="70" class="bo"/><text x="430" y="116" text-anchor="middle" class="b">Suavizado</text><text x="430" y="136" text-anchor="middle" class="s">mediana 5 + EMA 0,3</text>
+<rect x="540" y="90" width="120" height="70" class="bo"/><text x="600" y="116" text-anchor="middle" class="b">Bloqueo</text><text x="600" y="136" text-anchor="middle" class="s">3 sí · 5 no</text>
+<rect x="700" y="90" width="90" height="70" class="bx"/><text x="745" y="116" text-anchor="middle" class="b">station</text><text x="745" y="136" text-anchor="middle" class="s">.setCorrection</text>
+<path d="M140 125 H180 M320 125 H360 M500 125 H540 M660 125 H700" class="l" marker-end="url(#a)"/>
+<path d="M745 160 V220 H80 V162" class="l" marker-end="url(#a)" fill="none"/>
+<text x="400" y="214" text-anchor="middle" class="s">solo si |error| &gt; 2 Hz (zona muerta) · la corrección desplaza la frecuencia de recepción</text>
+<text x="790" y="292" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380" role="img" aria-labelledby="t d">
+<title id="t">Contenedores de la FFT y fuga espectral</title>
+<desc id="d">Doce contenedores de una FFT. Un tono situado exactamente entre los contenedores 5 y 6 reparte su energía entre ambos, con 0,64 de amplitud relativa en cada uno, y deja una cola decreciente en los demás por fuga espectral. El ancho de cada contenedor es fs dividido entre N.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.l{stroke:#12263f;stroke-width:2;fill:none}.g{stroke:#5b6b7b;stroke-width:1.5;stroke-dasharray:5 4;fill:none}</style>
+<rect width="800" height="380" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">N = 12 contenedores: un tono entre dos contenedores se reparte</text>
+<path d="M60 300 L740 300" class="l"/>
+<g fill="#12263f"><rect x="72" y="278" width="30" height="22"/><rect x="128" y="273" width="30" height="27"/><rect x="184" y="266" width="30" height="34"/><rect x="240" y="253" width="30" height="47"/><rect x="296" y="221" width="30" height="79"/></g>
+<g fill="#e8871e"><rect x="352" y="62" width="30" height="238"/></g>
+<g fill="#e8871e"><rect x="408" y="62" width="30" height="238"/></g>
+<g fill="#12263f"><rect x="464" y="221" width="30" height="79"/><rect x="520" y="253" width="30" height="47"/><rect x="576" y="266" width="30" height="34"/><rect x="632" y="273" width="30" height="27"/><rect x="688" y="278" width="30" height="22"/></g>
+<g class="s" text-anchor="middle"><text x="87" y="318">0</text><text x="143" y="318">1</text><text x="199" y="318">2</text><text x="255" y="318">3</text><text x="311" y="318">4</text><text x="367" y="318">5</text><text x="423" y="318">6</text><text x="479" y="318">7</text><text x="535" y="318">8</text><text x="591" y="318">9</text><text x="647" y="318">10</text><text x="703" y="318">11</text></g>
+<text x="395" y="52" text-anchor="middle" class="b">0,64 y 0,64: el tono verdadero está en 5,5</text>
+<path d="M352 335 L438 335" class="l"/><path d="M352 329 L352 341 M438 329 L438 341" class="l"/>
+<text x="395" y="356" text-anchor="middle" class="s">ancho de contenedor = fs / N</text>
+<text x="780" y="90" text-anchor="end" class="s">tono centrado en un contenedor: 1,00 y casi nada en los demás</text>
+<text x="780" y="108" text-anchor="end" class="s">la fuga se reduce con una ventana (figura 5)</text>
+<text x="790" y="372" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

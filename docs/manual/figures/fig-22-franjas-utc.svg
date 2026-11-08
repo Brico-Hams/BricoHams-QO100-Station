@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" width="800" height="300" role="img" aria-labelledby="t d">
+<title id="t">Franjas de tiempo de FT8 y FT4 sincronizadas con UTC</title>
+<desc id="d">FT8 usa franjas de 15 s alineadas con el reloj UTC. La señal empieza 0,5 s después del inicio y dura 12,64 s; el decodificador corre hacia los 14,5 s. FT4 usa franjas de 7,5 s con 105 símbolos de 0,048 s.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}</style>
+<rect width="800" height="300" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">El reloj manda: error de reloj &gt; ≈ 1 s ya degrada la decodificación</text>
+<text x="20" y="75" class="b">FT8</text>
+<rect x="80" y="55" width="680" height="40" fill="#fff" stroke="#12263f" stroke-width="2"/>
+<rect x="95" y="55" width="573" height="40" fill="#e8871e" opacity="0.8"/>
+<text x="380" y="80" text-anchor="middle" class="b">señal 12,64 s (0,5 → 13,14 s)</text>
+<g class="s" text-anchor="middle"><text x="80" y="115">0 s</text><text x="95" y="130">0,5</text><text x="668" y="115">13,14</text><text x="733" y="130">14,5 decodifica</text><text x="760" y="115">15 s</text></g>
+<text x="20" y="195" class="b">FT4</text>
+<rect x="80" y="175" width="340" height="30" fill="#fff" stroke="#12263f" stroke-width="2"/>
+<rect x="88" y="175" width="256" height="30" fill="#5b6b7b"/>
+<rect x="420" y="175" width="340" height="30" fill="#fff" stroke="#12263f" stroke-width="2"/>
+<text x="250" y="195" text-anchor="middle" style="fill:#fff" class="b">105 × 0,048 s</text>
+<g class="s" text-anchor="middle"><text x="80" y="225">0 s</text><text x="420" y="225">7,5 s</text><text x="760" y="225">15 s</text></g>
+<text x="790" y="292" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

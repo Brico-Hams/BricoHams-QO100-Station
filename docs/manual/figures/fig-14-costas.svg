@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 360" width="800" height="360" role="img" aria-labelledby="t d">
+<title id="t">Matriz Costas 7×7 de FT8</title>
+<desc id="d">Cuadrícula de 7 tiempos por 7 tonos con una marca en cada fila y columna siguiendo la secuencia 3, 1, 4, 0, 6, 5, 2. Como cada desplazamiento relativo aparece una sola vez, la autocorrelación fuera del origen es como máximo 1.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}</style>
+<rect width="800" height="360" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Secuencia Costas: 3 1 4 0 6 5 2</text>
+<g fill="#fff" stroke="#12263f" stroke-width="1.5"><rect x="100" y="50" width="245" height="245"/></g>
+<path d="M135 50 V295 M170 50 V295 M205 50 V295 M240 50 V295 M275 50 V295 M310 50 V295 M100 85 H345 M100 120 H345 M100 155 H345 M100 190 H345 M100 225 H345 M100 260 H345" stroke="#5b6b7b" stroke-width="1"/>
+<g fill="#e8871e" stroke="#12263f" stroke-width="2"><rect x="103" y="158" width="29" height="29"/><rect x="138" y="228" width="29" height="29"/><rect x="173" y="123" width="29" height="29"/><rect x="208" y="263" width="29" height="29"/><rect x="243" y="53" width="29" height="29"/><rect x="278" y="88" width="29" height="29"/><rect x="313" y="193" width="29" height="29"/></g>
+<text x="222" y="316" text-anchor="middle" class="s">tiempo (símbolos 0–6) →</text>
+<text x="380" y="120" class="b">Marcas (símbolo, tono, tono 0 abajo):</text>
+<text x="380" y="144" class="s">(0,3) (1,1) (2,4) (3,0) (4,6) (5,5) (6,2)</text>
+<text x="380" y="180" class="s">Cada par de marcas tiene un desfase (Δt, Δf) distinto,</text>
+<text x="380" y="200" class="s">por eso la correlación con la plantilla es nítida.</text>
+<text x="790" y="352" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>

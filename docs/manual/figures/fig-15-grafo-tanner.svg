@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 380" width="800" height="380" role="img" aria-labelledby="t d">
+<title id="t">Grafo de Tanner de un código pequeño (7,4)</title>
+<desc id="d">Siete nodos de variable abajo y tres nodos de comprobación arriba. Cada comprobación conecta cuatro variables: c1 con v1, v2, v4 y v5; c2 con v1, v3, v4 y v6; c3 con v2, v3, v4 y v7. La variable v4 está resaltada porque participa en las tres. El LDPC real de FT8 tiene 174 variables y 83 comprobaciones.</desc>
+<style>text{font:14px system-ui,'Segoe UI',Arial,sans-serif;fill:#12263f}.s{font-size:12px;fill:#5b6b7b}.b{font-weight:700}.h{font-size:16px;font-weight:700}.e{stroke:#5b6b7b;stroke-width:1.5}.eo{stroke:#e8871e;stroke-width:3}</style>
+<rect width="800" height="380" fill="#f7f8fa"/>
+<text x="20" y="28" class="h">Cada comprobación exige paridad par entre las variables que toca</text>
+<g class="e"><path d="M200 110 L110 270 M200 110 L230 270 M200 110 L470 270 M200 110 L590 270"/><path d="M400 110 L110 270 M400 110 L350 270 M400 110 L470 270 M400 110 L650 270"/><path d="M600 110 L230 270 M600 110 L350 270 M600 110 L470 270 M600 110 L710 270"/></g>
+<g class="eo"><path d="M470 270 L200 110 M470 270 L400 110 M470 270 L600 110"/></g>
+<g fill="#fff" stroke="#12263f" stroke-width="2"><rect x="180" y="90" width="40" height="40"/><rect x="380" y="90" width="40" height="40"/><rect x="580" y="90" width="40" height="40"/></g>
+<g class="b" text-anchor="middle"><text x="200" y="116">c1</text><text x="400" y="116">c2</text><text x="600" y="116">c3</text></g>
+<g stroke="#12263f" stroke-width="2"><circle cx="110" cy="270" r="20" fill="#fff"/><circle cx="230" cy="270" r="20" fill="#fff"/><circle cx="350" cy="270" r="20" fill="#fff"/><circle cx="470" cy="270" r="22" fill="#e8871e"/><circle cx="590" cy="270" r="20" fill="#fff"/><circle cx="650" cy="270" r="20" fill="#fff"/><circle cx="710" cy="270" r="20" fill="#fff"/></g>
+<g class="b" text-anchor="middle"><text x="110" y="275">v1</text><text x="230" y="275">v2</text><text x="350" y="275">v3</text><text x="470" y="275">v4</text><text x="590" y="275">v5</text><text x="650" y="275">v6</text><text x="710" y="275">v7</text></g>
+<text x="20" y="340" class="s">En FT8: 174 variables (91 de información + 83 de paridad) y 83 comprobaciones; el decodificador BP intercambia mensajes por estas aristas.</text>
+<text x="790" y="372" text-anchor="end" class="s">BricoHams · bricohams.org</text>
+</svg>
