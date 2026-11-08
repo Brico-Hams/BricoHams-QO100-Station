@@ -29,6 +29,15 @@ if [ "$1" = "configure" ]; then
   chown root:bricohams "$CONF_DIR/env"
   chmod 0600 "$CONF_DIR/env"
 
+  # SDR access: the service user needs the USB device nodes (udev rules give the bricohams group access) and serial/audio-class groups.
+  for g in plugdev dialout; do
+    if getent group "$g" >/dev/null; then adduser --quiet bricohams "$g" || true; fi
+  done
+  if command -v udevadm >/dev/null 2>&1; then
+    udevadm control --reload-rules >/dev/null 2>&1 || true
+    udevadm trigger --subsystem-match=usb --action=add >/dev/null 2>&1 || true
+  fi
+
   systemctl daemon-reload >/dev/null 2>&1 || true
   # Enable only; the service is started by the owner after editing the configuration.
   systemctl enable bricohams-qo100.service >/dev/null 2>&1 || true

@@ -1,0 +1,29 @@
+# BricoHams QO-100 Station: USB access for the SDR front ends used with SDRangel.
+# Installed to /lib/udev/rules.d/99-bricohams-sdr.rules by the .deb. Devices are made readable by the
+# "bricohams" group (the service user) and by the logged-in desktop user (uaccess tag).
+# Vendor/product IDs marked (verificar) should be checked with `lsusb` on the real device.
+
+# RTL-SDR (Realtek RTL2832U): generic dongles 0bda:2838 and 0bda:2832
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", GROUP="bricohams", MODE="0660", TAG+="uaccess", SYMLINK+="rtl_sdr"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2832", GROUP="bricohams", MODE="0660", TAG+="uaccess", SYMLINK+="rtl_sdr"
+
+# Airspy (R2 / Mini) and Airspy HF+
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="60a1", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="03eb", ATTRS{idProduct}=="800c", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+
+# SDRplay RSP family (verificar: product IDs differ per model and API version)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="2500", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="3000", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="3010", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="3020", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="3030", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="3050", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1df7", ATTRS{idProduct}=="3060", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+
+# HackRF One 1d50:6089, Jawbreaker 1d50:604b, Rad1o 1d50:cc15
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="6089", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="604b", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1d50", ATTRS{idProduct}=="cc15", GROUP="bricohams", MODE="0660", TAG+="uaccess"
+
+# ADALM-Pluto (PlutoSDR)
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0456", ATTRS{idProduct}=="b673", GROUP="bricohams", MODE="0660", TAG+="uaccess"

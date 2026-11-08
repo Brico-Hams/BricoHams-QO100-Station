@@ -14,7 +14,7 @@ import { createResetCode } from '../ptt/reset-code.js';
 import { createFileAudit } from '../ptt/audit.js';
 import { createSdrangelClient, SdrangelError } from '../sdrangel/client.js';
 import { createSdrangelPttDriver } from '../sdrangel/ptt-driver.js';
-import { createStation, StationError, createDefaultDecoderRegistry, createDecodeService } from '../modes/index.js';
+import { createStation, StationError, createDefaultDecoderRegistry, createDecodeService, openStationDb, createMemoryStore, MemoryError, createStationApi } from '../modes/index.js';
 import { createBeaconController } from '../beacon/index.js';
 import { LogError, createLogStore } from '../log/store.js';
 import { createLotwUploader } from '../log/lotw.js';
@@ -22,6 +22,7 @@ import { createQrzClient } from '../log/qrz.js';
 import { createSecretBox } from '../log/secrets.js';
 import { createLogApi } from '../log/routes.js';
 import { createRxAudio } from '../webrtc/rx-audio.js';
+import { createRecorder, RecordingError } from '../webrtc/recorder.js';
 import { createTxAudio, createUdpTxSink } from '../webrtc/tx-audio.js';
 import { createSpectrumFeed, createSpectrumSource } from '../webrtc/spectrum.js';
 
@@ -208,6 +209,39 @@ export function createApp(config, deps = {}) {
     io: { sendJson, readJson, BadRequest },
   });
 
+  // Memories and recordings share one lazily opened database, so a station that uses neither creates no file.
+  let stationDb = deps.stationDb ?? null;
+  const getStationDb = () => {
+    stationDb ??= openStationDb(config.stationDbPath);
+    return stationDb;
+  };
+  let memories = null;
+  let recorder = deps.recorder ?? null;
+  const getRecorder = () => {
+    if (!recorder) {
+      recorder = createRecorder({
+        db: getStationDb(), rxAudio, dir: config.recording.dir, enabled: config.recording.enabled,
+        maxFileMb: config.recording.maxFileMb, maxUserMb: config.recording.maxUserMb, logger,
+      });
+      recorder.recoverUnfinished();
+    }
+    return recorder;
+  };
+  const stationApi = createStationApi({
+    auth,
+    station,
+    memories: {
+      list: (u) => (memories ??= createMemoryStore({ db: getStationDb() })).list(u),
+      get: (u, id) => (memories ??= createMemoryStore({ db: getStationDb() })).get(u, id),
+      add: (u, i) => (memories ??= createMemoryStore({ db: getStationDb() })).add(u, i),
+      update: (u, id, i) => (memories ??= createMemoryStore({ db: getStationDb() })).update(u, id, i),
+      remove: (u, id) => (memories ??= createMemoryStore({ db: getStationDb() })).remove(u, id),
+    },
+    getRecorder,
+    isTxActive: () => ptt.state === 'TX_ON',
+    io: { sendJson, readJson, BadRequest },
+  });
+
   const wsOrigin = () => `${publicUrl.protocol === 'https:' ? 'wss:' : 'ws:'}//${publicUrl.host}`;
   const headersFor = () => securityHeaders({ https: publicUrl.protocol === 'https:', wsOrigin: wsOrigin() });
 
@@ -283,6 +317,7 @@ export function createApp(config, deps = {}) {
         return sendJson(res, 200, await station.setMode(body.mode));
       }
       if (await logApi.handle(req, res, url)) return;
+      if (await stationApi.handle(req, res, url)) return;
       if (pathname.startsWith('/api/') || pathname.startsWith('/auth/')) return sendJson(res, 404, { error: 'not_found' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return sendJson(res, 405, { error: 'method_not_allowed' });
       return await serveStatic(req, res, pathname);
@@ -290,6 +325,9 @@ export function createApp(config, deps = {}) {
       if (err instanceof AuthError) return sendJson(res, err.status, { error: err.code });
       if (err instanceof BadRequest) return sendJson(res, 400, { error: 'bad_request', detail: err.message });
       if (err instanceof StationError) return sendJson(res, 400, { error: err.code });
+      if (err instanceof MemoryError || err instanceof RecordingError) {
+        return sendJson(res, err.status, { error: err.code, ...(err.fields ? { fields: err.fields } : {}) });
+      }
       if (err instanceof LogError) {
         return sendJson(res, err.status, { error: err.code, ...(err.fields ? { fields: err.fields } : {}), ...(err.existingId ? { existingId: err.existingId } : {}) });
       }
@@ -549,6 +587,8 @@ export function createApp(config, deps = {}) {
       if (!deps.spectrum) spectrum?.stop();
       if (!deps.txSink) await txSink?.close?.();
       if (!deps.logStore) logStore?.close();
+      if (!deps.recorder) recorder?.stopAll('shutdown');
+      if (!deps.stationDb) stationDb?.close();
       await new Promise((resolve) => {
         server.close(() => resolve());
         server.closeAllConnections?.();

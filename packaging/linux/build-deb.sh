@@ -50,10 +50,16 @@ cp "$ROOT/package.json" "$ROOT/package-lock.json" "$ROOT/config.example.json" "$
 (cd "$APP" && PATH="$APP/node/bin:$PATH" npm ci --omit=dev --ignore-scripts)
 
 install -m 0644 "$HERE/bricohams-qo100.service" "$PKG/lib/systemd/system/bricohams-qo100.service"
+mkdir -p "$PKG/lib/udev/rules.d" "$PKG/etc/modprobe.d"
+install -m 0644 "$HERE/99-bricohams-sdr.rules" "$PKG/lib/udev/rules.d/99-bricohams-sdr.rules"
+install -m 0644 "$HERE/blacklist-bricohams-rtl.conf" "$PKG/etc/modprobe.d/blacklist-bricohams-rtl.conf"
+# Files under /etc are conffiles: dpkg keeps local edits on upgrade.
+echo "/etc/modprobe.d/blacklist-bricohams-rtl.conf" > "$PKG/DEBIAN/conffiles"
 
 sed -e "s/@VERSION@/$VERSION/" -e "s/@ARCH@/$ARCH/" "$HERE/control" > "$PKG/DEBIAN/control"
 install -m 0755 "$HERE/postinst" "$PKG/DEBIAN/postinst"
 install -m 0755 "$HERE/prerm" "$PKG/DEBIAN/prerm"
+install -m 0755 "$HERE/postrm" "$PKG/DEBIAN/postrm"
 
 mkdir -p "$ROOT/dist"
 OUT="$ROOT/dist/bricohams-qo100_${VERSION}_${ARCH}.deb"

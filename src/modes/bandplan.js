@@ -8,6 +8,25 @@ export const BAND_PLAN = Object.freeze([
   Object.freeze({ name: 'ssb', startHz: 10_489_650_000, endHz: 10_489_990_000, modes: Object.freeze(['USB']) }),
 ]);
 
+// verify: the CW beacons sit at the transponder edges; the BPSK beacon is the centre reference.
+/** Reference markers drawn on the spectrum (downlink, Hz). */
+export const BAND_MARKERS = Object.freeze([
+  Object.freeze({ name: 'CW beacon (low)', hz: 10_489_500_000, kind: 'cw-beacon' }),
+  Object.freeze({ name: 'BPSK beacon', hz: 10_489_750_000, kind: 'bpsk-beacon' }),
+  Object.freeze({ name: 'CW beacon (high)', hz: 10_490_000_000, kind: 'cw-beacon' }),
+]);
+
+/**
+ * Band plan description sent to the PWA for the spectrum overlay.
+ * @returns {{segments: object[], markers: object[]}} Plain copies, safe to serialize.
+ */
+export function describeBandPlan() {
+  return {
+    segments: BAND_PLAN.map((s) => ({ name: s.name, startHz: s.startHz, endHz: s.endHz, modes: [...s.modes] })),
+    markers: BAND_MARKERS.map((m) => ({ ...m })),
+  };
+}
+
 /** Default FT8 and FT4 dial frequencies (downlink, Hz), inside the digital segment. */
 // verify: operators agree on these locally; adjust to the current QO-100 digital calling frequencies.
 export const DEFAULT_DIAL_HZ = Object.freeze({

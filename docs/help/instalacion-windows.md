@@ -23,6 +23,12 @@ Requisitos: Windows 10/11 de 64 bits, [SDRangel](https://github.com/f4exb/sdrang
    No compartas este archivo. Para generar la clave: `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` (necesita Node) o cualquier generador de 32 bytes aleatorios en base64.
 7. Cierra del todo (icono de la bandeja, *Salir*) y vuelve a abrir.
 
+## Controladores del SDR
+
+- **RTL-SDR:** el controlador de Windows hay que cambiarlo a **WinUSB** con [Zadig](https://zadig.akeo.ie): conecta el dongle, abre Zadig, *Options → List All Devices*, elige **Bulk-In, Interface (Interface 0)** (no la interfaz 1 de la antena TV), selecciona **WinUSB** y pulsa *Replace Driver*. Haz esto solo con el dongle correcto, o romperás otros dispositivos USB.
+- **SDRplay:** instala antes el **SDRplay API** del fabricante (https://www.sdrplay.com/api/) y reinicia; SDRangel lo necesita para detectar los RSP (verificar la versión compatible con tu SDRangel).
+- **Airspy, HackRF, Pluto:** usa los controladores indicados por el fabricante o por SDRangel.
+
 ## Notas
 
 - La ventana al cerrarse queda en la bandeja. *Salir* detiene el servidor y corta cualquier transmisión.

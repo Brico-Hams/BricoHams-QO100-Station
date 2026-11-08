@@ -51,6 +51,24 @@ The CW decoder is a stream: it returns `[{text, wpm, freqHz}]` chunks of newly d
 A mode without a decoder gets the stub: `available:false`, and `decode()` throws `DecoderUnavailableError` (`code: 'decoder_not_available'`).
 In production FT8/FT4 decoding runs in a worker thread (`useWorkers: true`) because an inline decode blocks the event loop for about a second.
 
+## Advanced features (ADRs 0011-0013)
+
+| File | Purpose |
+|---|---|
+| `rit.js` | `MAX_OFFSET_HZ` (9999), `isValidOffset(hz)`, `computeTuning({dialHz, ritHz, xitHz, txFollowsRx, txDialHz})` returning `{rxHz, txDownlinkHz, uplinkHz, ownSignalOffsetHz}` |
+| `rx-profile.js` | `FILTER_PRESETS`, `filterNames(mode)`, `resolveFilter(mode, name)`, `AGC_MODES`, `DEFAULT_RX_DSP`, `parseRxDsp(input)`, `toChannelSettings(dsp)` (SDRangel field names: verify against swagger) |
+| `station-db.js` | `openStationDb(path)` (`node:sqlite`, migrations: `memories`, `settings`, `recordings`), `getSetting`, `setSetting` |
+| `memories.js` | `createMemoryStore({db, clock})` with `list/get/add/update/remove`, `QO100_PRESETS`, `MemoryError(code, status)` |
+| `routes.js` | `createStationApi({auth, station, memories, getRecorder, isTxActive, io})`; `handle(req, res, url)` serves `/api/bandplan`, `/api/memories*`, `/api/rit`, `/api/txlock`, `/api/filter`, `/api/rxdsp`, `/api/recordings*` |
+| `bandplan.js` | also `BAND_MARKERS` and `describeBandPlan()` |
+
+New station methods: `setOffsets({ritHz, xitHz})`, `setTxLock({locked, txDownlinkHz})`, `setFilter(name)`, `setRxDsp(partial)`; `status()` adds `ritHz, xitHz, txFollowsRx, rxHz, txDownlinkHz, ownSignalOffsetHz, filter, rxDsp`.
+
+Invariants: with RIT/XIT at 0 and the lock on, SDRangel patches are unchanged; RX and TX frequencies must stay in the narrow-band range;
+XIT/split changes reach the TX channel only through `onTxIdle()`; a failed call restores the previous state; memories of other users answer 404;
+only the `owner` role manages shared memories; every mutating route requires the operator role and a CSRF token.
+
+Tests: `node --test test/unit/advanced.test.js test/functional/advanced.test.js`.
+
 ## Testing
-`node --test test/unit/modes.test.js test/unit/cw-decoder.test.js test/unit/ft8.test.js test/unit/decode-service.test.js`.
 The decoder tests synthesize signals (CW with noise; FT8/FT4 with the built-in encoder plus seeded AWGN at -10 dB SNR in 2500 Hz); no audio fixtures or hardware.

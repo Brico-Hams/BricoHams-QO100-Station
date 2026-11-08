@@ -31,6 +31,16 @@
     tx_active: 'Not while transmitting.',
     frequency_out_of_range: 'Outside the narrow-band transponder.',
     unknown_mode: 'Unknown mode.',
+    offset_out_of_range: 'RIT/XIT is limited to +-9999 Hz.',
+    tx_frequency_out_of_range: 'The transmit frequency would leave the transponder.',
+    unknown_filter: 'This filter is not available for the mode.',
+    recording_disabled: 'Recording is disabled by the station owner.',
+    no_audio_source: 'No RX audio source on this station.',
+    already_recording: 'You are already recording.',
+    quota_exceeded: 'Recording quota reached. Delete old files.',
+    too_many_memories: 'Too many memories.',
+    duplicate_name: 'A memory with this name already exists.',
+    validation: 'Invalid value.',
     sdrangel_unavailable: 'SDRangel is not reachable.',
   };
 
@@ -54,6 +64,7 @@
     theme: 'auto',
   };
   const mic = { stream: null, ctx: null, node: null, seq: 0, opening: false };
+  const hooks = { station: [], ready: [] };
   const rx = { ctx: null, node: null, gain: null };
   const spec = { count: 0, binHz: 0, data: null, lo: -120, hi: -40, dirty: false };
 
@@ -458,22 +469,18 @@
 
   // ---- spectrum and waterfall ----
   let scopeColors = null;
-  const lut = (() => {
-    const stops = [[0, 0, 0, 24], [0.25, 0, 40, 170], [0.5, 0, 200, 220], [0.75, 255, 220, 0], [1, 255, 40, 20]];
-    const out = new Uint8ClampedArray(256 * 3);
-    for (let i = 0; i < 256; i++) {
-      const t = i / 255;
-      let k = 0;
-      while (k < stops.length - 2 && t > stops[k + 1][0]) k++;
-      const [t0, r0, g0, b0] = stops[k];
-      const [t1, r1, g1, b1] = stops[k + 1];
-      const f = Math.max(0, Math.min(1, (t - t0) / (t1 - t0)));
-      out[i * 3] = r0 + (r1 - r0) * f;
-      out[i * 3 + 1] = g0 + (g1 - g0) * f;
-      out[i * 3 + 2] = b0 + (b1 - b0) * f;
-    }
-    return out;
-  })();
+  // Display-only options (see scope-math.js). Changing them never touches the radio.
+  const view = { zoom: 1, center: 0.5, avgFrames: 1, peak: false, palette: 'classic', contrast: 0 };
+  const dsp = { avg: BHScope.createAverager(1), peak: BHScope.createPeakHold(0.5) };
+  let lut = BHScope.buildLut(view.palette, view.contrast);
+  const marks = { bands: null };
+
+  function rebuildScope() {
+    lut = BHScope.buildLut(view.palette, view.contrast);
+    dsp.avg = BHScope.createAverager(view.avgFrames);
+    dsp.peak.reset();
+    spec.dirty = true;
+  }
 
   function colors() {
     if (!scopeColors) {
@@ -493,6 +500,9 @@
     spec.binHz = view.getFloat32(12, true);
     spec.count = count;
     spec.data = new Uint8Array(buf.slice(18));
+    spec.raw = spec.data;
+    if (view.avgFrames > 1) spec.data = dsp.avg.push(spec.data);
+    spec.peakData = view.peak ? dsp.peak.push(spec.raw) : null;
     // Adaptive display range: floor from the median, ceiling from the peak, smoothed so it does not flicker.
     const sorted = Array.from(spec.data).sort((a, b) => a - b);
     const med = sorted[sorted.length >> 1] / 2 - 140;
@@ -512,13 +522,18 @@
     return spec.count * spec.binHz;
   }
 
+  // The window maps the canvas to a part of the full span when zoomed.
+  const win = () => BHScope.zoomWindow(view.zoom, view.center);
+
   function freqAtFraction(f) {
-    return BEACON_DL + (f - 0.5) * span();
+    return BEACON_DL + (BHScope.windowToFull(win(), f) - 0.5) * span();
   }
 
   function fractionOfFreq(hz) {
-    return (hz - BEACON_DL) / span() + 0.5;
+    return BHScope.fullToWindow(win(), (hz - BEACON_DL) / span() + 0.5);
   }
+
+  const binAt = (x, w) => Math.min(spec.count - 1, Math.floor(BHScope.windowToFull(win(), x / w) * spec.count));
 
   function pushWaterfall() {
     if (!spec.data || app.view !== 'radio') return;
@@ -530,7 +545,7 @@
     const row = ctx.createImageData(w, 1);
     const range = Math.max(10, spec.hi - spec.lo);
     for (let x = 0; x < w; x++) {
-      const bin = Math.min(spec.count - 1, Math.floor((x * spec.count) / w));
+      const bin = binAt(x, w);
       const t = Math.max(0, Math.min(1, (dbOf(spec.data[bin]) - spec.lo) / range));
       const i = Math.round(t * 255) * 3;
       row.data[x * 4] = lut[i];
@@ -555,8 +570,7 @@
       ctx.fillText('Waiting for spectrum...', 16, 28);
       return;
     }
-    const sp = span();
-    // Frequency grid with a step that gives about 6 to 12 labels.
+    const sp = span() / view.zoom; // visible span; pick a grid step giving about 6 to 12 labels
     const steps = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000];
     const step = steps.find((s) => sp / s <= 12) || steps[steps.length - 1];
     ctx.strokeStyle = col.grid;
@@ -572,17 +586,20 @@
       ctx.stroke();
       ctx.fillText((f / 1e6).toFixed(3), x + 3, h - 4);
     }
+    drawBands(ctx, w, h, col);
     const range = Math.max(10, spec.hi - spec.lo);
-    ctx.beginPath();
-    for (let x = 0; x < w; x++) {
-      const bin = Math.min(spec.count - 1, Math.floor((x * spec.count) / w));
-      const y = (h - 20) * (1 - Math.max(0, Math.min(1, (dbOf(spec.data[bin]) - spec.lo) / range))) + 2;
-      if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = col.trace;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
+    const trace = (data, color, width) => {
+      ctx.beginPath();
+      for (let x = 0; x < w; x++) {
+        const y = (h - 20) * (1 - Math.max(0, Math.min(1, (dbOf(data[binAt(x, w)]) - spec.lo) / range))) + 2;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.stroke();
+    };
+    if (spec.peakData) trace(spec.peakData, col.mark, 1);
+    trace(spec.data, col.trace, 1.5);
     const mark = (hz, color, dash) => {
       const f = fractionOfFreq(hz);
       if (f < 0 || f > 1) return;
@@ -597,7 +614,39 @@
       ctx.setLineDash([]);
     };
     mark(BEACON_DL, col.grid, [4, 4]);
-    if (app.station.downlinkHz) mark(app.station.downlinkHz, app.ptt.state === 'TX_ON' ? col.tx : col.mark, []);
+    const st = app.station;
+    if (st.downlinkHz) {
+      // RX marker follows RIT; the TX marker only appears when it differs from RX (split or XIT).
+      const rxHz = st.rxHz || st.downlinkHz;
+      mark(rxHz, app.ptt.state === 'TX_ON' ? col.tx : col.mark, []);
+      if (st.txDownlinkHz && st.txDownlinkHz !== rxHz) mark(st.txDownlinkHz, col.tx, [2, 3]);
+    }
+  }
+
+  // Band plan overlay: segment edges and beacon labels, fetched once from /api/bandplan.
+  function drawBands(ctx, w, h, col) {
+    if (!marks.bands) return;
+    ctx.fillStyle = col.text;
+    ctx.strokeStyle = col.mark;
+    ctx.font = '12px ui-monospace, Consolas, monospace';
+    ctx.lineWidth = 1;
+    for (const seg of marks.bands.segments) {
+      const a = Math.max(0, fractionOfFreq(seg.startHz));
+      const b = Math.min(1, fractionOfFreq(seg.endHz));
+      if (b <= a) continue;
+      ctx.globalAlpha = 0.18;
+      ctx.fillRect(Math.round(a * w), h - 38, Math.max(1, Math.round((b - a) * w)), 14);
+      ctx.globalAlpha = 1;
+      ctx.fillText(seg.name, Math.round(a * w) + 3, h - 27);
+    }
+    for (const m of marks.bands.markers) {
+      const f = fractionOfFreq(m.hz);
+      if (f < 0 || f > 1) continue;
+      ctx.beginPath();
+      ctx.moveTo(Math.round(f * w) + 0.5, h - 38);
+      ctx.lineTo(Math.round(f * w) + 0.5, h - 18);
+      ctx.stroke();
+    }
   }
 
   function frame() {
@@ -621,6 +670,7 @@
     $('step-info').textContent = `Step ${snap()} Hz`;
     if (s.downlinkHz) spectrumCanvas().setAttribute('aria-valuenow', String(s.downlinkHz));
     spec.dirty = true;
+    for (const fn of hooks.station) fn(s);
   }
 
   async function tune(hz) {
@@ -1007,8 +1057,16 @@
       return;
     }
     showApp();
+    for (const fn of hooks.ready) fn();
     setInterval(refreshStatus, 3000);
   }
+
+  // Narrow bridge for features.js (loaded after this script). It exposes no PTT or microphone function on purpose.
+  globalThis.BHApp = Object.freeze({
+    $, app, api, view, marks, spec, hooks, msgFor, isOperator, tune, setMode, snap, refreshStatus, rebuildScope,
+    toggleListen: () => (rx.ctx ? stopListening() : startListening()),
+    applyStation: (s) => { app.station = s; renderFreq(); },
+  });
 
   boot();
 })();

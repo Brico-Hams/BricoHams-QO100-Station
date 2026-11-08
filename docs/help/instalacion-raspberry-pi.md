@@ -18,5 +18,7 @@ Después sigue los pasos de [instalacion-linux.md](instalacion-linux.md#paquete-
 
 - Instala SDRangel para arm64 (o ejecútalo en otro PC y apunta `sdrangel.baseUrl` a él **solo dentro de una red de confianza**; su API no tiene autenticación).
 - Usa una fuente de alimentación buena y refrigeración: SDRangel y el audio cargan la CPU.
-- Con un SDR por USB comprueba que el usuario del servicio puede acceder al dispositivo (reglas udev).
+- Con un SDR por USB el paquete .deb ya instala las reglas udev y la lista negra del módulo DVB del kernel (detalles en [instalacion-linux.md](instalacion-linux.md#acceso-al-sdr-por-usb-udev-y-módulos-del-kernel)). Reconecta el dongle y comprueba con `rtl_test -t`.
+- Alimenta los dongles USB desde una fuente suficiente (un RTL-SDR más LNB bias-tee puede superar lo que da un puerto flojo); si `rtl_test` pierde muestras, prueba un hub con alimentación.
+- Calibra el error de PPM con `rtl_test -p` o deja que la baliza lo corrija.
 - Escucha primero solo en recepción ([primera-puesta-en-marcha.md](primera-puesta-en-marcha.md)).

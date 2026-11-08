@@ -1,5 +1,10 @@
 export { BEACON_DOWNLINK_HZ, TRANSPONDER_OFFSET_HZ, DEFAULT_LNB_LO_HZ, downlinkToUplink, uplinkToDownlink, downlinkToIf, ifToDownlink } from './frequencies.js';
-export { BAND_PLAN, DEFAULT_DIAL_HZ, segmentFor, checkTransmit } from './bandplan.js';
+export { BAND_PLAN, BAND_MARKERS, DEFAULT_DIAL_HZ, segmentFor, checkTransmit, describeBandPlan } from './bandplan.js';
+export { MAX_OFFSET_HZ, isValidOffset, computeTuning } from './rit.js';
+export { FILTER_PRESETS, DEFAULT_FILTER, AGC_MODES, filterNames, resolveFilter, parseRxDsp, toChannelSettings } from './rx-profile.js';
+export { openStationDb } from './station-db.js';
+export { MemoryError, QO100_PRESETS, createMemoryStore } from './memories.js';
+export { createStationApi } from './routes.js';
 export { DecoderUnavailableError, createUnavailableDecoder, createDecoderRegistry, createDefaultDecoderRegistry, utcSlot } from './decoders.js';
 export { createCwDecoder } from './cw-decoder.js';
 export { decodeSlot } from './ft8-decode.js';

@@ -28,6 +28,17 @@ function problems(raw, env = ENV) {
   assert.fail('expected ConfigError');
 }
 
+test('recording and stationDbPath get safe defaults and are validated', () => {
+  const c = validateConfig(base(), ENV);
+  assert.deepEqual({ ...c.recording }, { enabled: true, dir: './data/recordings', maxFileMb: 100, maxUserMb: 1000 });
+  assert.equal(c.stationDbPath, './data/station.db');
+  assert.ok(Object.isFrozen(c.recording));
+  assert.match(problems(base({ recording: { maxFileMb: 0 } })), /recording\.maxFileMb/);
+  assert.match(problems(base({ recording: { maxFileMb: 50, maxUserMb: 10 } })), /recording\.maxUserMb/);
+  assert.match(problems(base({ recording: { enabled: 'maybe' } })), /recording\.enabled/);
+  assert.match(problems(base({ stationDbPath: '' })), /stationDbPath/);
+});
+
 test('valid config gets defaults and normalization', () => {
   const c = validateConfig(base(), ENV);
   assert.equal(c.tx.enabled, false);

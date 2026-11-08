@@ -44,6 +44,11 @@ Only a new class with the same three methods is needed.
 - Spectrum frame layout in `parseSpectrumFrame` ("verify against SDRangel sdrbase/websockets spectrum format").
 - SSBMod UDP audio input format, port and sample rate.
 
-## Tests
+## Recording (ADR 0014)
 
-`node --test test/unit/rx-audio.test.js test/unit/tx-audio.test.js test/unit/spectrum.test.js test/functional/audio.test.js`
+- `wav.js`: `wavHeader`, `parseWavHeader`, `createWavWriter({path, sampleRate, maxBytes, channels})` (opens with `wx`, mode 0600, `full` flag at the cap, idempotent `close()`), `fixWavHeader(path)`.
+- `recorder.js`: `createRecorder({db, rxAudio, dir, enabled, maxFileMb, maxUserMb, clock, logger})` with `policy`, `setEnabled`, `status`, `start`, `stop`, `list`, `locate`, `remove`, `stopAll`, `recoverUnfinished`; `RecordingError(code, status)`.
+- Invariants: only RX audio is recorded; paths contain a hash of the e-mail, never user input; one recording per user, 4 concurrent; per-file and per-user caps; the config switch can only be tightened at run time; unfinished files are repaired at start-up.
+- Tests: `node --test test/unit/advanced.test.js test/functional/advanced.test.js`.
+
+## Tests test/unit/tx-audio.test.js test/unit/spectrum.test.js test/functional/audio.test.js`

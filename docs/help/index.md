@@ -12,7 +12,7 @@ BricoHams te permite operar tu estación del satélite QO-100 (transpondedor de 
 1. Instala el programa: [Windows](instalacion-windows.md), [Linux](instalacion-linux.md) o [Raspberry Pi](instalacion-raspberry-pi.md).
 2. Crea tu cliente de acceso con Google: [configurar-google.md](configurar-google.md).
 3. Configura SDRangel y la estación: [primera-puesta-en-marcha.md](primera-puesta-en-marcha.md).
-4. Opera: [SSB](operar-ssb.md), [CW](operar-cw.md), [modos digitales](operar-digitales.md).
+4. Opera: [SSB](operar-ssb.md), [CW](operar-cw.md), [modos digitales](operar-digitales.md). Herramientas extra (memorias, RIT/XIT, filtros, grabación, atajos): [funciones-avanzadas.md](funciones-avanzadas.md).
 5. Libro de guardia: [log, LoTW y QRZ](log-lotw-qrz.md).
 6. Acceso desde internet: [acceso-remoto.md](acceso-remoto.md).
 7. Escucha pública: [plugin-openwebrx.md](plugin-openwebrx.md).

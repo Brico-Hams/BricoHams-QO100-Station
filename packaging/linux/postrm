@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+case "$1" in
+  remove|purge)
+    # The rules file is a package file and is already gone; make udev forget it.
+    command -v udevadm >/dev/null 2>&1 && udevadm control --reload-rules >/dev/null 2>&1 || true
+    ;;
+esac
+if [ "$1" = "purge" ]; then
+  # Kernel module blacklist is a conffile: dpkg may keep it, so remove it explicitly on purge.
+  rm -f /etc/modprobe.d/blacklist-bricohams-rtl.conf
+fi
+
+exit 0

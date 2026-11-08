@@ -17,5 +17,7 @@
     "txUdp": { "host": "127.0.0.1", "port": 9999 },
     "spectrumUrl": "ws://127.0.0.1:8887"
   },
-  "auditLogPath": "./data/audit.log"
+  "auditLogPath": "./data/audit.log",
+  "stationDbPath": "./data/station.db",
+  "recording": { "enabled": true, "dir": "./data/recordings", "maxFileMb": 100, "maxUserMb": 1000 }
 }

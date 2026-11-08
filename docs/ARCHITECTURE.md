@@ -139,6 +139,8 @@ sequenceDiagram
 | Store | Path (config key) | Content | Notes |
 |---|---|---|---|
 | Logbook | `logbook.path` (`./data/logbook.db`) | tables `qsos`, `user_secrets`, `migrations` | `node:sqlite`, WAL, opened lazily; backup this file |
+| Station DB | `stationDbPath` (`./data/station.db`) | tables `memories`, `settings`, `recordings` | `node:sqlite`, lazily opened; backup this file |
+| Recordings | `recording.dir` (`./data/recordings`) | `<sha256(email)[0:16]>/rec-*.wav`, 12 kHz mono s16le | mode 0600; capped per file and per user |
 | Audit log | `auditLogPath` (`./data/audit.log`) | JSON lines of PTT events | append-only, mode 0600 |
 | Sessions | memory | sessions and pending logins | lost on restart |
 | Config | `BRICOHAMS_CONFIG` | JSON | no secrets |
@@ -173,6 +175,10 @@ File path: `BRICOHAMS_CONFIG` (default `./config.json`). Source of truth: `src/s
 | `audio.spectrumUrl` | `ws://127.0.0.1:8887` | - | SDRangel spectrum WS; `ws:` only on loopback, else `wss:` |
 | `auditLogPath` | `./data/audit.log` | - | PTT audit file |
 | `resetCodePath` | `<dir of auditLogPath>/ptt-reset-code` | - | One-time LOCKOUT reset code file (mode 0600) |
+| `stationDbPath` | `./data/station.db` | - | SQLite file for memories, settings and recording index |
+| `recording.enabled` | `true` | - | Master switch for RX recording (the owner may switch it off at run time, never on) |
+| `recording.dir` | `./data/recordings` | - | WAV directory |
+| `recording.maxFileMb` / `maxUserMb` | `100` / `1000` | - | Per-file and per-user caps (≥ 1; user cap ≥ file cap) |
 | `logbook.path` | `./data/logbook.db` | - | SQLite file |
 | `logbook.lotw.tqslPath` / `stationLocation` | unset | - | Enables LoTW; location must not start with `-` |
 
@@ -201,9 +207,23 @@ All JSON. Bodies max 4096 bytes with `Content-Type: application/json`. State-cha
 | `GET/PUT/DELETE /api/log/qrz-key` | operator (+CSRF for writes) | Write-only QRZ key; GET returns `{hasKey, canStore}` |
 | `POST /api/log/lotw` | operator + CSRF | `{ids}` (max 100); 503 `lotw_not_configured`, 409 `lotw_busy` |
 | `POST /api/log/qrz` | operator + CSRF | `{ids}` (max 100); 409 `qrz_key_missing` |
+| `GET /api/bandplan` | any role | Band plan segments, markers, filter presets, AGC modes |
+| `GET/POST /api/memories` | any role / operator + CSRF | Own + shared memories and QO-100 presets / add (201; 409 `duplicate_name`, `too_many_memories`) |
+| `PUT/DELETE /api/memories/:id` | operator + CSRF | Edit / delete (own; shared ones only by owner; others' ids give 404) |
+| `POST /api/memories/:id/recall` | operator + CSRF | Set mode (409 `tx_active` while keyed and the mode differs), tune, apply filter |
+| `POST /api/rit` | operator + CSRF | `{ritHz?, xitHz?}` (±9999 Hz); RIT moves RX only, XIT moves TX only |
+| `POST /api/txlock` | operator + CSRF | `{locked, txDownlinkHz?}`; `locked:true` = TX follows RX, `false` = split |
+| `POST /api/filter` | operator + CSRF | `{preset}` for the current mode (400 `unknown_filter`) |
+| `POST /api/rxdsp` | operator + CSRF | `{agc?, squelchDb?, noiseReduction?}` (squelch −100..0 dB or null) |
+| `GET /api/recordings` | any role | Own recordings (owner: all), `policy`, `current` |
+| `POST /api/recordings/start`, `/stop` | operator + CSRF | Record RX audio to WAV (403 `recording_disabled`, 409 `already_recording`, 413 `quota_exceeded`) |
+| `PUT /api/recordings/policy` | owner + CSRF | `{enabled}`; cannot override `recording.enabled: false` |
+| `GET /api/recordings/:id.wav`, `DELETE /api/recordings/:id` | operator (+CSRF for delete) | Download / delete own recording |
 | `GET /*` | none | Static PWA from `src/web/public` |
 
-Station errors: 502 `sdrangel_unavailable` (with `kind`), 400 `bad_request`.
+Station errors: 502 `sdrangel_unavailable` (with `kind`), 400 `bad_request` and station validation codes (`offset_out_of_range`, `tx_frequency_out_of_range`, `bad_tx_lock`, `unknown_filter`, `bad_dsp`, `bad_agc`, `bad_squelch`, `bad_noise_reduction`, `not_tuned`, `no_mode`). Memory and recording errors carry their own status (see above).
+
+Station state (`status`) also reports `ritHz`, `xitHz`, `txFollowsRx`, `rxHz`, `txDownlinkHz`, `ownSignalOffsetHz` (TX downlink − RX, to monitor your own signal), `filter {name, available}` and `rxDsp`. XIT/split changes are applied to the TX channel only after the carrier drops (deferred while keyed).
 
 ## WebSocket protocol (`/ws/control`)
 

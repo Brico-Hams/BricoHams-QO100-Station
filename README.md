@@ -25,6 +25,19 @@ a single-operator turn with a fail-safe PTT, beacon-based frequency correction, 
 | 9 | Installers | Windows x64 (NSIS), Linux x64 / arm64 `.deb` with systemd service, AppImage. Built by GitHub Actions. | Not yet tried on real machines |
 | 10 | Quality | Unit and functional tests (`npm test`), manual checklist, Spanish user help, ADRs, developer docs. | Done |
 
+Advanced operating tools, chosen from a comparison with other SDR programs ([comparison](docs/references/sdr-software/comparison.md), [help](docs/help/funciones-avanzadas.md), ADRs 0011-0017):
+
+| Tool | What you get | Status |
+|---|---|---|
+| Frequency memories | Per-user and shared memories in SQLite, QO-100 presets | Tested with fakes |
+| Band plan overlay | Narrow-band transponder segments over the spectrum | Tested statically |
+| RIT / XIT / TX lock | Receive and transmit offsets (±9999 Hz), split, own-signal offset; TX changes never apply while keyed | Tested with the mock SDRangel |
+| Filter presets, AGC, squelch, NR | Per-mode filter widths and RX settings sent to SDRangel | SDRangel field names **unverified** |
+| Scope tools | Zoom, averaging, peak hold, waterfall palettes and contrast | Tested statically |
+| Keyboard shortcuts | Documented, can be disabled; Space stays PTT-only and nothing else can transmit | Tested statically |
+| RX audio recording | Server-side WAV with file and user caps; the owner can disable it | Tested with fakes |
+| Linux USB setup | udev rules and DVB kernel module blacklist in the `.deb` | Not yet tried on real machines |
+
 Safety by design: transmit is **off by default**; the carrier is cut in under 2 s if the operator's connection is lost; see [SECURITY.md](SECURITY.md).
 
 ## Quick start

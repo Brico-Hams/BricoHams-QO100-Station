@@ -219,10 +219,28 @@ export function validateConfig(raw, env = process.env) {
   }
   const logbook = { path: logbookPath, lotw };
 
+  const stationDbPath = raw.stationDbPath ?? './data/station.db';
+  if (typeof stationDbPath !== 'string' || !stationDbPath) problems.push('stationDbPath must be a non-empty string');
+
+  const rcRaw = raw.recording ?? {};
+  const recording = {
+    enabled: parseBool(rcRaw.enabled ?? true, 'recording.enabled', problems),
+    dir: rcRaw.dir ?? './data/recordings',
+    maxFileMb: rcRaw.maxFileMb ?? 100,
+    maxUserMb: rcRaw.maxUserMb ?? 1000,
+  };
+  if (typeof recording.dir !== 'string' || !recording.dir) problems.push('recording.dir must be a non-empty string');
+  if (!isInt(recording.maxFileMb, 1, 4000)) problems.push('recording.maxFileMb must be an integer between 1 and 4000');
+  if (!isInt(recording.maxUserMb, 1, 100_000) || recording.maxUserMb < recording.maxFileMb) {
+    problems.push('recording.maxUserMb must be an integer between 1 and 100000, not below recording.maxFileMb');
+  }
+
   if (problems.length) throw new ConfigError(problems);
 
   const config = {
     logbook,
+    stationDbPath,
+    recording,
     port: portRaw,
     host,
     tls,
@@ -248,6 +266,7 @@ export function validateConfig(raw, env = process.env) {
       ...config.audio, rxUdp: Object.freeze(config.audio.rxUdp), txUdp: Object.freeze(config.audio.txUdp),
     }),
     logbook: Object.freeze({ ...config.logbook, lotw: config.logbook.lotw ? Object.freeze(config.logbook.lotw) : null }),
+    recording: Object.freeze(config.recording),
     allowlist: Object.freeze(config.allowlist),
   });
 }

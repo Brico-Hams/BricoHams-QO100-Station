@@ -91,6 +91,56 @@
         </div>
       </div>
 
+      <div class="card tools" id="tools-scope">
+        <h2>Scope</h2>
+        <div class="row">
+          <label>Zoom <select id="t-zoom"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option><option value="8">8x</option><option value="16">16x</option></select></label>
+          <label>Averaging <select id="t-avg"><option value="1">Off</option><option value="4">4 frames</option><option value="8">8 frames</option><option value="16">16 frames</option></select></label>
+          <label>Palette <select id="t-palette"><option value="classic">Classic</option><option value="grayscale">Grayscale</option><option value="fire">Fire</option><option value="viridis">Viridis (colour-blind friendly)</option></select></label>
+          <label>Contrast <input id="t-contrast" type="range" min="-100" max="100" step="10" value="0" aria-label="Waterfall contrast"></label>
+          <button type="button" id="t-peak" class="btn" aria-pressed="false" aria-keyshortcuts="p">Peak hold</button>
+        </div>
+      </div>
+
+      <div class="card tools" id="tools-rx">
+        <h2>Receive and transmit offsets</h2>
+        <div class="row">
+          <label>RIT <output id="t-rit-val" class="mono">0 Hz</output>
+            <input id="t-rit" type="range" min="-9999" max="9999" step="10" value="0" aria-label="RIT, receive offset in hertz"></label>
+          <label>XIT <output id="t-xit-val" class="mono">0 Hz</output>
+            <input id="t-xit" type="range" min="-9999" max="9999" step="10" value="0" aria-label="XIT, transmit offset in hertz"></label>
+          <button type="button" id="t-clear" class="btn" aria-keyshortcuts="0">Clear</button>
+          <button type="button" id="t-lock" class="btn" aria-pressed="true" aria-keyshortcuts="l">TX follows RX</button>
+        </div>
+        <p id="t-own" class="hint" role="status" aria-live="polite"></p>
+        <div class="row">
+          <label>Filter <select id="t-filter" aria-keyshortcuts="f"></select></label>
+          <label>AGC <select id="t-agc" aria-keyshortcuts="a"><option value="off">Off</option><option value="slow">Slow</option><option value="medium">Medium</option><option value="fast">Fast</option></select></label>
+          <label>Squelch <select id="t-squelch" aria-keyshortcuts="s"><option value="off">Off</option><option value="-70">-70 dB</option><option value="-60">-60 dB</option><option value="-50">-50 dB</option><option value="-40">-40 dB</option></select></label>
+          <button type="button" id="t-nr" class="btn" aria-pressed="false" aria-keyshortcuts="n">Noise reduction</button>
+        </div>
+      </div>
+
+      <div class="card tools" id="tools-mem">
+        <h2>Memories and recording</h2>
+        <div class="row">
+          <label>Memory <select id="m-list" aria-label="Frequency memories"></select></label>
+          <button type="button" id="m-recall" class="btn">Recall</button>
+          <button type="button" id="m-delete" class="btn">Delete</button>
+        </div>
+        <form id="m-form" class="row" autocomplete="off">
+          <label>Name <input id="m-name" maxlength="32" required></label>
+          <label class="check"><input id="m-shared" type="checkbox"> Shared (owner)</label>
+          <button type="submit" class="btn" aria-keyshortcuts="m">Save current frequency</button>
+        </form>
+        <div class="row">
+          <button type="button" id="r-toggle" class="btn" aria-pressed="false" aria-keyshortcuts="o">Record RX audio</button>
+          <span id="r-state" class="hint" role="status" aria-live="polite"></span>
+        </div>
+        <ul id="r-list" class="rec-list" aria-label="Recordings"></ul>
+        <p id="tools-msg" class="hint" role="status" aria-live="polite"></p>
+      </div>
+
       <div class="card decodes">
         <div class="decodes-head">
           <span id="decodes-label" class="label">Decoded</span>
@@ -181,12 +231,21 @@
         </form>
       </div>
       <div class="card">
+        <h2>Keyboard shortcuts</h2>
+        <label class="check"><input id="s-keys" type="checkbox" checked> Enable shortcuts (Space for PTT is always available on the Radio tab)</label>
+        <table id="shortcut-table" class="shortcuts"><caption class="hint">Shortcuts never arm or key the transmitter. Press ? on the Radio tab to jump here.</caption>
+          <thead><tr><th scope="col">Key</th><th scope="col">Action</th></tr></thead><tbody></tbody></table>
+      </div>
+      <div class="card">
         <h2>About</h2>
         <p>BricoHams QO-100 Station, GPL-3.0-or-later. Radio engine: SDRangel. See <a href="/help.html" target="_blank" rel="noopener">help</a>.</p>
       </div>
     </section>
   </main>
 
+  <script src="/scope-math.js" defer></script>
+  <script src="/shortcuts.js" defer></script>
   <script src="/app.js" defer></script>
+  <script src="/features.js" defer></script>
 </body>
 </html>

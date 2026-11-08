@@ -219,4 +219,32 @@ Solo el titular de la estación decide pasar a esta sección, con licencia váli
 
 ---
 
+## K. Funciones avanzadas ([guía](../help/funciones-avanzadas.md))
+
+| ✔ | Acción | Resultado esperado | Resultado / notas |
+|---|---|---|---|
+| [ ] | Guardar, recuperar y borrar una memoria; probar un nombre repetido | Funciona; el duplicado se rechaza | |
+| [ ] | Con otro usuario, comprobar que no ve las memorias privadas; el propietario crea una compartida | Aislamiento correcto; la compartida la ven todos | |
+| [ ] | Recuperar una memoria de otro modo con el PTT activo | Error `tx_active`; no cambia nada | |
+| [ ] | Ver el plan de bandas sobre el espectro | Segmentos y baliza en su sitio | |
+| [ ] | RIT ±: oír que solo cambia la recepción; ver que el TX no se mueve | Correcto | |
+| [ ] | XIT y split con carga ficticia: medir la frecuencia de TX | Coincide con la calculada; no cambia durante TX | |
+| [ ] | «Mi señal»: comprobar que el desplazamiento mostrado permite oírse | Coincide | |
+| [ ] | Cambiar el ancho de filtro en SSB, CW y FT8 | El ancho cambia en SDRangel; se restablece al cambiar de modo | |
+| [ ] | AGC, squelch y reducción de ruido | SDRangel refleja los ajustes (verificar nombres de campos) | |
+| [ ] | Zoom, promedio, retención de picos, paletas y contraste | Se ven bien; se recuerdan al recargar | |
+| [ ] | Probar cada atajo de la tabla; escribir en un campo de texto | No dispara atajos en campos; Espacio sigue siendo solo PTT | |
+| [ ] | Intentar transmitir con cualquier tecla que no sea Espacio | No es posible | |
+| [ ] | Desactivar los atajos en Ajustes | Dejan de funcionar | |
+| [ ] | Grabar audio RX, parar, descargar y abrir el WAV | Se reproduce; cabecera correcta | |
+| [ ] | Grabar hasta el límite configurado | Se detiene sola; la descarga es válida | |
+| [ ] | El propietario desactiva la grabación; un operador intenta grabar | Error `recording_disabled` | |
+| [ ] | Comprobar que otro operador no puede descargar mi grabación | 404 | |
+| [ ] | Linux: tras instalar el .deb, `rtl_test -t` con el dongle reconectado | Detecta el dongle sin `-6` ni `Permission denied` | |
+| [ ] | Linux: `apt purge` | Se eliminan las reglas udev y la lista negra | |
+| [ ] | Comprobar los IDs USB de tus SDR (`lsusb`) contra `99-bricohams-sdr.rules` | Coinciden | |
+| [ ] | Windows: instalar WinUSB con Zadig en un RTL-SDR | SDRangel lo detecta | |
+
+---
+
 Resumen final: ¿se puede considerar la versión lista para su uso? ______ . Envía el [informe](REPORT-TEMPLATE.md).

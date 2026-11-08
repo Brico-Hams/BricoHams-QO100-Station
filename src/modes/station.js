@@ -1,6 +1,8 @@
 import { BEACON_DOWNLINK_HZ, DEFAULT_LNB_LO_HZ, downlinkToIf, downlinkToUplink } from './frequencies.js';
 import { BAND_PLAN, DEFAULT_DIAL_HZ, segmentFor } from './bandplan.js';
 import { createDefaultDecoderRegistry } from './decoders.js';
+import { computeTuning, isValidOffset } from './rit.js';
+import { DEFAULT_FILTER, DEFAULT_RX_DSP, filterNames, parseRxDsp, resolveFilter, toChannelSettings } from './rx-profile.js';
 
 /** Supported operating modes. */
 export const MODES = Object.freeze(['USB', 'CW', 'FT8', 'FT4']);
@@ -45,7 +47,10 @@ export function createStation({
   client, rxDeviceSet = 0, txDeviceSet = 1, lnbLoHz = DEFAULT_LNB_LO_HZ, applyToTx = true,
   isTxActive = () => false, decoders = createDefaultDecoderRegistry(), logger = console,
 }) {
-  const state = { mode: null, downlinkHz: null, correctionHz: 0, correctionSource: 'none' };
+  const state = {
+    mode: null, downlinkHz: null, correctionHz: 0, correctionSource: 'none',
+    ritHz: 0, xitHz: 0, txFollowsRx: true, txDialHz: null, filter: DEFAULT_FILTER, rxDsp: {},
+  };
   const channels = { rx: null, tx: null };
   let txDirty = false;
   let queue = Promise.resolve();
@@ -71,9 +76,20 @@ export function createStation({
     return idx;
   }
 
+  const tuning = () => computeTuning({
+    dialHz: state.downlinkHz, txDialHz: state.txDialHz, ritHz: state.ritHz, xitHz: state.xitHz, txFollowsRx: state.txFollowsRx,
+  });
+
+  // Both the listened and the transmitted frequency must stay inside the NB transponder, whatever RIT/XIT/split say.
+  function checkTuning() {
+    const t = tuning();
+    if (t.rxHz < NB_MIN_HZ || t.rxHz >= NB_MAX_HZ) throw new StationError('frequency_out_of_range');
+    if (t.txDownlinkHz < NB_MIN_HZ || t.txDownlinkHz >= NB_MAX_HZ) throw new StationError('tx_frequency_out_of_range');
+  }
+
   async function applyChannelOffsets() {
     if (state.downlinkHz === null || channels.rx === null) return;
-    await client.patchChannelSettings(rxDeviceSet, channels.rx, { inputFrequencyOffset: Math.round(state.downlinkHz - BEACON_DOWNLINK_HZ) });
+    await client.patchChannelSettings(rxDeviceSet, channels.rx, { inputFrequencyOffset: Math.round(tuning().rxHz - BEACON_DOWNLINK_HZ) });
   }
 
   async function applyRxCenter() {
@@ -84,7 +100,7 @@ export function createStation({
     if (txDeviceSet === null) return;
     await client.setCenterFrequency(txDeviceSet, beaconUplink() - (applyToTx ? state.correctionHz : 0));
     if (channels.tx !== null && state.downlinkHz !== null) {
-      await client.patchChannelSettings(txDeviceSet, channels.tx, { inputFrequencyOffset: Math.round(state.downlinkHz - BEACON_DOWNLINK_HZ) });
+      await client.patchChannelSettings(txDeviceSet, channels.tx, { inputFrequencyOffset: Math.round(tuning().txDownlinkHz - BEACON_DOWNLINK_HZ) });
     }
     txDirty = false;
   }
@@ -105,6 +121,7 @@ export function createStation({
     const previous = state.downlinkHz;
     state.downlinkHz = rounded;
     try {
+      checkTuning();
       await applyRxCenter();
       await applyChannelOffsets();
       await applyTx();
@@ -118,12 +135,13 @@ export function createStation({
     if (!MODES.includes(mode)) throw new StationError('unknown_mode');
     const profile = MODE_PROFILES[mode];
     channels.rx = await ensureChannel(rxDeviceSet, RX_CHANNEL, 0);
-    await client.patchChannelSettings(rxDeviceSet, channels.rx, profile.rx);
+    await client.patchChannelSettings(rxDeviceSet, channels.rx, { ...profile.rx, ...toChannelSettings(state.rxDsp) });
     if (txDeviceSet !== null) {
       channels.tx = await ensureChannel(txDeviceSet, TX_CHANNEL, 1);
       await client.patchChannelSettings(txDeviceSet, channels.tx, profile.tx);
     }
     state.mode = mode;
+    state.filter = DEFAULT_FILTER;
     const seg = state.downlinkHz === null ? null : segmentFor(state.downlinkHz);
     await doTune(seg?.modes.includes(mode) ? state.downlinkHz : DEFAULT_DIAL_HZ[mode]);
   }
@@ -186,20 +204,106 @@ export function createStation({
       }
     }),
 
+    /**
+     * Set RIT (shifts the received frequency) and/or XIT (shifts the transmitted one). XIT never retunes a keyed transmitter.
+     * @param {{ritHz?: number, xitHz?: number}} offsets Integers within +-9999 Hz.
+     * @returns {Promise<object>} New status.
+     * @throws {StationError} `not_tuned`, `offset_out_of_range`, `frequency_out_of_range`, `tx_frequency_out_of_range`.
+     */
+    setOffsets: ({ ritHz, xitHz } = {}) => serial(async () => {
+      if (state.downlinkHz === null) throw new StationError('not_tuned');
+      if ((ritHz !== undefined && !isValidOffset(ritHz)) || (xitHz !== undefined && !isValidOffset(xitHz))) {
+        throw new StationError('offset_out_of_range');
+      }
+      const previous = { ritHz: state.ritHz, xitHz: state.xitHz };
+      state.ritHz = ritHz ?? state.ritHz;
+      state.xitHz = xitHz ?? state.xitHz;
+      try {
+        checkTuning();
+        if (state.ritHz !== previous.ritHz) await applyChannelOffsets();
+        if (state.xitHz !== previous.xitHz) await applyTx();
+      } catch (err) {
+        Object.assign(state, previous);
+        throw err;
+      }
+      return station.status();
+    }),
+
+    /**
+     * Lock the transmit frequency to the receive dial (default) or let it stay where it is (split).
+     * Unlocking keeps the transmitter on the current frequency unless `txDownlinkHz` is given. A keyed transmitter is not retuned.
+     * @param {{locked: boolean, txDownlinkHz?: number}} opts
+     * @returns {Promise<object>} New status.
+     * @throws {StationError} `bad_tx_lock`, `not_tuned`, `tx_frequency_out_of_range`.
+     */
+    setTxLock: ({ locked, txDownlinkHz } = {}) => serial(async () => {
+      if (typeof locked !== 'boolean' || (txDownlinkHz !== undefined && !Number.isFinite(txDownlinkHz))) throw new StationError('bad_tx_lock');
+      if (state.downlinkHz === null) throw new StationError('not_tuned');
+      const previous = { txFollowsRx: state.txFollowsRx, txDialHz: state.txDialHz };
+      state.txFollowsRx = locked;
+      state.txDialHz = locked ? null : Math.round(txDownlinkHz ?? state.txDialHz ?? state.downlinkHz);
+      try {
+        checkTuning();
+        await applyTx();
+      } catch (err) {
+        Object.assign(state, previous);
+        throw err;
+      }
+      return station.status();
+    }),
+
+    /**
+     * Select an RX passband preset of the current mode. Only the receiver is touched, never the transmit filter.
+     * @param {string} name e.g. `narrow`, `normal`, `wide`.
+     * @returns {Promise<object>} New status.
+     * @throws {StationError} `no_mode`, `unknown_filter`.
+     */
+    setFilter: (name) => serial(async () => {
+      if (channels.rx === null || state.mode === null) throw new StationError('no_mode');
+      const preset = resolveFilter(state.mode, name);
+      if (!preset) throw new StationError('unknown_filter');
+      await client.patchChannelSettings(rxDeviceSet, channels.rx, preset);
+      state.filter = name;
+      return station.status();
+    }),
+
+    /**
+     * Change AGC, squelch and noise reduction of the RX channel. They are remembered and re-applied after a mode change.
+     * @param {{agc?: string, squelchDb?: number|null, noiseReduction?: boolean}} partial
+     * @returns {Promise<object>} New status.
+     * @throws {StationError} `bad_dsp`, `bad_agc`, `bad_squelch`, `bad_noise_reduction`.
+     */
+    setRxDsp: (partial) => serial(async () => {
+      const parsed = parseRxDsp(partial);
+      if (!parsed.ok) throw new StationError(parsed.code);
+      if (channels.rx !== null) await client.patchChannelSettings(rxDeviceSet, channels.rx, toChannelSettings(parsed.value));
+      Object.assign(state.rxDsp, parsed.value);
+      return station.status();
+    }),
+
     /** @returns {object} Current tuning state. */
     status() {
       const seg = state.downlinkHz === null ? null : segmentFor(state.downlinkHz);
       const decoder = state.mode && state.mode !== 'USB' ? decoders.get(state.mode) : null;
+      const t = state.downlinkHz === null ? null : tuning();
       return {
         mode: state.mode,
         downlinkHz: state.downlinkHz,
-        uplinkHz: state.downlinkHz === null ? null : downlinkToUplink(state.downlinkHz),
+        uplinkHz: t === null ? null : t.uplinkHz,
         ifHz: state.downlinkHz === null ? null : downlinkToIf(state.downlinkHz, lnbLoHz),
         segment: seg?.name ?? null,
         correctionHz: state.correctionHz,
         correctionSource: state.correctionSource,
         txRetunePending: txDirty,
         decoder: decoder ? { available: decoder.available !== false } : null,
+        ritHz: state.ritHz,
+        xitHz: state.xitHz,
+        txFollowsRx: state.txFollowsRx,
+        rxHz: t === null ? null : t.rxHz,
+        txDownlinkHz: t === null ? null : t.txDownlinkHz,
+        ownSignalOffsetHz: t === null ? null : t.ownSignalOffsetHz,
+        filter: state.mode === null ? null : { name: state.filter, available: filterNames(state.mode) },
+        rxDsp: { ...DEFAULT_RX_DSP, ...state.rxDsp },
       };
     },
   };
