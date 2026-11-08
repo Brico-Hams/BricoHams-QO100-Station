@@ -15,7 +15,7 @@ Un único programa para operar una estación QO-100 (Es'hail-2), tanto en transm
 4. **Log**: contactos SSB, CW y digitales guardados en local. Exportación ADIF 3.1 compatible con LoTW (`PROP_MODE=SAT`, `SAT_NAME=QO-100`, `BAND=13CM`, `BAND_RX=3CM`, `FREQ` y `FREQ_RX`), subida a LoTW mediante TQSL y subida a QRZ Logbook mediante su API.
 5. **Acceso web remoto**: interfaz HTML5 instalable como PWA ("web install"), con espectro, cascada, audio de recepción y micrófono del navegador para transmitir.
 6. **Multiusuario con un solo operador a la vez**: inicio de sesión con Google (OpenID Connect) y lista de cuentas autorizadas que mantiene el titular de la estación, cada una asociada a un indicativo y a un rol. El turno de transmisión es exclusivo y lo gestiona la máquina de PTT.
-7. **Cifrado**: HTTPS/TLS para la web y la API, WSS para el control y DTLS-SRTP (WebRTC) para el audio. Las claves de terceros (QRZ) se guardan cifradas en reposo.
+7. **Cifrado**: HTTPS/TLS para la web y la API, WSS (TLS) para el control y el audio. Las claves de terceros (QRZ) se guardan cifradas en reposo.
 8. **Escucha pública**: un plugin para OpenWebRX+ que solo escucha y no tiene ninguna ruta hacia la transmisión.
 9. **Instaladores**: Windows x64 (NSIS), Linux x64 y Raspberry Pi arm64 (.deb con servicio systemd y AppImage). Los genera GitHub Actions.
 10. **Calidad**: pruebas unitarias por módulo, pruebas funcionales de extremo a extremo con un SDRangel simulado, checklist manual para quien lo pruebe con hardware, ayuda de usuario, ADR que justifican la arquitectura y documentación para desarrolladores lo bastante completa como para que cualquiera entienda y corrija el código.
@@ -64,7 +64,7 @@ Módulos (cada uno en `src/<módulo>/`, con su propio README, pruebas unitarias 
 | `beacon` | Localiza el pico de la baliza en el espectro, calcula la deriva en Hz, la filtra (mediana + EMA) y aplica la corrección en RX y TX. Sin baliza, la corrección no se aplica y se avisa. |
 | `modes` | Cambio de modo, filtros y frecuencia de trabajo según el plan de banda NB de QO-100. Decodificación FT8/FT4 (el decodificador de SDRangel si lo trae, si no `ft8_lib`) y CW (`ggmorse` o el de SDRangel). |
 | `log` | CRUD de contactos, validación, deduplicado, exportación e importación ADIF, subida a LoTW con `tqsl` (el certificado lo gestiona el usuario en TQSL; BricoHams solo invoca el CLI) y a QRZ Logbook (clave cifrada con AES-256-GCM). |
-| `webrtc` | Audio RX del servidor al navegador y audio del micrófono del navegador al servidor y a SDRangel TX (Opus, DTLS-SRTP). El micrófono solo se abre con el turno PTT concedido. |
+| `webrtc` | Audio RX del servidor al navegador y audio del micrófono del navegador al servidor y a SDRangel TX (PCM 16 bits por WSS; AudioWorklet en el navegador). El micrófono solo se abre con el turno PTT concedido. |
 | `web` | PWA: espectro y cascada, sintonía con clic, botón PTT (mantener pulsado y barra espaciadora), formulario de log, estado de la baliza y del turno, ayuda integrada. Accesible (teclado y ARIA). |
 | `plugins/openwebrx` | Plugin para OpenWebRX+: marcadores QO-100, ayuda de offset y enlace a la PWA. Solo recepción. |
 
@@ -76,7 +76,7 @@ Módulos (cada uno en `src/<módulo>/`, con su propio README, pruebas unitarias 
 - La escucha pública es un plugin para OpenWebRX (decisión del usuario).
 - La versión 1 debe cumplir todos los objetivos (decisión del usuario).
 - Node, `node:sqlite`, `node:test` y PWA (decisión de Claude, por coherencia con el repo anterior y por tener pocas dependencias).
-- `werift` (MIT) como pila WebRTC en Node, salvo que el ADR correspondiente justifique otra (decisión de Claude).
+- Audio por WSS (TLS) con PCM 16 bits y AudioWorklet en el navegador, en lugar de WebRTC: evita un códec Opus nativo en el servidor, que no es portable entre Windows, Linux y Pi (decisión de Claude; ADR 0006).
 
 ## 7. Riesgos que hay que verificar (se registran en los ADR)
 

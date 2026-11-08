@@ -15,6 +15,11 @@ import { createSdrangelClient, SdrangelError } from '../sdrangel/client.js';
 import { createSdrangelPttDriver } from '../sdrangel/ptt-driver.js';
 import { createStation, StationError } from '../modes/index.js';
 import { createBeaconController } from '../beacon/index.js';
+import { LogError, createLogStore } from '../log/store.js';
+import { createLotwUploader } from '../log/lotw.js';
+import { createQrzClient } from '../log/qrz.js';
+import { createSecretBox } from '../log/secrets.js';
+import { createLogApi } from '../log/routes.js';
 import { isLoopbackHost } from './config.js';
 
 const MIME = {
@@ -115,6 +120,7 @@ async function readJson(req) {
  * @param {Readonly<object>} config Validated config (see config.js).
  * @param {{oidc?: object, driver?: object, audit?: object, clock?: object, publicDir?: string, sdrangel?: object,
  *   spectrumSource?: () => Promise<{powersDb: ArrayLike<number>, centerHz: number, binHz: number}|null>, beaconAutoStart?: boolean,
+ *   logStore?: object, lotwUploader?: object, qrz?: object, qrzFetch?: typeof fetch,
  *   logger?: {error: Function, info?: Function}, tlsCredentials?: {cert: Buffer, key: Buffer}}} [deps] Injectable collaborators for tests.
  * @returns {{server: import('node:http').Server, ptt: object, auth: object, station: object, beacon: object|null, listen: () => Promise<{port: number, url: string}>, close: () => Promise<void>}}
  */
@@ -159,6 +165,27 @@ export function createApp(config, deps = {}) {
     ? publicBeacon(beacon.status())
     : { status: 'no-lock', offsetHz: null, appliedHz: 0, snrDb: null, reason: 'no_source' });
   const auth = createAuth({ config, oidc, getRedirectUri: () => `${publicUrl.origin}/auth/callback` });
+
+  // The logbook is opened on first use so that a station that never logs does not create a database.
+  let logStore = deps.logStore ?? null;
+  let lotw = deps.lotwUploader ?? null;
+  const logApi = createLogApi({
+    auth,
+    getStore: () => {
+      logStore ??= createLogStore({
+        path: config.logbook.path,
+        secretBox: config.secretsKey ? createSecretBox(config.secretsKey) : null,
+      });
+      return logStore;
+    },
+    getLotw: () => {
+      if (!lotw && config.logbook.lotw) lotw = createLotwUploader(config.logbook.lotw);
+      return lotw;
+    },
+    qrz: deps.qrz ?? createQrzClient({ fetch: deps.qrzFetch }),
+    hasSecretsKey: Boolean(config.secretsKey),
+    io: { sendJson, readJson, BadRequest },
+  });
 
   const wsOrigin = () => `${publicUrl.protocol === 'https:' ? 'wss:' : 'ws:'}//${publicUrl.host}`;
   const headersFor = () => securityHeaders({ https: publicUrl.protocol === 'https:', wsOrigin: wsOrigin() });
@@ -231,6 +258,7 @@ export function createApp(config, deps = {}) {
         if (ptt.state === 'TX_ON') return sendJson(res, 409, { error: 'tx_active' });
         return sendJson(res, 200, await station.setMode(body.mode));
       }
+      if (await logApi.handle(req, res, url)) return;
       if (pathname.startsWith('/api/') || pathname.startsWith('/auth/')) return sendJson(res, 404, { error: 'not_found' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return sendJson(res, 405, { error: 'method_not_allowed' });
       return await serveStatic(req, res, pathname);
@@ -238,6 +266,9 @@ export function createApp(config, deps = {}) {
       if (err instanceof AuthError) return sendJson(res, err.status, { error: err.code });
       if (err instanceof BadRequest) return sendJson(res, 400, { error: 'bad_request', detail: err.message });
       if (err instanceof StationError) return sendJson(res, 400, { error: err.code });
+      if (err instanceof LogError) {
+        return sendJson(res, err.status, { error: err.code, ...(err.fields ? { fields: err.fields } : {}), ...(err.existingId ? { existingId: err.existingId } : {}) });
+      }
       if (err instanceof SdrangelError) {
         logger.error('sdrangel request failed:', err.kind, err.message);
         return sendJson(res, 502, { error: 'sdrangel_unavailable', kind: err.kind });
@@ -456,6 +487,7 @@ export function createApp(config, deps = {}) {
       if (holder) await ptt.release(holder, 'shutdown');
       ptt.dispose();
       for (const { ws } of sockets.values()) ws.terminate();
+      if (!deps.logStore) logStore?.close();
       await new Promise((resolve) => {
         server.close(() => resolve());
         server.closeAllConnections?.();

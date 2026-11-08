@@ -182,9 +182,24 @@ export function validateConfig(raw, env = process.env) {
   const auditLogPath = raw.auditLogPath ?? './data/audit.log';
   if (typeof auditLogPath !== 'string' || !auditLogPath) problems.push('auditLogPath must be a non-empty string');
 
+  const lbRaw = raw.logbook ?? {};
+  const logbookPath = lbRaw.path ?? './data/logbook.db';
+  if (typeof logbookPath !== 'string' || !logbookPath) problems.push('logbook.path must be a non-empty string');
+  let lotw = null;
+  if (lbRaw.lotw !== undefined) {
+    const { tqslPath, stationLocation } = lbRaw.lotw ?? {};
+    if (typeof tqslPath !== 'string' || !tqslPath) problems.push('logbook.lotw.tqslPath must be a non-empty string');
+    if (typeof stationLocation !== 'string' || !stationLocation || stationLocation.startsWith('-')) {
+      problems.push('logbook.lotw.stationLocation must be a non-empty name not starting with "-"');
+    }
+    lotw = { tqslPath, stationLocation };
+  }
+  const logbook = { path: logbookPath, lotw };
+
   if (problems.length) throw new ConfigError(problems);
 
   const config = {
+    logbook,
     port: portRaw,
     host,
     tls,
@@ -204,6 +219,7 @@ export function validateConfig(raw, env = process.env) {
     tx: Object.freeze(config.tx),
     sdrangel: Object.freeze(config.sdrangel),
     station: Object.freeze(config.station),
+    logbook: Object.freeze({ ...config.logbook, lotw: config.logbook.lotw ? Object.freeze(config.logbook.lotw) : null }),
     allowlist: Object.freeze(config.allowlist),
   });
 }
