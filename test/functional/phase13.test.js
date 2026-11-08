@@ -27,6 +27,9 @@ async function start(extra = {}, deps = {}) {
     tx: { enabled: true, totSeconds: 60, heartbeatTimeoutMs: 1000 },
     sdrangel: { baseUrl: sdrUrl },
     auditLogPath: join(dir, 'audit.log'),
+    // keep every store in the temp dir: the defaults under ./data persist between runs and break duplicate checks
+    logbook: { path: join(dir, 'logbook.db') },
+    stationDbPath: join(dir, 'station.db'),
     ...extra,
   }, { GOOGLE_CLIENT_SECRET: 'test-secret', BRICOHAMS_WEBHOOK_SECRET_1: 'a'.repeat(32) });
   const oidc = createFakeOidc();
