@@ -1,3 +1,5 @@
+[ES](../es/05-hardware-sdr.md) · [EN](../en/05-hardware-sdr.md) · [FR](../fr/05-hardware-sdr.md) · [PT](../pt/05-hardware-sdr.md)
+
 # 5. Hardware SDR
 
 ## Objetivos

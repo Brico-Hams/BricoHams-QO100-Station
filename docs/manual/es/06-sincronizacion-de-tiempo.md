@@ -1,3 +1,5 @@
+[ES](../es/06-sincronizacion-de-tiempo.md) · [EN](../en/06-sincronizacion-de-tiempo.md) · [FR](../fr/06-sincronizacion-de-tiempo.md) · [PT](../pt/06-sincronizacion-de-tiempo.md)
+
 # 6. Sincronización de tiempo
 
 ## Objetivos

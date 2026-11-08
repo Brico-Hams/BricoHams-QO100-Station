@@ -1,3 +1,5 @@
+[ES](../es/07-sincronizacion-de-portadora.md) · [EN](../en/07-sincronizacion-de-portadora.md) · [FR](../fr/07-sincronizacion-de-portadora.md) · [PT](../pt/07-sincronizacion-de-portadora.md)
+
 # 7. Sincronización de portadora
 
 ## Objetivos

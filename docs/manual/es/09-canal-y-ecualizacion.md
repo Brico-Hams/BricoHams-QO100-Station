@@ -1,3 +1,5 @@
+[ES](../es/09-canal-y-ecualizacion.md) · [EN](../en/09-canal-y-ecualizacion.md) · [FR](../fr/09-canal-y-ecualizacion.md) · [PT](../pt/09-canal-y-ecualizacion.md)
+
 # 9. Canal y ecualización
 
 ## Objetivos

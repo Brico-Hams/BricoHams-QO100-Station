@@ -1,3 +1,5 @@
+[ES](../es/12-practicas.md) · [EN](../en/12-practicas.md) · [FR](../fr/12-practicas.md) · [PT](../pt/12-practicas.md)
+
 # 12. Prácticas
 
 Todas las prácticas se ejecutan en la raíz del repositorio, con Node 24, sin red, sin hardware y sin cuentas. Se usan los módulos reales de `src/`.

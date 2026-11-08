@@ -1,3 +1,5 @@
+[ES](../es/02-senales-y-sistemas.md) · [EN](../en/02-senales-y-sistemas.md) · [FR](../fr/02-senales-y-sistemas.md) · [PT](../pt/02-senales-y-sistemas.md)
+
 # 2. Señales y sistemas
 
 ## Objetivos

@@ -1,3 +1,5 @@
+[ES](../es/00-prologo.md) · [EN](../en/00-prologo.md) · [FR](../fr/00-prologo.md) · [PT](../pt/00-prologo.md)
+
 # Prólogo
 
 ![Bloques de una SDR](../figures/fig-01-bloques-sdr.svg)

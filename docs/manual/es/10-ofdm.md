@@ -1,3 +1,5 @@
+[ES](../es/10-ofdm.md) · [EN](../en/10-ofdm.md) · [FR](../fr/10-ofdm.md) · [PT](../pt/10-ofdm.md)
+
 # 10. OFDM
 
 ## Objetivos

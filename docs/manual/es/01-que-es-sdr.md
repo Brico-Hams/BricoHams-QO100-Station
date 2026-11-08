@@ -1,3 +1,5 @@
+[ES](../es/01-que-es-sdr.md) · [EN](../en/01-que-es-sdr.md) · [FR](../fr/01-que-es-sdr.md) · [PT](../pt/01-que-es-sdr.md)
+
 # 1. ¿Qué es una radio definida por software?
 
 ## Objetivos

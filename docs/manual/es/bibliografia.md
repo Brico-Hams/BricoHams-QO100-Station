@@ -1,3 +1,5 @@
+[ES](../es/bibliografia.md) · [EN](../en/bibliografia.md) · [FR](../fr/bibliografia.md) · [PT](../pt/bibliografia.md)
+
 # Bibliografía y lecturas
 
 ## Libro de referencia (lectura recomendada por capítulo)

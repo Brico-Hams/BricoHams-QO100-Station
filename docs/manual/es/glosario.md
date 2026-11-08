@@ -1,3 +1,5 @@
+[ES](../es/glosario.md) · [EN](../en/glosario.md) · [FR](../fr/glosario.md) · [PT](../pt/glosario.md)
+
 # Glosario
 
 | Término | Significado |

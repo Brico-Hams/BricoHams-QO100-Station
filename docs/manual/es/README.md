@@ -1,3 +1,5 @@
+[ES](../es/README.md) · [EN](../en/README.md) · [FR](../fr/README.md) · [PT](../pt/README.md)
+
 <p align="center">
   <a href="https://bricohams.org"><img src="../../../branding/bricohams_horizontal.png" alt="BricoHams" width="360"></a>
 </p>

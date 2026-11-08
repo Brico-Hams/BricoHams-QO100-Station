@@ -136,9 +136,9 @@ export function berChartSvg() {
   const xTicks = []; for (let d = 0; d <= 24; d += 4) xTicks.push({ px: px(d), label: `${d}` });
   const yTicks = []; for (let e = 0; e >= -12; e -= 2) yTicks.push({ py: py(10 ** e), label: e === 0 ? '1' : `1e${e}` });
   const curves = [
-    { name: 'BPSK / QPSK', f: berPsk, style: `stroke="${NAVY}" stroke-width="3"`, lx: 190 },
-    { name: '16-QAM', f: (d) => berQam(16, d), style: `stroke="${ORANGE}" stroke-width="3"`, lx: 330 },
-    { name: '64-QAM', f: (d) => berQam(64, d), style: `stroke="${GREY}" stroke-width="3" stroke-dasharray="9 5"`, lx: 480 },
+    { name: 'BPSK / QPSK', f: berPsk, style: `stroke="${NAVY}" stroke-width="3" stroke-dasharray="none"`, lx: 190 },
+    { name: '16-QAM', f: (d) => berQam(16, d), style: `stroke="${ORANGE}" stroke-width="3" stroke-dasharray="12 4"`, lx: 330 },
+    { name: '64-QAM', f: (d) => berQam(64, d), style: `stroke="${GREY}" stroke-width="3" stroke-dasharray="2 4"`, lx: 480 },
   ];
   let body = plotFrame({ x0, x1, y0, y1, xTicks, yTicks, xLabel: 'Eb/N0 (dB)', yLabel: 'Tasa de error de bit (BER)' });
   body += `<text x="${x0}" y="36" class="h">BER teórico en canal AWGN (codificación Gray)</text>`;
@@ -229,10 +229,10 @@ export function raisedCosineChartSvg() {
   body += `<text x="${x0}" y="36" class="h">Filtro de coseno alzado según el factor de caída α</text>`;
   const styles = [
     { a: 0, s: `stroke="${NAVY}" stroke-width="3"` },
-    { a: 0.25, s: `stroke="${ORANGE}" stroke-width="3"` },
-    { a: 0.5, s: `stroke="${GREY}" stroke-width="3"` },
+    { a: 0.25, s: `stroke="${ORANGE}" stroke-width="3" stroke-dasharray="12 4"` },
+    { a: 0.5, s: `stroke="${GREY}" stroke-width="3" stroke-dasharray="2 4"` },
     { a: 0.75, s: `stroke="${NAVY}" stroke-width="3" stroke-dasharray="9 5"` },
-    { a: 1, s: `stroke="${ORANGE}" stroke-width="3" stroke-dasharray="9 5"` },
+    { a: 1, s: `stroke="${ORANGE}" stroke-width="3" stroke-dasharray="14 4 2 4"` },
   ];
   styles.forEach((c, i) => {
     const pts = [];

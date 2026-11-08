@@ -1,3 +1,5 @@
+[ES](../es/08-tramas-y-codificacion.md) · [EN](../en/08-tramas-y-codificacion.md) · [FR](../fr/08-tramas-y-codificacion.md) · [PT](../pt/08-tramas-y-codificacion.md)
+
 # 8. Tramas y codificación
 
 ## Objetivos
