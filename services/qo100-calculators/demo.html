@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BricoHams QO-100 Calculators (demo)</title>
+  <link rel="stylesheet" href="assets/qo100-calc.css">
+  <style>body { font-family: system-ui, sans-serif; margin: 1rem auto; max-width: 48rem; padding: 0 1rem; } @media (prefers-color-scheme: dark) { body { background: #0d1118; color: #e6ebf2; } }</style>
+</head>
+<body>
+  <h1>BricoHams QO-100 Calculators</h1>
+  <p>Demo local. Los módulos ES requieren servir esta carpeta por HTTP, por ejemplo <code>python -m http.server</code> o <code>npx --no-install serve</code> dentro de <code>services/qo100-calculators</code>.</p>
+  <div data-calc="dish"></div>
+  <div data-calc="pointing"></div>
+  <div data-calc="lnb"></div>
+  <div data-calc="helix"></div>
+  <div data-calc="ifcalc"></div>
+  <script type="module" src="assets/qo100-calc.js"></script>
+</body>
+</html>

@@ -80,9 +80,23 @@ jobs:
             dist/*.deb
             dist/*.sha256
 
+  calculators:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zip WordPress plugin
+        run: |
+          mkdir -p dist
+          cd services
+          zip -r ../dist/bricohams-qo100-calculators.zip qo100-calculators
+      - uses: actions/upload-artifact@v4
+        with:
+          name: calculators
+          path: dist/bricohams-qo100-calculators.zip
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [windows, linux-desktop, deb]
+    needs: [windows, linux-desktop, deb, calculators]
     runs-on: ubuntu-latest
     permissions:
       contents: write

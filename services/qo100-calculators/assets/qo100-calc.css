@@ -1,0 +1,78 @@
+.bh-qo100 {
+  --bh-bg: #ffffff;
+  --bh-fg: #1b2330;
+  --bh-muted: #566072;
+  --bh-accent: #0b5cad;
+  --bh-accent-fg: #ffffff;
+  --bh-border: #c9d1dc;
+  --bh-err: #b3261e;
+  box-sizing: border-box;
+  max-width: 44rem;
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--bh-bg);
+  color: var(--bh-fg);
+  border: 1px solid var(--bh-border);
+  border-left: 4px solid var(--bh-accent);
+  border-radius: 8px;
+  font: 1rem/1.5 system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bh-qo100 {
+    --bh-bg: #141a24;
+    --bh-fg: #e6ebf2;
+    --bh-muted: #a3afc0;
+    --bh-accent: #5aa9ff;
+    --bh-accent-fg: #07111f;
+    --bh-border: #354055;
+    --bh-err: #ff8a80;
+  }
+}
+
+.bh-qo100 *, .bh-qo100 *::before, .bh-qo100 *::after { box-sizing: border-box; }
+.bh-qo100 h3 { margin: 0 0 .75rem; font-size: 1.2rem; }
+.bh-qo100 h4 { margin: 1rem 0 .25rem; font-size: 1rem; }
+
+.bh-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: .75rem 1rem; }
+.bh-field { display: flex; flex-direction: column; gap: .25rem; }
+.bh-field label { font-weight: 600; font-size: .9rem; }
+.bh-field input, .bh-field select {
+  padding: .45rem .5rem;
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--bh-border);
+  border-radius: 4px;
+}
+.bh-field input:focus-visible, .bh-field select:focus-visible, .bh-btn:focus-visible, .bh-sources a:focus-visible {
+  outline: 3px solid var(--bh-accent);
+  outline-offset: 2px;
+}
+
+.bh-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: .5rem; }
+.bh-btn {
+  padding: .5rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--bh-accent-fg);
+  background: var(--bh-accent);
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.bh-btn-alt { color: var(--bh-fg); background: transparent; border: 1px solid var(--bh-accent); }
+
+.bh-results dl { display: grid; grid-template-columns: 1fr auto; gap: .2rem 1rem; margin: 0; }
+.bh-results dt { color: var(--bh-muted); }
+.bh-results dd { margin: 0; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.bh-error { color: var(--bh-err); font-weight: 600; }
+.bh-note { color: var(--bh-muted); font-size: .85rem; }
+.bh-sources { margin-top: 1rem; padding-top: .5rem; border-top: 1px solid var(--bh-border); font-size: .85rem; color: var(--bh-muted); }
+.bh-sources a { color: var(--bh-accent); }
+
+@media (max-width: 30rem) {
+  .bh-qo100 { padding: .75rem; }
+  .bh-results dl { grid-template-columns: 1fr; }
+  .bh-results dd { text-align: left; }
+}
