@@ -1,0 +1,53 @@
+FileInputSettings:
+  description: FileInput
+  properties:
+    title:
+      type: string
+      description: "User-visible title."
+    fileName:
+      description: The name (path) of the file being read
+      type: string
+    accelerationFactor:
+      description: Playback acceleration (1 if normal speed)
+      type: integer
+    loop:
+      description: 1 if playing in a loop else 0
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+
+FileInputReport:
+  description: FileInput
+  properties:
+    fileName:
+      type: string
+      description: "File name or path."
+    sampleRate:
+      description: Record sample rate in S/s
+      type: integer
+    sampleSize:
+      description: Record sample size in number of bits
+      type: integer
+    absoluteTime:
+      description: Absolute record time string representation
+      type: string
+    elapsedTime:
+      description: Elapsed time since beginning string representation
+      type: string
+    durationTime:
+      description: Duration time string representation
+      type: string

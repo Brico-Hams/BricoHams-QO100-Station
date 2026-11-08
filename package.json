@@ -14,7 +14,8 @@
     "desktop": "electron .",
     "dist:win": "electron-builder --win --x64 --publish never",
     "dist:linux": "electron-builder --linux AppImage --x64 --arm64 --publish never",
-    "test": "node --test \"test/**/*.test.js\"",
+    "test": "node --test \"test/unit/*.test.js\" \"test/functional/*.test.js\"",
+    "sim": "node --test \"test/sim/*.sim.test.js\"",
     "test:unit": "node --test \"test/unit/*.test.js\"",
     "test:functional": "node --test \"test/functional/*.test.js\""
   },

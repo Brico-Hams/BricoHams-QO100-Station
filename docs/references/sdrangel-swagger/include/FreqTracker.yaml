@@ -1,0 +1,106 @@
+FreqTrackerSettings:
+  description: FreqTracker
+  properties:
+    inputFrequencyOffset:
+      description: channel center frequency shift from baseband center in Hz
+      type: integer
+      format: int64
+    rfBandwidth:
+      description: channel RF bandwidth in Hz (floors to next 100 Hz)
+      type: number
+      format: float
+    log2Decim:
+      type: integer
+      minimum: 0
+      maximum: 6
+      description: "Base-2 exponent of the software decimation factor; the output sample rate is divided by 2^log2Decim."
+    squelch:
+      description: power squelch threshold in decibels
+      type: number
+      format: float
+    rgbColor:
+      type: integer
+      description: "Display color encoded as an RGB integer."
+    title:
+      type: string
+      description: "User-visible title."
+    spanLog2:
+      type: integer
+      description: "Base-2 exponent controlling the displayed or processed frequency span."
+    alphaEMA:
+      description: Alpha factor for delta frequency EMA
+      type: number
+      format: float
+    tracking:
+      description: Tracking 1 for enabled 0 for disabled
+      type: integer
+      minimum: 0
+      maximum: 1
+    trackerType:
+      description: Tracker element type (FLL, PLL...)
+      type: integer
+    pllPskOrder:
+      description: M-ary PSK type (log2)
+      type: integer
+    rrc:
+      description: RRC filter (1 for on, 0 for off)
+      type: integer
+      minimum: 0
+      maximum: 1
+    rrcRolloff:
+      description: RRC filter rolloff factor in %
+      type: integer
+    squelchGate:
+      description: Squelch trigger gate in 10s of ms
+      type: integer
+    streamIndex:
+      description: MIMO channel. Not relevant when connected to SI (single Rx).
+      type: integer
+    useReverseAPI:
+      description: Synchronize with reverse API (1 for yes, 0 for no)
+      type: integer
+      minimum: 0
+      maximum: 1
+    reverseAPIAddress:
+      type: string
+      description: "IPv4 address or host name of the reverse API peer."
+    reverseAPIPort:
+      type: integer
+      description: "TCP port of the reverse API peer."
+      minimum: 1
+      maximum: 65535
+    reverseAPIDeviceIndex:
+      type: integer
+      description: "Device-set index used by the reverse API peer."
+    reverseAPIChannelIndex:
+      type: integer
+      description: "Channel index used by the reverse API peer."
+    spectrumConfig:
+      $ref: "http://swgserver:8081/api/swagger/include/GLSpectrum.yaml#/GLSpectrum"
+      description: "Spectrum-display configuration."
+    channelMarker:
+      $ref: "http://swgserver:8081/api/swagger/include/ChannelMarker.yaml#/ChannelMarker"
+      description: "Channel-marker display configuration."
+    rollupState:
+      $ref: "http://swgserver:8081/api/swagger/include/RollupState.yaml#/RollupState"
+      description: "Saved expanded or collapsed state of the GUI sections."
+
+FreqTrackerReport:
+  description: FreqTracker
+  properties:
+    channelPowerDB:
+      description: power received in channel (dB)
+      type: number
+      format: float
+    trackingDeltaFrequency:
+      description: difference between channel and PLL or FLL center frequency (Hz)
+      type: integer
+    squelch:
+      description: squelch status (1 if open else 0)
+      type: integer
+    sampleRate:
+      type: integer
+      description: "Sample rate in samples per second."
+    channelSampleRate:
+      type: integer
+      description: "Effective sample rate delivered to the channel in samples per second."

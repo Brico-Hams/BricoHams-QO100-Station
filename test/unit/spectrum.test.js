@@ -31,6 +31,7 @@ test('malformed frames are rejected', () => {
   assert.equal(parseSpectrumFrame(good.subarray(0, good.length - 4)), null);
   assert.equal(parseSpectrumFrame(buildSpectrumFrame({ n: 1000 })), null, 'FFT size must be a power of two');
   assert.equal(parseSpectrumFrame(buildSpectrumFrame({ sampleRate: 0 })), null);
+  assert.equal(parseSpectrumFrame(buildSpectrumFrame({ ssb: true })), null, 'ssb half-spectrum frames are not supported');
   assert.equal(parseSpectrumFrame(Buffer.alloc(0)), null);
 });
 

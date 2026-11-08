@@ -2,7 +2,9 @@ import { EventEmitter } from 'node:events';
 import { WebSocket } from 'ws';
 import { encodeSpectrumFrame } from './frames.js';
 
-const HEADER_BYTES = 20;
+const HEADER_BYTES = 36;
+const IND_LINEAR = 1;
+const IND_SSB = 2;
 const MIN_FFT = 64;
 const MAX_FFT = 65_536;
 const FLOOR_DB = -200;
@@ -11,39 +13,42 @@ const WS_OPEN = 1;
 /**
  * Decode one binary frame of SDRangel's spectrum WebSocket server.
  *
- * verify against SDRangel sdrbase/websockets spectrum format. Assumed layout (little endian):
+ * ref: docs/references/sdrangel-swagger/source/wsspectrum.cpp (buildPayload). Little endian:
  *
  * | offset | size | field |
  * |---|---|---|
  * | 0 | u64 | centre frequency, Hz |
- * | 8 | u32 | sample rate, Hz (the span covered by the FFT) |
- * | 12 | u32 | FFT size N (power of two) |
- * | 16 | u32 | flags: bit 0 = values are already dB, otherwise linear power |
- * | 20 | N x f32 | power, fftshifted: bin i is at centre + (i - N/2) * sampleRate / N |
+ * | 8 | i64 | FFT time, ms |
+ * | 16 | u64 | timestamp, ms since epoch |
+ * | 24 | i32 | FFT size N (power of two) |
+ * | 28 | i32 | bandwidth, Hz (the span covered by the FFT = sample rate) |
+ * | 32 | i32 | indicators: bit 0 linear power (else dB), bit 1 ssb, bit 2 usb |
+ * | 36 | N x f32 | power; bin i at centre + (i - N/2) * bandwidth / N (low to high; bin order UNCONFIRMED in wsspectrum.cpp) |
  *
- * If the real format differs, only this function and `test/fixtures/spectrum-frame.js` need changing.
+ * Frames with the ssb indicator (half spectrum, layout unconfirmed) are rejected: provision the server with `ssb: 0`.
  * @param {Uint8Array} buf
- * @returns {{centerHz: number, binHz: number, sampleRate: number, power: Float32Array, powersDb: Float32Array}|null}
+ * @returns {{centerHz: number, binHz: number, sampleRate: number, timestampMs: number, power: Float32Array, powersDb: Float32Array}|null}
  *   `power` and `powersDb` are the same dB array (the latter is the name the beacon module uses). null when malformed.
  */
 export function parseSpectrumFrame(buf) {
   if (!buf || buf.length < HEADER_BYTES) return null;
   const view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   const centerHz = Number(view.getBigUint64(0, true));
-  const sampleRate = view.getUint32(8, true);
-  const n = view.getUint32(12, true);
-  const flags = view.getUint32(16, true);
+  const timestampMs = Number(view.getBigUint64(16, true));
+  const n = view.getInt32(24, true);
+  const sampleRate = view.getInt32(28, true);
+  const indicators = view.getInt32(32, true);
   if (n < MIN_FFT || n > MAX_FFT || (n & (n - 1)) !== 0) return null;
   if (buf.length !== HEADER_BYTES + n * 4) return null;
-  if (!Number.isSafeInteger(centerHz) || sampleRate === 0) return null;
+  if (!Number.isSafeInteger(centerHz) || sampleRate <= 0 || (indicators & IND_SSB) !== 0) return null;
   const power = new Float32Array(n);
-  const isDb = (flags & 1) === 1;
+  const isDb = (indicators & IND_LINEAR) === 0;
   for (let i = 0; i < n; i++) {
     const v = view.getFloat32(HEADER_BYTES + i * 4, true);
     const db = isDb ? v : 10 * Math.log10(v);
     power[i] = Number.isFinite(db) ? db : FLOOR_DB;
   }
-  return { centerHz, binHz: sampleRate / n, sampleRate, power, powersDb: power };
+  return { centerHz, binHz: sampleRate / n, sampleRate, timestampMs, power, powersDb: power };
 }
 
 /**
