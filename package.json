@@ -11,9 +11,9 @@
   },
   "scripts": {
     "start": "node src/server/index.js",
-    "test": "node --test test/unit/ test/functional/",
-    "test:unit": "node --test test/unit/",
-    "test:functional": "node --test test/functional/"
+    "test": "node --test \"test/**/*.test.js\"",
+    "test:unit": "node --test \"test/unit/*.test.js\"",
+    "test:functional": "node --test \"test/functional/*.test.js\""
   },
   "dependencies": {
     "openid-client": "6.8.9",

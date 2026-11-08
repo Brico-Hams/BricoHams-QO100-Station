@@ -1,0 +1,15 @@
+{
+  "port": 8443,
+  "host": "0.0.0.0",
+  "tls": { "certPath": "./certs/server.crt", "keyPath": "./certs/server.key" },
+  "publicUrl": "https://qo100.example.org:8443",
+  "google": { "clientId": "YOUR-CLIENT-ID.apps.googleusercontent.com" },
+  "allowlist": [
+    { "email": "owner@example.org", "callsign": "EA4XXX", "role": "owner" },
+    { "email": "operator@example.org", "callsign": "EA4YYY", "role": "operator" },
+    { "email": "listener@example.org", "callsign": "EA4ZZZ", "role": "listener" }
+  ],
+  "tx": { "enabled": false, "totSeconds": 600, "heartbeatTimeoutMs": 2000, "armedTimeoutSeconds": 120 },
+  "sdrangel": { "baseUrl": "http://127.0.0.1:8091" },
+  "auditLogPath": "./data/audit.log"
+}
