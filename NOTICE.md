@@ -16,5 +16,6 @@ BricoHams QO-100 Station is GPL-3.0-or-later. It uses or interoperates with:
 | SDR++ | GPL-3.0 | Functional reference |
 | DJ0ABR QO-100 WebSDR | n/a | Functional reference |
 | SDR Console | Proprietary | Idea only; no code or assets used |
+| Curso Iniciación QO-100 and OpenWebRX+ receiver by Mateo EA5EN | Third-party copyright (course not distributed) | Acknowledged: the course is summarised in own words in `docs/help/` with citations; his public receiver is only linked as an external reference. See `docs/references/ea5en/README.md` |
 
 Check each project's own license text for the authoritative terms.

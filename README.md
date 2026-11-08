@@ -85,4 +85,5 @@ GPL-3.0-or-later (see [LICENSE](LICENSE)), because the program integrates SDRang
 - [SDRangel](https://github.com/f4exb/sdrangel) by Edouard Griffiths F4EXB and contributors: the radio engine.
 - AMSAT-DL and the Es'hail-2 / QO-100 team; DJ0ABR's QO-100 WebSDR, SDR++ and OpenWebRX+ as functional references.
 - SDR Console was used as an idea only; no code or assets from proprietary software are included.
+- Curso Iniciación QO-100 y receptor OpenWebRX+ de Mateo EA5EN (see [docs/references/ea5en](docs/references/ea5en/README.md)).
 - BricoHams community.

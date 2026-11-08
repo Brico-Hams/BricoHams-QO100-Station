@@ -93,6 +93,8 @@ Repite por cada SDR disponible (RTL-SDR, SDRplay, Airspy, ADALM-Pluto, USRP B200
 | [ ] | Calentar o enfriar el LNB (si es posible) | La corrección sigue la deriva | |
 | [ ] | Con `audio.enabled: false` | Baliza «no-lock» por falta de fuente | |
 | [ ] | Una señal conocida mantiene su frecuencia al variar la deriva | La señal no se mueve en el espectro | |
+| [ ] | Referencia externa: abrir en otra pestaña el receptor de EA5EN (`http://ea5urm.dns2go.com:8073`, perfil QO100, FI centrada en 739,800 MHz; HTTP, puede no estar disponible) y comparar la separación entre las balizas de CW (baja/alta) y la BPSK central con la tuya | Misma separación (≈ 250 kHz entre balizas) y la BPSK entre ambas; anota la FI de la baliza en cada receptor. Una diferencia constante de FI es el LO distinto de cada LNB; la diferencia no debe cambiar si cambia la deriva | |
+| [ ] | Con la baliza «locked», sintonizar la baliza en ambos receptores | Tras la corrección, tu pantalla muestra 10489,750 MHz; la desviación frente a EA5EN queda dentro de tu margen del LNB (anótala) | |
 
 ---
 

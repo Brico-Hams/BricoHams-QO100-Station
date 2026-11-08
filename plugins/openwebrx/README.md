@@ -18,6 +18,16 @@ Paths differ between package installs and Docker images; check yours.
 4. Reload the receiver page. The bookmark API call (`bookmarks.replace_bookmarks`) is
    guarded; if your version lacks it, add the frequencies in `bookmarks.json` of the server instead.
 
+## Known public receivers (RX-only, not bundled)
+
+| Name | Origin | IF centre |
+|---|---|---|
+| EA5EN Churra-Murcia (OpenWebRX+) | `http://ea5urm.dns2go.com:8073` | 739.800 MHz |
+
+It is plain HTTP (no TLS): browsers block it as mixed content when embedded in an HTTPS page, so
+only link to it (new tab), never embed it. The plugin does not configure it; this is a reference
+only. See `docs/references/ea5en/README.md`.
+
 ## License
 
 The plugin is GPL-3.0-or-later. OpenWebRX+ is AGPL-3.0. GPL-3.0 section 13 allows combining
