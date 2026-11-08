@@ -94,21 +94,21 @@ Leyenda: ✔ sí · ◐ parcial/depende de plugin o versión · ✘ no · ? no e
 | Modos de AGC | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ◐ | ✔ | ✔ (off/lento/medio/rápido) |
 | Squelch | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ |
 | Reducción de ruido | ✔ | ✔ | ✔ | ✔ | ◐ | ✔ | ✘ | ✔ | ◐ (la del SDRangel, verificar) |
-| Notch / auto-notch | ✔ | ✔ | ✔ | ✔ | ◐ | ✔ | ✘ | ✔ | ✘ |
+| Notch / auto-notch | ✔ | ✔ | ✔ | ✔ | ◐ | ✔ | ✘ | ✔ | ✔ (cliente, biquad + LMS) |
 | RIT/XIT | ✔ | ✔ | ◐ | ✔ | ◐ | ✘ | ✘ | ✘ | ✔ |
 | Presets de ancho de filtro | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ◐ | ✘ | ✔ |
 | Promedio / retención de picos | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ◐ | ✔ | ✔ |
 | Zoom del espectro | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ (1-16x) |
 | Paletas y contraste de cascada | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ (4 paletas) |
 | Atajos de teclado | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✘ | ✔ |
-| Grabación I/Q | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✘ | ✔ | ✘ |
+| Grabación I/Q | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✘ | ✔ | ✔ (vía SDRangel, verificar) |
 | Grabación de audio | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ | ✔ (WAV en servidor) |
-| Clúster DX / spots | ◐ | ✘ | ◐ | ✔ | ✘ | ✘ | ✘ | ✘ | ✘ |
+| Clúster DX / spots | ◐ | ✘ | ◐ | ✔ | ✘ | ✘ | ✘ | ✘ | ✔ (opcional, solo RX) |
 | Acceso remoto/web | ◐ | ✘ | ◐ | ✔ | ✔ | ◐ (rigctl) | ✘ | ◐ | ✔ (PWA + WSS) |
 | Multiusuario con roles | ✘ | ✘ | ✘ | ◐ | ✘ | ✘ | ✘ | ✘ | ✔ (listener/operator/owner) |
 | Diario de QSO + LoTW/QRZ | ✘ | ✘ | ✘ | ✘ | ✘ | ✘ | ✘ | ✘ | ✔ |
 | Decodificadores digitales | ◐ | ◐ | ◐ | ◐ | ✔ | ✘ | ✘ | ◐ | ✔ (FT8/FT4) |
-| Plugins | ✔ | ✔ (extIO) | ✔ | ◐ | ✔ | ✘ | ✘ | ✔ | ◐ (plugin OpenWebRX+, ADR 0010) |
+| Plugins | ✔ | ✔ (extIO) | ✔ | ◐ | ✔ | ✘ | ✘ | ✔ | ✔ (API de cliente + webhooks, ADR 0018; plugin OpenWebRX+, ADR 0010) |
 | Plataformas | Win | Win | Win (+) | Win | Win/Lin/Mac | Lin/Mac | Win/Lin/Mac | Lin/Win/Mac | Linux .deb, Windows, Raspberry Pi |
 
 Fuera de alcance (no aparecen en la matriz): ADS-B (dump1090, gr-air-modes) y sensores 433 MHz (rtl_433).
@@ -126,12 +126,12 @@ Fuera de alcance (no aparecen en la matriz): ADS-B (dump1090, gr-air-modes) y se
 7. **Atajos de teclado** — implementado; Espacio queda reservado solo para PTT y ningún atajo puede transmitir (ADR 0015).
 8. **Grabación de audio RX en WAV** — implementado en el servidor, con límites y control del propietario (ADR 0014).
 
-Pendiente (candidatos futuros, por valor):
-- Notch y auto-notch (depende de qué ofrezca SDRangel; verificar).
-- Grabación/reproducción I/Q (mucho disco; mejor dejarlo a SDRangel).
-- Clúster DX/spots y calendario de actividad en QO-100.
-- Memorias con importación/exportación.
-- API de plugins propia.
+Implementado en la fase 13 (antes «pendiente»):
+9. **Notch y auto-notch** — implementado (ADR 0019): notch en el AudioWorklet de RX (biquad + LMS), con ajuste opcional en SDRangel (verificar).
+10. **Grabación/reproducción I/Q** — implementado vía SDRangel, sin pasar muestras por Node (ADR 0020).
+11. **Clúster DX/spots y calendario de actividad en QO-100** — implementado, desactivado por defecto (ADR 0021).
+12. **Memorias con importación/exportación** — implementado: JSON versionado y CSV, con vista previa (ADR 0021).
+13. **API de plugins propia** — implementado: plugins de cliente congelados y webhooks firmados; sin plugins de código en servidor (ADR 0018).
 
 ### Lo que BricoHams hace y los demás (en general) no
 

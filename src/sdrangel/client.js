@@ -15,6 +15,12 @@ export const ENDPOINTS = Object.freeze({
   channelSettings: (ds, ch) => `/sdrangel/deviceset/${ds}/channel/${ch}/settings`,
   channelReport: (ds, ch) => `/sdrangel/deviceset/${ds}/channel/${ch}/report`,
   spectrumSettings: (ds) => `/sdrangel/deviceset/${ds}/spectrum/settings`,
+  // verify against SDRangel swagger: switching the device of a set (PUT with deviceHwType) is how a FileInput gets selected.
+  device: (ds) => `/sdrangel/deviceset/${ds}/device`,
+  // verify against SDRangel swagger: stock SDRangel has no file-listing/deleting REST endpoint; these two paths assume a
+  // helper (or a future API) exposing the recordings directory. Without it list/delete only act on the station's own table.
+  iqFiles: () => '/sdrangel/iq/files',
+  iqFile: (name) => `/sdrangel/iq/files/${encodeURIComponent(name)}`,
 });
 
 // verify against SDRangel swagger (sdrangel/swagger/sdrangel/api/swagger/swagger.yaml)
@@ -34,6 +40,7 @@ export const DEVICE_SETTINGS_KEYS = Object.freeze({
   TestSource: 'testSourceSettings',
   TestSink: 'testSinkSettings',
   FileSource: 'fileSourceSettings',
+  FileInput: 'fileInputSettings',
 });
 
 // verify against SDRangel swagger (sdrangel/swagger/sdrangel/api/swagger/swagger.yaml)
@@ -42,6 +49,7 @@ export const CHANNEL_SETTINGS_KEYS = Object.freeze({
   SSBDemod: 'ssbDemodSettings',
   SSBMod: 'ssbModSettings',
   ChannelAnalyzer: 'channelAnalyzerSettings',
+  FileSink: 'fileSinkSettings',
 });
 
 const DEFAULT_TIMEOUT_MS = 5000;
@@ -263,6 +271,31 @@ export function createSdrangelClient({ baseUrl = 'http://127.0.0.1:8091', timeou
      * @returns {Promise<object>}
      */
     patchSpectrumSettings: (deviceSet, settings) => request('PATCH', ENDPOINTS.spectrumSettings(checkIndex(deviceSet, 'deviceSet')), settings),
+
+    /**
+     * Replace the hardware of a device set (e.g. RTLSDR -> FileInput for I/Q playback, and back).
+     * @param {number} deviceSet
+     * @param {string} hwType Key of DEVICE_SETTINGS_KEYS.
+     * @param {0|1} direction
+     * @returns {Promise<object>}
+     */
+    switchDevice(deviceSet, hwType, direction) {
+      if (!Object.hasOwn(DEVICE_SETTINGS_KEYS, hwType)) throw new SdrangelError('invalid', `unsupported device type ${String(hwType)}`);
+      if (direction !== 0 && direction !== 1) throw new SdrangelError('invalid', 'direction must be 0 or 1');
+      return request('PUT', ENDPOINTS.device(checkIndex(deviceSet, 'deviceSet')), { deviceHwType: hwType, direction });
+    },
+
+    /** @returns {Promise<{files: Array<{name: string, bytes: number}>}>} I/Q files known to SDRangel's host. */
+    listIqFiles: () => request('GET', ENDPOINTS.iqFiles()),
+
+    /**
+     * @param {string} name File name previously returned by `listIqFiles` (no path separators).
+     * @returns {Promise<object>}
+     */
+    deleteIqFile(name) {
+      if (typeof name !== 'string' || !/^[\w.-]{1,120}$/.test(name)) throw new SdrangelError('invalid', 'bad I/Q file name');
+      return request('DELETE', ENDPOINTS.iqFile(name));
+    },
   };
 
   api.baseUrl = base;

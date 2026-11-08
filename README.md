@@ -43,6 +43,11 @@ Advanced operating tools, chosen from a comparison with other SDR programs ([com
 | Scope tools | Zoom, averaging, peak hold, waterfall palettes and contrast | Tested statically |
 | Keyboard shortcuts | Documented, can be disabled; Space stays PTT-only and nothing else can transmit | Tested statically |
 | RX audio recording | Server-side WAV with file and user caps; the owner can disable it | Tested with fakes |
+| Notch / auto-notch | Biquad notch and LMS auto-notch in the RX audio worklet; click a carrier to notch it | Tested with synthetic signals |
+| I/Q recording and playback | Driven through SDRangel (off by default); quota and owner switch like WAV | Tested with the mock; verify against SDRangel |
+| DX cluster and activity calendar | QO-100 NB spots on the spectrum (click tunes RX only), `.ics` calendar; off by default | Tested with fakes |
+| Memories import/export | JSON (versioned) and CSV, CHIRP-like columns, dry-run preview | Tested |
+| Plugin API | Frozen client plugin API and signed outgoing webhooks; no server-side code plugins | Tested |
 | Linux USB setup | udev rules and DVB kernel module blacklist in the `.deb` | Not yet tried on real machines |
 
 Safety by design: transmit is **off by default**; the carrier is cut in under 2 s if the operator's connection is lost; see [SECURITY.md](SECURITY.md).

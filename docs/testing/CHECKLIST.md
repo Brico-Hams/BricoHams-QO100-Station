@@ -240,6 +240,14 @@ Solo el titular de la estación decide pasar a esta sección, con licencia váli
 | [ ] | Grabar hasta el límite configurado | Se detiene sola; la descarga es válida | |
 | [ ] | El propietario desactiva la grabación; un operador intenta grabar | Error `recording_disabled` | |
 | [ ] | Comprobar que otro operador no puede descargar mi grabación | 404 | |
+| [ ] | Notch manual sobre una portadora (clic en el espectro) y auto-notch (`k`, `u`) | La portadora baja claramente; el audio a ±1 kHz no se altera | |
+| [ ] | Con `iq.enabled`, grabar I/Q, parar, reproducir y volver a directo | Archivo en SDRangel; RX vuelve a sintonizar (verificar claves swagger) | |
+| [ ] | Sin `iq.enabled`, intentar grabar I/Q | Error `iq_disabled` | |
+| [ ] | Con `cluster.enabled` y un nodo real, esperar spots | Solo aparecen los del NB; un clic sintoniza el RX | |
+| [ ] | Calendario `.ics` con URL configurada y subida manual | Próximas actividades listadas; oyente no puede actualizar | |
+| [ ] | Exportar memorias (JSON y CSV), importar con vista previa y borrar duplicados | Informe de válidas/duplicadas/inválidas; un oyente no puede importar | |
+| [ ] | Activar el plugin de ejemplo `hello-panel` | Panel visible; sin acceso a PTT ni micrófono | |
+| [ ] | Webhook a un receptor de prueba | Firma HMAC válida; sin secretos en el contenido | |
 | [ ] | Linux: tras instalar el .deb, `rtl_test -t` con el dongle reconectado | Detecta el dongle sin `-6` ni `Permission denied` | |
 | [ ] | Linux: `apt purge` | Se eliminan las reglas udev y la lista negra | |
 | [ ] | Comprobar los IDs USB de tus SDR (`lsusb`) contra `99-bricohams-sdr.rules` | Coinciden | |

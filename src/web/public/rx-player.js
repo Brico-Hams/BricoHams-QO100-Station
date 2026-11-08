@@ -23,7 +23,30 @@ class RxPlayer extends AudioWorkletProcessor {
       if (m && m.pcm instanceof Int16Array) this.push(m.pcm);
       else if (m && m.type === 'target' && m.ms > 0 && m.ms < 1000) this.targetSamples = Math.round(SOURCE_RATE * m.ms / 1000);
       else if (m && m.type === 'flush') this.flush();
+      else if (m && m.type === 'notch') this.setNotch(m);
     };
+    this.notch = null;
+    this.mode = 'off';
+  }
+
+  // Notch settings come from the page; values are clamped here as well because the port is not a trust boundary for DSP maths.
+  setNotch(m) {
+    const dsp = globalThis.BHNotch;
+    if (!dsp || !m.enabled) {
+      this.notch = null;
+      this.mode = 'off';
+      return;
+    }
+    if (m.auto) {
+      if (this.mode !== 'auto') this.notch = dsp.createLmsNotch();
+      this.mode = 'auto';
+      return;
+    }
+    const f = Number(m.freq);
+    const w = Number(m.width);
+    if (!(f >= 20 && f <= 5900 && w >= 10 && w <= 1000)) return;
+    this.notch = dsp.createBiquadNotch(SOURCE_RATE, f, w);
+    this.mode = 'manual';
   }
 
   flush() {
@@ -34,8 +57,10 @@ class RxPlayer extends AudioWorkletProcessor {
   }
 
   push(pcm) {
+    const notch = this.notch;
     for (let i = 0; i < pcm.length; i++) {
-      this.ring[this.write] = pcm[i] / 32768;
+      const s = pcm[i] / 32768;
+      this.ring[this.write] = notch ? notch.process(s) : s;
       this.write = (this.write + 1) % CAPACITY;
     }
     this.count = Math.min(CAPACITY, this.count + pcm.length);

@@ -3,7 +3,7 @@ import https from 'node:https';
 import { readFileSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { randomBytes } from 'node:crypto';
-import { extname, join, normalize, sep } from 'node:path';
+import { extname, join, normalize, resolve as resolvePath, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WebSocketServer } from 'ws';
 import {
@@ -14,6 +14,10 @@ import { createResetCode } from '../ptt/reset-code.js';
 import { createFileAudit } from '../ptt/audit.js';
 import { createSdrangelClient, SdrangelError } from '../sdrangel/client.js';
 import { createSdrangelPttDriver } from '../sdrangel/ptt-driver.js';
+import { createIqManager } from '../sdrangel/iq.js';
+import { createIqApi } from '../sdrangel/iq-routes.js';
+import { createClusterClient, createSpotStore, createCalendar, createClusterApi } from '../cluster/index.js';
+import { createWebhookDispatcher, resolvePluginFile } from '../plugins/index.js';
 import { createStation, StationError, createDefaultDecoderRegistry, createDecodeService, openStationDb, createMemoryStore, MemoryError, createStationApi } from '../modes/index.js';
 import { createBeaconController } from '../beacon/index.js';
 import { LogError, createLogStore } from '../log/store.js';
@@ -96,13 +100,13 @@ const MAX_JSON_BYTES = 4096;
 
 class BadRequest extends Error {}
 
-async function readJson(req) {
+async function readJson(req, maxBytes = MAX_JSON_BYTES) {
   if (!String(req.headers['content-type'] ?? '').toLowerCase().startsWith('application/json')) throw new BadRequest('content_type');
   const chunks = [];
   let size = 0;
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > MAX_JSON_BYTES) throw new BadRequest('too_large');
+    if (size > maxBytes) throw new BadRequest('too_large');
     chunks.push(chunk);
   }
   try {
@@ -152,6 +156,36 @@ export function createApp(config, deps = {}) {
     applyToTx: config.station.applyCorrectionToTx,
     isTxActive: () => ptt.state === 'TX_ON',
     decoders,
+    notchEngine: config.station.notchEngine,
+    logger,
+  });
+  // Outgoing events exist only when the owner enabled webhooks and listed endpoints; the feed is read-only.
+  const webhooks = deps.webhooks ?? (config.webhooks.enabled && config.webhooks.endpoints.length
+    ? createWebhookDispatcher({ endpoints: config.webhooks.endpoints, fetch: deps.webhookFetch, timers: deps.webhookTimers, logger })
+    : null);
+  const spots = deps.spots ?? createSpotStore();
+  const onSpot = (spot) => {
+    broadcast({ type: 'spot', spot });
+    webhooks?.emit('spot', spot);
+  };
+  const cluster = config.cluster.enabled
+    ? createClusterClient({
+      host: config.cluster.host,
+      port: config.cluster.port,
+      callsign: config.cluster.callsign,
+      allowPost: config.cluster.postSpots,
+      connect: deps.clusterConnect,
+      timers: deps.clusterTimers,
+      onSpot: (spot) => onSpot(spots.add(spot, 'cluster')),
+      logger,
+    })
+    : null;
+  const calendar = deps.calendar ?? createCalendar({
+    enabled: config.calendar.enabled,
+    url: config.calendar.url,
+    fetch: deps.calendarFetch,
+    maxBytes: config.calendar.maxKb * 1024,
+    refreshMs: config.calendar.refreshHours * 3_600_000,
     logger,
   });
   const sourceEnabled = config.audio.enabled;
@@ -159,7 +193,11 @@ export function createApp(config, deps = {}) {
     ? createRxAudio({ host: config.audio.rxUdp.host, port: config.audio.rxUdp.port, logger })
     : null);
   const decodeService = createDecodeService({
-    rxAudio, station, decoders, publish: (msg) => broadcast(msg), now: deps.decodeNow, logger,
+    rxAudio, station, decoders, now: deps.decodeNow, logger,
+    publish: (msg) => {
+      broadcast(msg);
+      if (msg.type === 'decode') webhooks?.emit('decode', msg);
+    },
   });
   const spectrum = deps.spectrum ?? (sourceEnabled
     ? createSpectrumSource({ url: config.audio.spectrumUrl, logger })
@@ -206,6 +244,7 @@ export function createApp(config, deps = {}) {
     },
     qrz: deps.qrz ?? createQrzClient({ fetch: deps.qrzFetch }),
     hasSecretsKey: Boolean(config.secretsKey),
+    onQsoLogged: (q) => webhooks?.emit('qso_logged', q),
     io: { sendJson, readJson, BadRequest },
   });
 
@@ -241,6 +280,30 @@ export function createApp(config, deps = {}) {
     isTxActive: () => ptt.state === 'TX_ON',
     io: { sendJson, readJson, BadRequest },
   });
+
+  let iq = deps.iq ?? null;
+  const getIq = () => {
+    iq ??= createIqManager({
+      db: getStationDb(),
+      client: sdr,
+      rxDeviceSet: config.station.rxDeviceSet,
+      enabled: config.iq.enabled,
+      maxUserMb: config.iq.maxUserMb,
+      maxSeconds: config.iq.maxSeconds,
+      // Back on live hardware: re-apply centre frequency and channel offset.
+      onLive: async () => {
+        const s = station.status();
+        if (s.downlinkHz !== null) await station.tune(s.downlinkHz);
+      },
+      logger,
+    });
+    return iq;
+  };
+  const iqApi = createIqApi({ auth, getIq, station, io: { sendJson, readJson, BadRequest } });
+  const clusterApi = createClusterApi({
+    auth, spots, cluster, postSpots: config.cluster.postSpots, calendar, onSpot, io: { sendJson, readJson, BadRequest },
+  });
+  const pluginsDir = resolvePath(config.plugins.dir);
 
   const wsOrigin = () => `${publicUrl.protocol === 'https:' ? 'wss:' : 'ws:'}//${publicUrl.host}`;
   const headersFor = () => securityHeaders({ https: publicUrl.protocol === 'https:', wsOrigin: wsOrigin() });
@@ -316,10 +379,17 @@ export function createApp(config, deps = {}) {
         if (ptt.state === 'TX_ON') return sendJson(res, 409, { error: 'tx_active' });
         return sendJson(res, 200, await station.setMode(body.mode));
       }
+      if (pathname === '/api/plugins' && req.method === 'GET') {
+        auth.requireAuth(req);
+        return sendJson(res, 200, { enabled: config.plugins.enabled }), true;
+      }
       if (await logApi.handle(req, res, url)) return;
       if (await stationApi.handle(req, res, url)) return;
+      if (await iqApi.handle(req, res, url)) return;
+      if (await clusterApi.handle(req, res, url)) return;
       if (pathname.startsWith('/api/') || pathname.startsWith('/auth/')) return sendJson(res, 404, { error: 'not_found' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return sendJson(res, 405, { error: 'method_not_allowed' });
+      if (pathname.startsWith('/plugins/')) return await servePlugin(req, res, pathname);
       return await serveStatic(req, res, pathname);
     } catch (err) {
       if (err instanceof AuthError) return sendJson(res, err.status, { error: err.code });
@@ -368,6 +438,25 @@ export function createApp(config, deps = {}) {
       logger.error('login rejected:', err.code);
       sendHtml(res, err.status,
         `<!doctype html><meta charset="utf-8"><title>Login failed</title><p>Login failed (${err.code}).</p><a href="/">Back</a>`);
+    }
+  }
+
+  // Owner-installed client plugins: static files of enabled plugins only (see src/plugins/static.js).
+  async function servePlugin(req, res, pathname) {
+    let rel;
+    try {
+      rel = decodeURIComponent(pathname);
+    } catch {
+      return sendJson(res, 400, { error: 'bad_request' });
+    }
+    const hit = resolvePluginFile(pluginsDir, config.plugins.enabled, rel);
+    if (!hit) return sendJson(res, 404, { error: 'not_found' });
+    try {
+      const body = await readFile(hit.file);
+      res.writeHead(200, { 'Content-Type': hit.contentType, 'Content-Length': body.length, 'Cache-Control': 'no-cache' });
+      res.end(req.method === 'HEAD' ? undefined : body);
+    } catch {
+      sendJson(res, 404, { error: 'not_found' });
     }
   }
 
@@ -421,6 +510,7 @@ export function createApp(config, deps = {}) {
 
   ptt.on('state', (s) => {
     for (const [connId, c] of sockets) send(c.ws, publicPtt(connId));
+    webhooks?.emit('ptt_state', publicPtt(null));
     if (s.state !== 'TX_ON') station.onTxIdle().catch(() => {});
   });
 
@@ -452,6 +542,7 @@ export function createApp(config, deps = {}) {
     sockets.set(connId, conn);
     send(ws, publicPtt(connId));
     send(ws, { type: 'beacon', ...beaconSnapshot() });
+    send(ws, { type: 'spots', spots: spots.list() });
     send(ws, { type: 'caps', rxAudio: Boolean(rxAudio), spectrum: Boolean(spectrumFeed), txAudio: Boolean(txAudio), totSeconds: config.tx.totSeconds });
 
     ws.on('message', (data, isBinary) => {
@@ -548,6 +639,11 @@ export function createApp(config, deps = {}) {
     beacon,
     txAudio,
     rxAudio,
+    cluster,
+    spots,
+    calendar,
+    webhooks,
+    getIq,
     /**
      * Start listening on the configured host/port.
      * @returns {Promise<{port: number, url: string}>}
@@ -566,6 +662,8 @@ export function createApp(config, deps = {}) {
             rxAudio?.start().catch((err) => logger.error('rx audio disabled:', err.message));
           }
           if (!deps.spectrum) spectrum?.start();
+          cluster?.start();
+          calendar.start();
           resolve({ port, url: publicUrl.origin });
         });
       });
@@ -578,6 +676,9 @@ export function createApp(config, deps = {}) {
       clearInterval(sweeper);
       clearInterval(beaconTimer);
       decodeService.stop();
+      cluster?.stop();
+      calendar.stop();
+      if (!deps.iq && iq) await iq.stopAll('shutdown').catch(() => {});
       await decoders.close?.();
       const holder = ptt.holderId;
       if (holder) await ptt.release(holder, 'shutdown');

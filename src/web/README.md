@@ -15,6 +15,10 @@ Static files in `public/`, served by `src/server/app.js` with a self-only CSP. N
 | `shortcuts.js` | `BHShortcuts`: the shortcut table and `resolveShortcut(event)` |
 | `features.js` | Wires memories, RIT/XIT, filter/DSP, scope tools, recording and shortcuts through the frozen `BHApp` bridge exposed by `app.js` |
 
+| `notch-dsp.js` | `BHNotch`: biquad notch and LMS adaptive line enhancer (pure DSP, loaded into the RX worklet scope) |
+| `radio-tools.js` | Notch UI, spots list/markers, calendar, memories import/export, I/Q panel |
+| `plugin-loader.js` | `BHPluginApi`: frozen client-plugin API (no PTT/mic/tokens/raw WS) and loader for enabled plugins from `/api/plugins` |
+
 Invariants: all server data is rendered via `textContent`; the mic is opened only after the turn is granted and
 released when the turn ends; key-up on blur/hidden/pagehide; mic frames are sent only in `TX_ON`.
 Space is bound to PTT only, in `app.js`; `shortcuts.js` never maps it to another action and `features.js` ignores it, never references PTT, turn or mic code,

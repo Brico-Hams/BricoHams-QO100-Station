@@ -91,6 +91,35 @@ Write a test for every change; see [CONTRIBUTING.md](../CONTRIBUTING.md).
 Implement `{mode, available:true, decode(pcmFrame, utcSlot, nowMs)}` (returns an array, or a Promise of one), register it with `registry.register(decoder)` (see `createDefaultDecoderRegistry` in `src/modes/decoders.js`) and pass the registry to `createStation` / `createApp({decoders})`.
 The built-in CW, FT8 and FT4 decoders are pure JavaScript; see `src/modes/README.md`. `decode-service.js` taps the RX audio, runs the decoder of the current mode and broadcasts WebSocket `decode` messages that the PWA lists.
 
+## Plugin API
+
+BricoHams has two extension points and **no server-side code plugins** (rationale: [ADR 0018](adr/0018-plugin-api.md)).
+
+### Client plugins
+
+A plugin is a static ES module `plugins/<name>/index.js` (name `[a-z0-9-]`, max 32 chars) that exports `activate(api)`. The owner installs it and lists it in `plugins.enabled` of `config.json`; only listed names are served (`/plugins/<name>/...`, whitelisted path segments and file types, no path traversal) and loaded by `plugin-loader.js`. The CSP stays `self`-only.
+
+`api` is a frozen object:
+
+| Member | Meaning |
+|---|---|
+| `version` | API version (integer) |
+| `topics` | `frequency`, `mode`, `beacon`, `spots`, `decodes` |
+| `subscribe(topic, fn)` | Read-only state subscription; returns an unsubscribe function; unknown topics (for example `ptt`) throw `TypeError` |
+| `registerPanel({title, render})` | Add a panel to the plugin area; `render(el)` fills a container owned by the plugin |
+| `requestTune(downlinkHz)` | Asks for an RX tune through the normal role-checked `POST /api/tune`; never touches TX |
+| `prefillLog({call, ...})` | Pre-fills the QSO form (the user still saves it) |
+
+The API has no PTT, microphone, token or raw WebSocket access, and the loader removes `globalThis.BHApp` before plugins run. This is defence in depth, **not a sandbox**: a plugin is same-origin code installed by the owner, so install only code you trust. Example: `plugins/examples/hello-panel/` (copy it to `plugins/hello-panel/` and enable it).
+
+### Outgoing webhooks (server side)
+
+Configure `webhooks.endpoints[]` with `{url, events, secretEnv}`; events: `decode`, `spot`, `qso_logged`, `ptt_state` (informational only). Each delivery is `POST` JSON `{id, type, time, data}` with headers `X-BricoHams-Timestamp` (unix seconds) and `X-BricoHams-Signature: sha256=<hex>`, the HMAC-SHA256 of `"<timestamp>.<body>"` with the endpoint secret read from the environment variable `secretEnv`. Receivers should verify the signature in constant time and reject timestamps older than a few minutes (`verifySignature` in `src/plugins/webhooks.js` does this). Failed deliveries are retried with exponential backoff; redirects are refused; payloads never contain secrets, tokens or cookies.
+
+### Test seams of `createApp`
+
+`deps.clusterConnect`, `deps.clusterTimers`, `deps.calendarFetch`, `deps.webhookFetch`, `deps.webhookTimers`, `deps.iq`, `deps.spots`, `deps.calendar`, `deps.webhooks` replace network and hardware with in-process fakes (see `test/functional/phase13.test.js`).
+
 ## Debugging common failures
 
 | Symptom | Check |

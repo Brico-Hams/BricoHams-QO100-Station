@@ -1,7 +1,10 @@
 import { createReadStream } from 'node:fs';
 import { describeBandPlan } from './bandplan.js';
 import { QO100_PRESETS } from './memories.js';
+import { exportMemories, importMemories } from './memory-io.js';
 import { FILTER_PRESETS, AGC_MODES } from './rx-profile.js';
+
+const MAX_IMPORT_BYTES = 256 * 1024;
 
 const MEMORY_PATH = /^\/api\/memories\/(\d{1,9})(\/recall)?$/;
 const RECORDING_PATH = /^\/api\/recordings\/(\d{1,9})(\.wav)?$/;
@@ -52,6 +55,24 @@ export function createStationApi({ auth, station, memories, getRecorder, isTxAct
         const s = operator(req);
         return sendJson(res, 201, memories.add(s.user, await readJson(req))), true;
       }
+      if (pathname === '/api/memories/export' && m === 'GET') {
+        const s = anyUser(req);
+        const format = url.searchParams.get('format') ?? 'json';
+        const out = exportMemories(memories.list(s.user), format);
+        res.writeHead(200, {
+          'Content-Type': out.contentType,
+          'Content-Disposition': `attachment; filename="${out.filename}"`,
+          'Cache-Control': 'no-store',
+        });
+        return res.end(out.body), true;
+      }
+      if (pathname === '/api/memories/import' && m === 'POST') {
+        const s = operator(req);
+        const b = await readJson(req, MAX_IMPORT_BYTES);
+        if (typeof b.content !== 'string') throw new io.BadRequest('content');
+        if (b.dryRun !== undefined && typeof b.dryRun !== 'boolean') throw new io.BadRequest('dryRun');
+        return sendJson(res, 200, importMemories({ store: memories, user: s.user, format: b.format, content: b.content, dryRun: b.dryRun === true })), true;
+      }
       const mm = MEMORY_PATH.exec(pathname);
       if (mm) {
         const id = Number(mm[1]);
@@ -93,6 +114,10 @@ export function createStationApi({ auth, station, memories, getRecorder, isTxAct
       if (pathname === '/api/rxdsp' && m === 'POST') {
         operator(req);
         return sendJson(res, 200, await station.setRxDsp(await readJson(req))), true;
+      }
+      if (pathname === '/api/notch' && m === 'POST') {
+        operator(req);
+        return sendJson(res, 200, await station.setNotch(await readJson(req))), true;
       }
 
       if (pathname === '/api/recordings' && m === 'GET') {

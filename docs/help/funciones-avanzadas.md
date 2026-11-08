@@ -47,6 +47,31 @@ Solo cambian tu pantalla y se guardan en tu navegador:
 - El **propietario** puede desactivar la grabación (y la configuración `recording.enabled: false` la desactiva siempre). Los oyentes no pueden grabar.
 - Se graba solo el audio recibido, nunca el micrófono. Avisa a tus operadores de que el audio puede guardarse.
 
+## Notch y auto-notch
+
+- El **notch** elimina una portadora o un silbido dentro de la banda: indica el desplazamiento (Hz) y el ancho, o **haz clic en la portadora del espectro** para colocarlo. El **auto-notch** busca y elimina tonos estables solo (filtro adaptativo LMS).
+- Por defecto se aplica en tu navegador (solo afecta a tu audio). Si el propietario configura `station.notchEngine: "sdrangel"` se envía al demodulador (verificar contra la versión de SDRangel).
+- Teclas: `k` notch, `u` auto-notch. Solo operadores y propietario.
+
+## Grabación y reproducción I/Q
+
+- Desactivada por defecto (`iq.enabled`). La hace SDRangel en su equipo: las muestras no pasan por BricoHams. Operadores y propietario pueden iniciar/parar, listar, borrar y **reproducir** (el RX pasa a un dispositivo de archivo; *Volver a directo* restablece la radio).
+- Límites: espacio por usuario y duración máxima; el propietario puede desactivarla. Nunca toca el transmisor.
+
+## Clúster DX y calendario de actividad
+
+- Desactivados por defecto; el propietario configura el clúster (`cluster`) y la URL del calendario `.ics` (`calendar`). Solo se muestran spots del downlink de banda estrecha (10489,5–10490,0 MHz); los dados en el uplink 2400,x se convierten.
+- Los spots aparecen como marcas en el espectro y en una lista; **un clic sintoniza el RX**, nunca transmite. «Spot this» (operador) publica en el clúster solo si `cluster.postSpots` está activo.
+- El calendario lista las próximas actividades (el propietario puede actualizarlo o subir un `.ics`; las reglas de repetición RRULE no se expanden).
+
+## Importar y exportar memorias
+
+- Exporta tus memorias en JSON (con versión de esquema) o CSV. Importa JSON o CSV (también columnas tipo CHIRP: nombre, frecuencia en MHz, modo). Usa primero la **vista previa**: muestra filas válidas, duplicadas e inválidas. Solo operadores y propietario importan; lo importado es personal.
+
+## Plugins
+
+- El propietario puede instalar plugins de cliente en `plugins/` y activarlos en `plugins.enabled`. Solo ven datos (frecuencia, modo, baliza, spots, decodificaciones), añaden paneles, piden sintonizar el RX o rellenan el formulario del diario; no pueden transmitir ni usar el micrófono. Instala solo código en el que confíes. Ver `docs/DEVELOPER.md`.
+
 ## Atajos de teclado
 
 Se pueden desactivar en *Ajustes*. Se ignoran al escribir en un campo de texto y con Ctrl/Alt/Meta. **Ningún atajo puede transmitir**: el único que toca el PTT es la barra espaciadora, con las reglas de turno y mantener pulsado.
@@ -72,6 +97,8 @@ Se pueden desactivar en *Ajustes*. Se ignoran al escribir en un campo de texto y
 | r | Empezar/parar escucha |
 | o | Empezar/parar grabación |
 | m | Guardar frecuencia como memoria |
+| k | Notch sí/no |
+| u | Auto-notch sí/no |
 | ? | Mostrar la lista |
 
 Las acciones que cambian la radio solo funcionan si eres operador o propietario.

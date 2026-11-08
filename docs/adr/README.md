@@ -21,5 +21,9 @@ Español: las decisiones afectan a los contribuidores; la ayuda de usuario está
 | [0015](0015-pwa-scope-tools-and-shortcuts.md) | PWA scope tools and keyboard shortcuts | Accepted |
 | [0016](0016-sdr-usb-access-packaging.md) | USB access rules and kernel blacklist in the .deb | Accepted |
 | [0017](0017-comparison-driven-scope.md) | Feature selection from the SDR software comparison | Accepted |
+| [0018](0018-plugin-api.md) | Plugin API: frozen client plugins and signed webhooks | Accepted |
+| [0019](0019-notch-auto-notch.md) | Notch and auto-notch in the RX audio path | Accepted |
+| [0020](0020-iq-recording-via-sdrangel.md) | I/Q recording and playback delegated to SDRangel | Accepted |
+| [0021](0021-cluster-calendar-memory-io.md) | DX cluster, activity calendar and memory import/export | Accepted |
 
 Format: Title, Status, Date, Context, Decision, Alternatives considered, Consequences. To change a decision, add a new ADR that supersedes the old one.

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { freezeExtraConfig, parseExtraConfig } from './config-extras.js';
 
 /** Thrown for any invalid or unreadable configuration. The message never contains secret values. */
 export class ConfigError extends Error {
@@ -169,7 +170,9 @@ export function validateConfig(raw, env = process.env) {
     txDeviceSet: stRaw.txDeviceSet ?? 1,
     applyCorrectionToTx: stRaw.applyCorrectionToTx ?? false, // beacon offset measures LNB (RX) drift; TX only shares it with a common reference
     beaconIntervalMs: stRaw.beaconIntervalMs ?? 1000,
+    notchEngine: stRaw.notchEngine ?? 'client', // 'client': audio notch in the PWA; 'sdrangel': patch the demod channel
   };
+  if (station.notchEngine !== 'client' && station.notchEngine !== 'sdrangel') problems.push('station.notchEngine must be "client" or "sdrangel"');
   if (!Number.isFinite(station.lnbLoHz) || station.lnbLoHz < 1e9 || station.lnbLoHz > 1.2e10) {
     problems.push('station.lnbLoHz must be a frequency in Hz between 1e9 and 1.2e10');
   }
@@ -235,9 +238,12 @@ export function validateConfig(raw, env = process.env) {
     problems.push('recording.maxUserMb must be an integer between 1 and 100000, not below recording.maxFileMb');
   }
 
+  const extra = parseExtraConfig(raw, env, problems);
+
   if (problems.length) throw new ConfigError(problems);
 
   const config = {
+    ...extra,
     logbook,
     stationDbPath,
     recording,
@@ -258,6 +264,7 @@ export function validateConfig(raw, env = process.env) {
   config.allowlist.forEach(Object.freeze);
   return Object.freeze({
     ...config,
+    ...freezeExtraConfig(extra),
     google: Object.freeze(config.google),
     tx: Object.freeze(config.tx),
     sdrangel: Object.freeze(config.sdrangel),
@@ -304,5 +311,6 @@ export function redactConfig(config) {
     ...config,
     google: { ...config.google, clientSecret: '[redacted]' },
     secretsKey: config.secretsKey ? '[redacted]' : null,
+    webhooks: { ...config.webhooks, endpoints: config.webhooks.endpoints.map((e) => ({ url: '[redacted]', events: e.events, secret: '[redacted]' })) },
   };
 }

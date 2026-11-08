@@ -52,5 +52,9 @@ Config `audio`: `{enabled (default false), rxUdp{host,port}, txUdp{host,port}, s
 - The default PTT driver starts/stops the SDRangel TX device set (`src/sdrangel/ptt-driver.js`); TX stays disabled unless `tx.enabled`.
 - Without `spectrumSource` there is no beacon controller and `/api/beacon` reports `no-lock` / `no_source`.
 
+## Phase 13 wiring and config
+
+`config-extras.js` validates the `iq`, `cluster`, `calendar`, `webhooks` and `plugins` sections (all disabled by default; webhook secrets only from environment variables; redacted in `redactConfig`). `app.js` wires them lazily and adds test seams `clusterConnect`, `clusterTimers`, `calendarFetch`, `webhookFetch`, `webhookTimers`, `iq`, `spots`, `calendar`, `webhooks`.
+
 ## Testing
 `node --test test/unit/config.test.js test/functional/server.test.js test/functional/station.test.js`

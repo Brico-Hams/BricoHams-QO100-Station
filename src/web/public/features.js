@@ -251,6 +251,8 @@
     'agc-cycle': () => cycleSelect('t-agc'),
     'squelch-cycle': () => cycleSelect('t-squelch'),
     'nr-toggle': toggleNr,
+    'notch-toggle': () => globalThis.BHRadioTools && globalThis.BHRadioTools.toggleNotch(),
+    'autonotch-toggle': () => globalThis.BHRadioTools && globalThis.BHRadioTools.toggleAuto(),
     'peak-toggle': () => { view.peak = !view.peak; scopeChanged(); },
     'avg-cycle': () => cycleSelect('t-avg'),
     'zoom-in': () => stepZoom(1),
@@ -262,7 +264,7 @@
     help: () => document.querySelector('.tab[data-view="settings"]').click(),
   };
   const OPERATOR_ONLY = new Set(['tune-down', 'tune-up', 'tune-down-fast', 'tune-up-fast', 'rit-down', 'rit-up', 'xit-down', 'xit-up', 'offsets-clear',
-    'txlock-toggle', 'filter-cycle', 'agc-cycle', 'squelch-cycle', 'nr-toggle', 'record-toggle', 'memory-save']);
+    'txlock-toggle', 'filter-cycle', 'agc-cycle', 'squelch-cycle', 'nr-toggle', 'notch-toggle', 'autonotch-toggle', 'record-toggle', 'memory-save']);
 
   function onKey(e) {
     if (!shortcutsOn || !app.me || e.code === 'Space' || isTyping(e.target)) return;
@@ -331,6 +333,7 @@
   }
 
   hooks.station.push(renderStationControls);
+  document.addEventListener('bh-memories-changed', loadMemories);
   hooks.ready.push(async () => {
     const plan = await call('GET', '/api/bandplan');
     if (plan) {

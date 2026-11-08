@@ -70,5 +70,11 @@ only the `owner` role manages shared memories; every mutating route requires the
 
 Tests: `node --test test/unit/advanced.test.js test/functional/advanced.test.js`.
 
+## Notch and memory import/export (phase 13)
+
+- `notch.js`: `parseNotch(input)` validates `{enabled, offsetHz, widthHz, auto}`; `notchToChannelSettings` maps it to SDRangel keys (**verify**). `station.setNotch` stores it (`status().notch`).
+- `memory-io.js`: `exportMemories(items, 'json'|'csv')`, `importMemories({store, user, format, content, dryRun})` (validation, dedupe, dry run, CHIRP-like CSV). Invariant: imported memories are always personal.
+- Test: `node --test test/unit/phase13.test.js test/functional/phase13.test.js`.
+
 ## Testing
 The decoder tests synthesize signals (CW with noise; FT8/FT4 with the built-in encoder plus seeded AWGN at -10 dB SNR in 2500 Hz); no audio fixtures or hardware.

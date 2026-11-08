@@ -52,6 +52,20 @@ function parseFields(input) {
 }
 
 /**
+ * Validate a memory input without storing it.
+ * @param {object} input
+ * @returns {{ok: true, value: {name: string, downlinkHz: number, mode: string, filter: string|null, shared: boolean}} | {ok: false, fields: object}}
+ */
+export function validateMemoryInput(input) {
+  try {
+    return { ok: true, value: parseFields(input) };
+  } catch (err) {
+    if (err instanceof MemoryError) return { ok: false, fields: err.fields };
+    throw err;
+  }
+}
+
+/**
  * Per-user frequency memories (plus station-wide shared ones that only the owner role manages).
  * Rows of other users are never returned and answer `not_found`, so their existence is not revealed.
  * @param {{db: import('node:sqlite').DatabaseSync, clock?: () => number}} opts

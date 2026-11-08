@@ -145,6 +145,71 @@
         <p id="tools-msg" class="hint" role="status" aria-live="polite"></p>
       </div>
 
+      <div class="card tools" id="tools-notch">
+        <h2>Notch filter</h2>
+        <div class="row">
+          <button type="button" id="n-toggle" class="btn" aria-pressed="false" aria-keyshortcuts="k">Notch</button>
+          <button type="button" id="n-auto" class="btn" aria-pressed="false" aria-keyshortcuts="u">Auto-notch</button>
+          <label>Frequency Hz <input id="n-freq" type="number" min="20" max="5900" step="10" value="1000" aria-label="Notch audio frequency in hertz"></label>
+          <label>Width Hz <input id="n-width" type="number" min="10" max="1000" step="10" value="50" aria-label="Notch width in hertz"></label>
+          <button type="button" id="n-pick" class="btn" aria-pressed="false">Pick on spectrum</button>
+        </div>
+        <p id="n-engine" class="hint"></p>
+        <p id="n-msg" class="hint" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="card tools" id="tools-spots">
+        <h2>DX spots</h2>
+        <p id="spot-state" class="hint"></p>
+        <ul id="spot-list" class="decode-list" aria-label="Spots on the narrow-band transponder"></ul>
+        <p id="spot-empty" class="hint">No spots. Clicking a spot only tunes the receiver.</p>
+        <form id="spot-form" class="row" autocomplete="off" hidden>
+          <label>Callsign <input id="spot-call" maxlength="15" required autocapitalize="characters" spellcheck="false"></label>
+          <label>Comment <input id="spot-comment" maxlength="60"></label>
+          <button type="submit" class="btn">Spot this frequency</button>
+        </form>
+        <p id="spot-msg" class="hint" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="card tools" id="tools-calendar">
+        <h2>Activity calendar</h2>
+        <p id="cal-state" class="hint"></p>
+        <ul id="cal-list" class="rec-list" aria-label="Upcoming activities"></ul>
+        <div id="cal-owner" class="row" hidden>
+          <button type="button" id="cal-refresh" class="btn">Refresh from URL</button>
+          <label>Upload .ics <input id="cal-file" type="file" accept=".ics,text/calendar"></label>
+        </div>
+        <p id="cal-msg" class="hint" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="card tools" id="tools-import">
+        <h2>Memories: import and export</h2>
+        <div class="row">
+          <a id="mi-export-json" class="btn" href="/api/memories/export?format=json" download>Export JSON</a>
+          <a id="mi-export-csv" class="btn" href="/api/memories/export?format=csv" download>Export CSV</a>
+        </div>
+        <div class="row">
+          <label>File <input id="mi-file" type="file" accept=".json,.csv,text/csv,application/json" disabled></label>
+          <label>Format <select id="mi-format" disabled><option value="csv">CSV (also CHIRP-like)</option><option value="json">JSON</option></select></label>
+          <button type="button" id="mi-preview" class="btn" disabled>Preview</button>
+          <button type="button" id="mi-import" class="btn" disabled>Import</button>
+        </div>
+        <p id="mi-msg" class="hint" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="card tools" id="iq-panel" hidden>
+        <h2>I/Q recording</h2>
+        <div class="row">
+          <button type="button" id="iq-toggle" class="btn" aria-pressed="false">Record I/Q</button>
+          <button type="button" id="iq-live" class="btn" hidden>Back to live receiver</button>
+          <span id="iq-state" class="hint" role="status" aria-live="polite"></span>
+        </div>
+        <ul id="iq-list" class="rec-list" aria-label="I/Q recordings"></ul>
+        <p id="iq-msg" class="hint" role="status" aria-live="polite"></p>
+      </div>
+
+      <div id="plugin-panels"></div>
+
       <div class="card decodes">
         <div class="decodes-head">
           <span id="decodes-label" class="label">Decoded</span>
@@ -258,5 +323,7 @@
   <script src="/shortcuts.js" defer></script>
   <script src="/app.js" defer></script>
   <script src="/features.js" defer></script>
+  <script src="/radio-tools.js" defer></script>
+  <script src="/plugin-loader.js" defer></script>
 </body>
 </html>

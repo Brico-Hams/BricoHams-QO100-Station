@@ -21,7 +21,7 @@ function parseIds(body, BadRequest) {
  * @returns {{handle: (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse, url: URL) => Promise<boolean>}}
  *   `handle` returns false when the path is not a logbook route; errors propagate to the caller's error mapper.
  */
-export function createLogApi({ auth, getStore, getLotw, qrz, hasSecretsKey, io }) {
+export function createLogApi({ auth, getStore, getLotw, qrz, hasSecretsKey, io, onQsoLogged = () => {} }) {
   const { sendJson, readJson, BadRequest } = io;
   let lotwBusy = false;
 
@@ -52,6 +52,7 @@ export function createLogApi({ auth, getStore, getLotw, qrz, hasSecretsKey, io }
       const s = guard(true);
       const body = await readJson(req);
       const q = getStore().add(body, s.user, { force: body.force === true });
+      try { onQsoLogged(q); } catch { /* an observer must never break logging */ }
       sendJson(res, 201, publicQso(q));
       return true;
     }

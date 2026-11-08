@@ -33,6 +33,23 @@ const MIGRATIONS = Object.freeze([
       CREATE INDEX recordings_owner ON recordings (owner);
     `,
   },
+  {
+    version: 2,
+    sql: `
+      CREATE TABLE iq_recordings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        owner TEXT NOT NULL,
+        callsign TEXT NOT NULL,
+        file TEXT NOT NULL,
+        center_hz INTEGER,
+        started_at INTEGER NOT NULL,
+        ended_at INTEGER,
+        bytes INTEGER NOT NULL DEFAULT 0,
+        end_reason TEXT
+      );
+      CREATE INDEX iq_recordings_owner ON iq_recordings (owner);
+    `,
+  },
 ]);
 
 /**

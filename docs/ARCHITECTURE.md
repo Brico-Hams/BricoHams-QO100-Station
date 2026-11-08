@@ -15,6 +15,8 @@ SDRangel does all DSP and talks to the SDR hardware; BricoHams adds authenticati
 | `src/sdrangel/` | REST client (`client.js`), PTT driver (`ptt-driver.js`), in-process mock (`mock-server.js`) |
 | `src/modes/` | Frequency maths, band plan, `station.js` (tune/mode/correction), decoders: `cw-decoder.js` (CW), `ft8-*.js` (FT8/FT4 decode, encode, synth), `slot-decoder.js`, `decode-service.js` (RX audio tap to WebSocket `decode` messages) |
 | `src/beacon/` | Beacon peak estimator, filter and controller |
+| `src/cluster/` | DX cluster client, spot parser/store, `.ics` calendar, routes (off by default) |
+| `src/plugins/` | Static client-plugin resolver and signed webhook dispatcher (no server code plugins) |
 | `src/webrtc/` | (historical name, **no WebRTC**) RX/TX audio over WSS, spectrum source/feed, binary frames |
 | `src/log/` | SQLite logbook, ADIF, LoTW (TQSL), QRZ, secret box, HTTP routes |
 | `src/web/public/` | PWA (vanilla JS, AudioWorklets, service worker, help page) |
@@ -180,6 +182,12 @@ File path: `BRICOHAMS_CONFIG` (default `./config.json`). Source of truth: `src/s
 | `recording.dir` | `./data/recordings` | - | WAV directory |
 | `recording.maxFileMb` / `maxUserMb` | `100` / `1000` | - | Per-file and per-user caps (≥ 1; user cap ≥ file cap) |
 | `logbook.path` | `./data/logbook.db` | - | SQLite file |
+| `station.notchEngine` | `client` | - | `client` (RX AudioWorklet) or `sdrangel` (demod settings, verify) |
+| `iq.enabled` / `maxUserMb` / `maxSeconds` | `false` / `2000` / `600` | - | I/Q via SDRangel master switch and limits |
+| `cluster.enabled` / `host` / `port` / `callsign` / `postSpots` | `false` / - / `7300` / - / `false` | - | DX cluster telnet client (outbound only when enabled) |
+| `calendar.enabled` / `url` / `refreshHours` / `maxKb` | `false` / `null` / `6` / `256` | - | `.ics` activity calendar |
+| `webhooks.enabled`, `webhooks.endpoints[]` | `false`, `[]` | `secretEnv` names | `{url, events, secretEnv}`; secret ≥ 16 chars from env; `https` except loopback |
+| `plugins.enabled` / `dir` | `[]` / `./plugins` | - | Client plugin names and directory |
 | `logbook.lotw.tqslPath` / `stationLocation` | unset | - | Enables LoTW; location must not start with `-` |
 
 Secrets (environment only): `GOOGLE_CLIENT_SECRET` (required), `BRICOHAMS_SECRETS_KEY` (optional; 32 bytes as 64 hex chars or base64; without it QRZ key storage returns 503). `google.clientSecret` in the file is rejected. `config.example.json` is a starting point (it binds `0.0.0.0` with TLS and enables audio).
@@ -219,6 +227,19 @@ All JSON. Bodies max 4096 bytes with `Content-Type: application/json`. State-cha
 | `POST /api/recordings/start`, `/stop` | operator + CSRF | Record RX audio to WAV (403 `recording_disabled`, 409 `already_recording`, 413 `quota_exceeded`) |
 | `PUT /api/recordings/policy` | owner + CSRF | `{enabled}`; cannot override `recording.enabled: false` |
 | `GET /api/recordings/:id.wav`, `DELETE /api/recordings/:id` | operator (+CSRF for delete) | Download / delete own recording |
+| `POST /api/notch` | operator + CSRF | `{enabled?, offsetHz?, widthHz?, auto?}`; state in `status.notch` (ADR 0019) |
+| `GET /api/memories/export?format=json\|csv` | any role | Download own memories (JSON `schema`+`version`, CSV) |
+| `POST /api/memories/import` | operator + CSRF | `{format, content, dryRun?}` max 256 KB; reports `imported`, `duplicates`, `invalid` |
+| `GET /api/iq` | operator | Own I/Q recordings, `policy`, `current` (ADR 0020) |
+| `POST /api/iq/start`, `/stop`, `/live` | operator + CSRF | Record I/Q via SDRangel FileSink / stop / back to live RX (403 `iq_disabled`, 409 `already_recording`, 413 `quota_exceeded`) |
+| `POST /api/iq/:id/playback`, `DELETE /api/iq/:id` | operator + CSRF | Switch RX to FileInput playback / delete |
+| `PUT /api/iq/policy` | owner + CSRF | `{enabled}`; cannot override `iq.enabled: false` |
+| `GET /api/spots` | any role | Recent DX cluster spots and cluster state |
+| `POST /api/spots` | operator + CSRF | `{dx, downlinkHz, comment?}`; 403 `posting_disabled` unless `cluster.postSpots` |
+| `GET /api/calendar` | any role | Upcoming activities |
+| `POST /api/calendar/refresh`, `/upload` | owner + CSRF | Fetch the configured `.ics` / `{content}` |
+| `GET /api/plugins` | any role | `{enabled}` client plugin names (ADR 0018) |
+| `GET /plugins/<name>/<file>` | session | Static files of enabled client plugins only |
 | `GET /*` | none | Static PWA from `src/web/public` |
 
 Station errors: 502 `sdrangel_unavailable` (with `kind`), 400 `bad_request` and station validation codes (`offset_out_of_range`, `tx_frequency_out_of_range`, `bad_tx_lock`, `unknown_filter`, `bad_dsp`, `bad_agc`, `bad_squelch`, `bad_noise_reduction`, `not_tuned`, `no_mode`). Memory and recording errors carry their own status (see above).
@@ -240,6 +261,7 @@ Upgrade requires a valid session (else 401), `Origin` equal to the `publicUrl` o
 | server → client | `state` | `{state, txEnabled, holder:{callsign}, isHolder, lockoutReason}` |
 | server → client | `beacon` | `{status, offsetHz, appliedHz, snrDb, reason}` |
 | server → client | `caps` | `{rxAudio, spectrum, txAudio, totSeconds}` |
+| server → client | `spots` / `spot` | `{spots:[…]}` on connect / `{spot:{spotter, dx, downlinkHz, comment, time}}` live (in-band only) |
 | server → client | `result` | `{op, ok, reason}`; reasons `tx_disabled`, `lockout`, `forbidden`, `busy`, `no_turn`, `not_armed`, `audit_failed`, `driver_error`, `aborted` |
 | server → client | `error` | `{error:'bad_message'|'unknown_type'}` |
 | server → client | binary kind 2 (RX_AUDIO) | 12 kHz s16le, 240 samples |

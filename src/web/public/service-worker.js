@@ -2,7 +2,7 @@
 
 // Only static assets are cached. API, auth and WebSocket traffic always goes to the network,
 // so a cached page can never show stale tuning, PTT or log data.
-const CACHE = 'bricohams-static-v2';
+const CACHE = 'bricohams-static-v3';
 const STATIC = [
   '/',
   '/index.html',
@@ -11,6 +11,9 @@ const STATIC = [
   '/scope-math.js',
   '/shortcuts.js',
   '/features.js',
+  '/radio-tools.js',
+  '/plugin-loader.js',
+  '/notch-dsp.js',
   '/rx-player.js',
   '/mic-capture.js',
   '/manifest.webmanifest',

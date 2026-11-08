@@ -64,8 +64,8 @@
     theme: 'auto',
   };
   const mic = { stream: null, ctx: null, node: null, seq: 0, opening: false };
-  const hooks = { station: [], ready: [] };
-  const rx = { ctx: null, node: null, gain: null };
+  const hooks = { station: [], ready: [], message: [], draw: [], pick: [] };
+  const rx = { ctx: null, node: null, gain: null, notch: { enabled: false, auto: false, freq: 1000, width: 50 } };
   const spec = { count: 0, binHz: 0, data: null, lo: -120, hi: -40, dirty: false };
 
   const isOperator = () => app.me && (app.me.user.role === 'operator' || app.me.user.role === 'owner');
@@ -238,6 +238,7 @@
       case 'error': $('ptt-msg').textContent = msgFor(msg.error); break;
       default: break;
     }
+    for (const fn of hooks.message) fn(msg);
   }
 
   function onResult(msg) {
@@ -428,6 +429,7 @@
       ctx = new AudioContext({ latencyHint: 'interactive' });
     }
     try {
+      await ctx.audioWorklet.addModule('/notch-dsp.js');
       await ctx.audioWorklet.addModule('/rx-player.js');
     } catch {
       ctx.close().catch(() => {});
@@ -445,8 +447,24 @@
     rx.gain = gain;
     app.listening = true;
     $('btn-listen').setAttribute('aria-pressed', 'true');
+    postNotch();
     $('btn-listen').textContent = 'Stop listening';
     wsSend({ type: 'subscribe', rxAudio: true });
+  }
+
+  // Client-side audio notch lives in the RX worklet; the page only forwards plain numbers to it.
+  function postNotch() {
+    if (rx.node) rx.node.port.postMessage({ type: 'notch', ...rx.notch });
+  }
+
+  function setRxNotch(n) {
+    rx.notch = {
+      enabled: n.enabled === true,
+      auto: n.auto === true,
+      freq: Math.max(20, Math.min(5900, Number(n.freq) || 1000)),
+      width: Math.max(10, Math.min(1000, Number(n.width) || 50)),
+    };
+    postNotch();
   }
 
   function stopListening() {
@@ -615,6 +633,7 @@
     };
     mark(BEACON_DL, col.grid, [4, 4]);
     const st = app.station;
+    for (const fn of hooks.draw) fn(ctx, w, h, col);
     if (st.downlinkHz) {
       // RX marker follows RIT; the TX marker only appears when it differs from RX (split or XIT).
       const rxHz = st.rxHz || st.downlinkHz;
@@ -739,7 +758,9 @@
   function onSpectrumPointer(e) {
     if (!spec.data) return;
     const r = spectrumCanvas().getBoundingClientRect();
-    tune(freqAtFraction((e.clientX - r.left) / r.width));
+    const hz = freqAtFraction((e.clientX - r.left) / r.width);
+    for (const fn of hooks.pick) if (fn(hz)) return;
+    tune(hz);
   }
 
   function onSpectrumKey(e) {
@@ -1064,6 +1085,7 @@
   // Narrow bridge for features.js (loaded after this script). It exposes no PTT or microphone function on purpose.
   globalThis.BHApp = Object.freeze({
     $, app, api, view, marks, spec, hooks, msgFor, isOperator, tune, setMode, snap, refreshStatus, rebuildScope,
+    fractionOfFreq, setRxNotch,
     toggleListen: () => (rx.ctx ? stopListening() : startListening()),
     applyStation: (s) => { app.station = s; renderFreq(); },
   });

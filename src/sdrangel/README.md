@@ -25,5 +25,9 @@ The paths and keys were written from memory of the SDRangel REST API and are **n
 (`rtlSdrSettings`, `plutoSdrOutputSettings`, ...). Also check: the response of `POST .../channel`, the TX hardware type names,
 and whether stopping the TX device actually removes the carrier on every supported SDR.
 
+## I/Q recording and playback (phase 13)
+
+`iq.js` `createIqManager` and `iq-routes.js` `createIqApi`: FileSink recording and FileInput playback on the RX device set, WAV-like policy (config switch, owner switch, per-user quota). Client additions: `switchDevice`, `listIqFiles`, `deleteIqFile`. All endpoints and keys are marked **verify** against the swagger; the mock (`mock-server.js`) emulates them. Invariant: never touches the TX device set or PTT. See ADR 0020.
+
 ## Testing
 `node --test test/unit/sdrangel.test.js`

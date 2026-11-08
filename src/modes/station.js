@@ -3,6 +3,7 @@ import { BAND_PLAN, DEFAULT_DIAL_HZ, segmentFor } from './bandplan.js';
 import { createDefaultDecoderRegistry } from './decoders.js';
 import { computeTuning, isValidOffset } from './rit.js';
 import { DEFAULT_FILTER, DEFAULT_RX_DSP, filterNames, parseRxDsp, resolveFilter, toChannelSettings } from './rx-profile.js';
+import { DEFAULT_NOTCH, notchToChannelSettings, parseNotch } from './notch.js';
 
 /** Supported operating modes. */
 export const MODES = Object.freeze(['USB', 'CW', 'FT8', 'FT4']);
@@ -45,12 +46,13 @@ export class StationError extends Error {
  */
 export function createStation({
   client, rxDeviceSet = 0, txDeviceSet = 1, lnbLoHz = DEFAULT_LNB_LO_HZ, applyToTx = true,
-  isTxActive = () => false, decoders = createDefaultDecoderRegistry(), logger = console,
+  isTxActive = () => false, decoders = createDefaultDecoderRegistry(), logger = console, notchEngine = 'client',
 }) {
   const state = {
     mode: null, downlinkHz: null, correctionHz: 0, correctionSource: 'none',
-    ritHz: 0, xitHz: 0, txFollowsRx: true, txDialHz: null, filter: DEFAULT_FILTER, rxDsp: {},
+    ritHz: 0, xitHz: 0, txFollowsRx: true, txDialHz: null, filter: DEFAULT_FILTER, rxDsp: {}, notch: { ...DEFAULT_NOTCH },
   };
+  const serverNotch = () => (notchEngine === 'sdrangel' ? notchToChannelSettings(state.notch) : {});
   const channels = { rx: null, tx: null };
   let txDirty = false;
   let queue = Promise.resolve();
@@ -135,7 +137,7 @@ export function createStation({
     if (!MODES.includes(mode)) throw new StationError('unknown_mode');
     const profile = MODE_PROFILES[mode];
     channels.rx = await ensureChannel(rxDeviceSet, RX_CHANNEL, 0);
-    await client.patchChannelSettings(rxDeviceSet, channels.rx, { ...profile.rx, ...toChannelSettings(state.rxDsp) });
+    await client.patchChannelSettings(rxDeviceSet, channels.rx, { ...profile.rx, ...toChannelSettings(state.rxDsp), ...serverNotch() });
     if (txDeviceSet !== null) {
       channels.tx = await ensureChannel(txDeviceSet, TX_CHANNEL, 1);
       await client.patchChannelSettings(txDeviceSet, channels.tx, profile.tx);
@@ -281,6 +283,23 @@ export function createStation({
       return station.status();
     }),
 
+    /**
+     * Set the RX notch / auto-notch. With the `client` engine (default) only the state is kept and the PWA filters the audio;
+     * with `sdrangel` the settings are also patched into the RX channel (RX only, never the transmitter).
+     * @param {{enabled?: boolean, auto?: boolean, offsetHz?: number, widthHz?: number}} partial
+     * @returns {Promise<object>} New status.
+     * @throws {StationError} `bad_notch`, `bad_notch_frequency`, `bad_notch_width`.
+     */
+    setNotch: (partial) => serial(async () => {
+      const parsed = parseNotch(partial, state.notch);
+      if (!parsed.ok) throw new StationError(parsed.code);
+      if (notchEngine === 'sdrangel' && channels.rx !== null) {
+        await client.patchChannelSettings(rxDeviceSet, channels.rx, notchToChannelSettings(parsed.value));
+      }
+      state.notch = parsed.value;
+      return station.status();
+    }),
+
     /** @returns {object} Current tuning state. */
     status() {
       const seg = state.downlinkHz === null ? null : segmentFor(state.downlinkHz);
@@ -304,6 +323,7 @@ export function createStation({
         ownSignalOffsetHz: t === null ? null : t.ownSignalOffsetHz,
         filter: state.mode === null ? null : { name: state.filter, available: filterNames(state.mode) },
         rxDsp: { ...DEFAULT_RX_DSP, ...state.rxDsp },
+        notch: { ...state.notch, engine: notchEngine },
       };
     },
   };

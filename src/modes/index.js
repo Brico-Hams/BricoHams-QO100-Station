@@ -3,8 +3,10 @@ export { BAND_PLAN, BAND_MARKERS, DEFAULT_DIAL_HZ, segmentFor, checkTransmit, de
 export { MAX_OFFSET_HZ, isValidOffset, computeTuning } from './rit.js';
 export { FILTER_PRESETS, DEFAULT_FILTER, AGC_MODES, filterNames, resolveFilter, parseRxDsp, toChannelSettings } from './rx-profile.js';
 export { openStationDb } from './station-db.js';
+export { DEFAULT_NOTCH, NOTCH_RANGE, SDRANGEL_NOTCH_KEYS, parseNotch, notchToChannelSettings } from './notch.js';
 export { MemoryError, QO100_PRESETS, createMemoryStore } from './memories.js';
 export { createStationApi } from './routes.js';
+export { MEMORY_SCHEMA, MEMORY_SCHEMA_VERSION, MAX_IMPORT_ROWS, exportMemories, importMemories } from './memory-io.js';
 export { DecoderUnavailableError, createUnavailableDecoder, createDecoderRegistry, createDefaultDecoderRegistry, utcSlot } from './decoders.js';
 export { createCwDecoder } from './cw-decoder.js';
 export { decodeSlot } from './ft8-decode.js';

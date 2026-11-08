@@ -23,6 +23,8 @@
     { key: 'a', action: 'agc-cycle', label: 'Next AGC mode' },
     { key: 's', action: 'squelch-cycle', label: 'Next squelch level' },
     { key: 'n', action: 'nr-toggle', label: 'Noise reduction on / off' },
+    { key: 'k', action: 'notch-toggle', label: 'Notch filter on / off' },
+    { key: 'u', action: 'autonotch-toggle', label: 'Auto-notch on / off' },
     { key: 'p', action: 'peak-toggle', label: 'Peak hold on / off' },
     { key: 'v', action: 'avg-cycle', label: 'Next spectrum averaging' },
     { key: 'z', action: 'zoom-in', label: 'Zoom in' },

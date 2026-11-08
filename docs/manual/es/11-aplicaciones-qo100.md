@@ -51,6 +51,10 @@ Cada contacto se guarda en SQLite (módulo `node:sqlite` de Node). Se exporta en
 
 El plugin de [`plugins/openwebrx/`](../../../plugins/openwebrx/README.md) añade marcadores y ayuda de desplazamiento a OpenWebRX+, es de **solo recepción** y no tiene ninguna ruta hacia la transmisión.
 
+## 11.5b Notch, I/Q, spots, memorias y plugins
+
+La estación incluye notch/auto-notch, grabación I/Q delegada en SDRangel, clúster DX y calendario de actividad, importación/exportación de memorias y una API de plugins acotada. Todo lo que contacta con el exterior está desactivado por defecto y nada de ello puede transmitir; ver [funciones avanzadas](../../help/funciones-avanzadas.md).
+
 ## 11.6 Calculadoras
 
 Para dimensionar tu estación: plato, LNB, helix, apuntado y deriva del LNB se calculan en [`services/qo100-calculators/`](../../../services/qo100-calculators/README.md).
