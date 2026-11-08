@@ -20,7 +20,16 @@ jobs:
           node-version: 24
       - run: npm ci
       - run: npm test
-      - run: npx electron-builder --win --x64 --publish never
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~\AppData\Local\electron\Cache
+            ~\AppData\Local\electron-builder\Cache
+          key: eb-win-${{ hashFiles('package-lock.json') }}
+      # GitHub release downloads (Electron, SHASUMS) intermittently return 504: retry instead of failing the release
+      - name: Build installer
+        shell: bash
+        run: for i in 1 2 3; do npx electron-builder --win --x64 --publish never && exit 0; echo "attempt $i failed, retrying"; sleep 90; done; exit 1
       - name: Checksums
         shell: pwsh
         run: |
@@ -44,7 +53,15 @@ jobs:
           node-version: 24
       - run: npm ci
       - run: npm test
-      - run: npx electron-builder --linux AppImage --x64 --arm64 --publish never
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/electron
+            ~/.cache/electron-builder
+          key: eb-linux-${{ hashFiles('package-lock.json') }}
+      # GitHub release downloads (Electron, SHASUMS) intermittently return 504: retry instead of failing the release
+      - name: Build AppImage
+        run: for i in 1 2 3; do npx electron-builder --linux AppImage --x64 --arm64 --publish never && exit 0; echo "attempt $i failed, retrying"; sleep 90; done; exit 1
       - name: Checksums
         run: cd dist && for f in *.AppImage; do sha256sum "$f" > "$f.sha256"; done
       - uses: actions/upload-artifact@v4
