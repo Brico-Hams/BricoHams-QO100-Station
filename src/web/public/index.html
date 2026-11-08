@@ -3,10 +3,181 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0f14">
   <title>BricoHams QO-100 Station</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <h1>BricoHams QO-100 Station</h1>
-  <p><a href="/auth/login">Sign in with Google</a></p>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <div class="brand">
+      <img src="/icon.svg" alt="" width="32" height="32">
+      <span>BricoHams <strong>QO-100</strong></span>
+    </div>
+    <nav id="nav" aria-label="Main" hidden>
+      <button type="button" class="tab" data-view="radio" aria-pressed="true">Radio</button>
+      <button type="button" class="tab" data-view="log" aria-pressed="false">Log</button>
+      <button type="button" class="tab" data-view="settings" aria-pressed="false">Settings</button>
+      <a class="tab" href="/help.html" target="_blank" rel="noopener">Help</a>
+    </nav>
+    <div class="topbar-right">
+      <span id="conn" class="pill" role="status" aria-label="Connection">offline</span>
+      <span id="whoami" class="who" hidden></span>
+      <button type="button" id="btn-theme" class="ghost" aria-label="Colour theme: auto">Theme: auto</button>
+      <button type="button" id="btn-logout" class="ghost" hidden>Sign out</button>
+    </div>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <noscript><p>BricoHams needs JavaScript.</p></noscript>
+
+    <section id="view-login" class="card login" hidden aria-labelledby="login-title">
+      <h1 id="login-title">BricoHams QO-100 Station</h1>
+      <p>Remote operation of the QO-100 narrow-band transponder. Only accounts approved by the station owner can sign in.</p>
+      <a id="btn-login" class="btn primary" href="/auth/login"><span class="g" aria-hidden="true">G</span> Sign in with Google</a>
+      <p id="login-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <section id="view-radio" hidden aria-label="Radio">
+      <div class="grid-top">
+        <div class="card freq" aria-label="Frequencies">
+          <div class="freq-row">
+            <span class="label">Downlink (RX)</span>
+            <output id="f-down" class="mono big" aria-live="off">-</output>
+            <span class="unit">MHz</span>
+          </div>
+          <div class="freq-row">
+            <span class="label">Uplink (TX)</span>
+            <output id="f-up" class="mono" aria-live="off">-</output>
+            <span class="unit">MHz</span>
+          </div>
+        </div>
+
+        <div class="card" role="group" aria-labelledby="mode-label">
+          <span id="mode-label" class="label">Mode</span>
+          <div class="seg" id="modes">
+            <button type="button" class="seg-btn" data-mode="USB" aria-pressed="false">USB</button>
+            <button type="button" class="seg-btn" data-mode="CW" aria-pressed="false">CW</button>
+            <button type="button" class="seg-btn" data-mode="FT8" aria-pressed="false">FT8</button>
+            <button type="button" class="seg-btn" data-mode="FT4" aria-pressed="false">FT4</button>
+          </div>
+          <p id="role-note" class="hint" hidden>Your account can listen only; tuning and transmitting are disabled.</p>
+        </div>
+
+        <div class="card" aria-label="Beacon lock">
+          <span class="label">Beacon</span>
+          <div id="beacon" class="beacon off" role="status">
+            <span class="dot" aria-hidden="true"></span>
+            <span id="beacon-text">no lock</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card scope">
+        <canvas id="spectrum" class="spectrum" width="1024" height="220" tabindex="0"
+          role="slider" aria-label="Spectrum. Click to tune; arrow keys tune by one step, Shift for ten steps"
+          aria-valuemin="10489500000" aria-valuemax="10490000000" aria-valuenow="10489700000"></canvas>
+        <canvas id="waterfall" class="waterfall" width="1024" height="200" aria-label="Waterfall" role="img"></canvas>
+        <div class="scope-bar">
+          <button type="button" id="btn-listen" aria-pressed="false">Listen</button>
+          <label class="vol">Volume
+            <input id="volume" type="range" min="0" max="100" value="80" aria-label="Receive volume">
+          </label>
+          <span id="step-info" class="hint"></span>
+        </div>
+      </div>
+
+      <div class="card ptt">
+        <div class="ptt-status">
+          <div id="tx-state" class="txstate off" role="status" aria-live="assertive" aria-atomic="true">TX OFF</div>
+          <div id="tot" class="mono tot" aria-hidden="true"></div>
+          <div id="turn" class="turn" role="status" aria-live="polite">Turn: free</div>
+        </div>
+        <div class="ptt-actions">
+          <button type="button" id="btn-arm" class="btn" aria-pressed="false">Arm TX</button>
+          <button type="button" id="btn-ptt" class="ptt-btn" disabled aria-disabled="true" aria-keyshortcuts="Space">
+            PTT<span class="sub">hold, or hold Space</span>
+          </button>
+        </div>
+        <p id="ptt-msg" class="hint" role="status" aria-live="polite"></p>
+        <div class="meter" aria-hidden="true"><div id="mic-level" class="meter-bar"></div></div>
+      </div>
+    </section>
+
+    <section id="view-log" hidden aria-label="Log">
+      <div class="card">
+        <h2>New contact</h2>
+        <form id="qso-form" autocomplete="off" novalidate>
+          <div class="form-grid">
+            <label>Callsign<input id="q-call" name="call" required maxlength="15" autocapitalize="characters" spellcheck="false"></label>
+            <label>Mode
+              <select id="q-mode" name="mode">
+                <option>SSB</option><option>CW</option><option>FT8</option><option>FT4</option>
+              </select>
+            </label>
+            <label>Date (UTC)<input id="q-date" name="qso_date" inputmode="numeric" placeholder="YYYY-MM-DD"></label>
+            <label>Time (UTC)<input id="q-time" name="time_on" inputmode="numeric" placeholder="HH:MM:SS"></label>
+            <label>Uplink MHz<input id="q-freq" name="freq" inputmode="decimal"></label>
+            <label>Downlink MHz<input id="q-freq-rx" name="freq_rx" inputmode="decimal"></label>
+            <label>RST sent<input id="q-rst-s" name="rst_sent" maxlength="4"></label>
+            <label>RST rcvd<input id="q-rst-r" name="rst_rcvd" maxlength="4"></label>
+            <label>Grid<input id="q-grid" name="gridsquare" maxlength="8" spellcheck="false"></label>
+            <label class="wide">Comment<input id="q-comment" name="comment" maxlength="200"></label>
+          </div>
+          <div class="row">
+            <button type="submit" class="btn primary">Log contact</button>
+            <button type="button" id="q-now" class="btn">Fill now</button>
+            <span id="q-msg" class="hint" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="row space">
+          <h2>Contacts</h2>
+          <div class="row">
+            <a id="btn-adif" class="btn" href="/api/log/export.adi" download>Export ADIF</a>
+            <button type="button" id="btn-lotw" class="btn">Upload LoTW</button>
+            <button type="button" id="btn-qrz" class="btn">Upload QRZ</button>
+          </div>
+        </div>
+        <p id="log-msg" class="hint" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table id="log-table">
+            <caption class="sr">Logged contacts. Tick rows to upload them.</caption>
+            <thead>
+              <tr><th scope="col"><span class="sr">Select</span></th><th scope="col">Call</th><th scope="col">UTC</th><th scope="col">Mode</th><th scope="col">Downlink MHz</th><th scope="col">RST</th><th scope="col">LoTW</th><th scope="col">QRZ</th></tr>
+            </thead>
+            <tbody id="log-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-settings" hidden aria-label="Settings">
+      <div class="card">
+        <h2>QRZ Logbook key</h2>
+        <p class="hint">Your key is stored encrypted on the station and can never be read back. Enter a new one to replace it.</p>
+        <form id="qrz-form" autocomplete="off">
+          <label>QRZ API key<input id="s-qrz" type="password" minlength="8" maxlength="128" autocomplete="new-password" spellcheck="false"></label>
+          <div class="row">
+            <button type="submit" class="btn primary">Save key</button>
+            <button type="button" id="s-qrz-del" class="btn">Delete key</button>
+            <span id="s-qrz-state" class="hint" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <h2>About</h2>
+        <p>BricoHams QO-100 Station, GPL-3.0-or-later. Radio engine: SDRangel. See <a href="/help.html" target="_blank" rel="noopener">help</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/app.js" defer></script>
 </body>
 </html>

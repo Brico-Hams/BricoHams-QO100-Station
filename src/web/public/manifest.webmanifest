@@ -1,0 +1,14 @@
+{
+  "name": "BricoHams QO-100 Station",
+  "short_name": "BricoHams",
+  "description": "Remote QO-100 operation: spectrum, audio, PTT and log.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

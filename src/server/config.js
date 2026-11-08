@@ -179,6 +179,26 @@ export function validateConfig(raw, env = process.env) {
   if (typeof station.applyCorrectionToTx !== 'boolean') problems.push('station.applyCorrectionToTx must be a boolean');
   if (!isInt(station.beaconIntervalMs, 100, 60_000)) problems.push('station.beaconIntervalMs must be an integer between 100 and 60000');
 
+  const auRaw = raw.audio ?? {};
+  const audio = {
+    enabled: parseBool(auRaw.enabled ?? false, 'audio.enabled', problems),
+    rxUdp: { host: auRaw.rxUdp?.host ?? '127.0.0.1', port: auRaw.rxUdp?.port ?? 9998 },
+    txUdp: { host: auRaw.txUdp?.host ?? '127.0.0.1', port: auRaw.txUdp?.port ?? 9999 },
+    spectrumUrl: auRaw.spectrumUrl ?? 'ws://127.0.0.1:8887',
+  };
+  for (const key of ['rxUdp', 'txUdp']) {
+    if (typeof audio[key].host !== 'string' || !audio[key].host) problems.push(`audio.${key}.host must be a non-empty string`);
+    if (!isInt(audio[key].port, 1, 65535)) problems.push(`audio.${key}.port must be an integer between 1 and 65535`);
+  }
+  // The spectrum and audio sources are local SDRangel services; a remote one would leak the RX/TX audio in clear.
+  try {
+    const su = new URL(audio.spectrumUrl);
+    if (su.protocol !== 'ws:' && su.protocol !== 'wss:') throw new Error('protocol');
+    if (su.protocol === 'ws:' && !isLoopbackHost(su.hostname)) problems.push('audio.spectrumUrl must use wss: unless it is a loopback address');
+  } catch {
+    problems.push('audio.spectrumUrl must be a valid ws(s) URL');
+  }
+
   const auditLogPath = raw.auditLogPath ?? './data/audit.log';
   if (typeof auditLogPath !== 'string' || !auditLogPath) problems.push('auditLogPath must be a non-empty string');
 
@@ -209,6 +229,7 @@ export function validateConfig(raw, env = process.env) {
     tx,
     sdrangel: { baseUrl: sdrUrl.origin + sdrUrl.pathname.replace(/\/$/, '') },
     station,
+    audio,
     secretsKey,
     auditLogPath,
   };
@@ -219,6 +240,9 @@ export function validateConfig(raw, env = process.env) {
     tx: Object.freeze(config.tx),
     sdrangel: Object.freeze(config.sdrangel),
     station: Object.freeze(config.station),
+    audio: Object.freeze({
+      ...config.audio, rxUdp: Object.freeze(config.audio.rxUdp), txUdp: Object.freeze(config.audio.txUdp),
+    }),
     logbook: Object.freeze({ ...config.logbook, lotw: config.logbook.lotw ? Object.freeze(config.logbook.lotw) : null }),
     allowlist: Object.freeze(config.allowlist),
   });

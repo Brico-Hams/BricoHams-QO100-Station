@@ -21,6 +21,9 @@ import { createQrzClient } from '../log/qrz.js';
 import { createSecretBox } from '../log/secrets.js';
 import { createLogApi } from '../log/routes.js';
 import { isLoopbackHost } from './config.js';
+import { createRxAudio } from '../webrtc/rx-audio.js';
+import { createTxAudio, createUdpTxSink } from '../webrtc/tx-audio.js';
+import { createSpectrumFeed, createSpectrumSource } from '../webrtc/spectrum.js';
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -120,6 +123,7 @@ async function readJson(req) {
  * @param {Readonly<object>} config Validated config (see config.js).
  * @param {{oidc?: object, driver?: object, audit?: object, clock?: object, publicDir?: string, sdrangel?: object,
  *   spectrumSource?: () => Promise<{powersDb: ArrayLike<number>, centerHz: number, binHz: number}|null>, beaconAutoStart?: boolean,
+ *   rxAudio?: object, txSink?: object, spectrum?: object,
  *   logStore?: object, lotwUploader?: object, qrz?: object, qrzFetch?: typeof fetch,
  *   logger?: {error: Function, info?: Function}, tlsCredentials?: {cert: Buffer, key: Buffer}}} [deps] Injectable collaborators for tests.
  * @returns {{server: import('node:http').Server, ptt: object, auth: object, station: object, beacon: object|null, listen: () => Promise<{port: number, url: string}>, close: () => Promise<void>}}
@@ -149,9 +153,23 @@ export function createApp(config, deps = {}) {
     isTxActive: () => ptt.state === 'TX_ON',
     logger,
   });
-  const beacon = deps.spectrumSource
+  const sourceEnabled = config.audio.enabled;
+  const rxAudio = deps.rxAudio ?? (sourceEnabled
+    ? createRxAudio({ host: config.audio.rxUdp.host, port: config.audio.rxUdp.port, logger })
+    : null);
+  const spectrum = deps.spectrum ?? (sourceEnabled
+    ? createSpectrumSource({ url: config.audio.spectrumUrl, logger })
+    : null);
+  const spectrumFeed = spectrum ? createSpectrumFeed({ source: spectrum }) : null;
+  const txSink = deps.txSink ?? (sourceEnabled
+    ? createUdpTxSink({ host: config.audio.txUdp.host, port: config.audio.txUdp.port })
+    : null);
+  const txAudio = txSink ? createTxAudio({ ptt, sink: txSink }) : null;
+
+  const spectrumGetter = deps.spectrumSource ?? (spectrum ? () => spectrum.getSpectrum() : null);
+  const beacon = spectrumGetter
     ? createBeaconController({
-      getSpectrum: deps.spectrumSource,
+      getSpectrum: spectrumGetter,
       station,
       lnbLoHz: config.station.lnbLoHz,
       onStatus: (s) => broadcast({ type: 'beacon', ...publicBeacon(s) }),
@@ -386,9 +404,11 @@ export function createApp(config, deps = {}) {
 
   function onConnection(ws, sessionId) {
     const connId = randomBytes(8).toString('hex');
-    sockets.set(connId, { ws, sessionId });
+    const conn = { ws, sessionId, unsubscribe: { rx: null, spectrum: null } };
+    sockets.set(connId, conn);
     send(ws, publicPtt(connId));
     send(ws, { type: 'beacon', ...beaconSnapshot() });
+    send(ws, { type: 'caps', rxAudio: Boolean(rxAudio), spectrum: Boolean(spectrumFeed), txAudio: Boolean(txAudio), totSeconds: config.tx.totSeconds });
 
     ws.on('message', (data, isBinary) => {
       handleMessage(ws, connId, sessionId, data, isBinary).catch((err) => {
@@ -398,9 +418,20 @@ export function createApp(config, deps = {}) {
     ws.on('error', () => {});
     ws.on('close', () => {
       sockets.delete(connId);
+      conn.unsubscribe.rx?.();
+      conn.unsubscribe.spectrum?.();
       // Connection loss must always drop the carrier.
       ptt.release(connId, 'disconnect');
     });
+  }
+
+  function setSubscription(conn, key, source, wanted) {
+    if (wanted === undefined) return;
+    if (wanted === true && !conn.unsubscribe[key] && source) conn.unsubscribe[key] = source.addListener(conn.ws);
+    if (wanted === false && conn.unsubscribe[key]) {
+      conn.unsubscribe[key]();
+      conn.unsubscribe[key] = null;
+    }
   }
 
   async function handleMessage(ws, connId, sessionId, data, isBinary) {
@@ -409,9 +440,13 @@ export function createApp(config, deps = {}) {
       ws.close(4401, 'session expired');
       return;
     }
+    // Binary frames are microphone audio. They are not heartbeats and never answered (no reply flood).
+    if (isBinary) {
+      txAudio?.handleFrame(connId, data);
+      return;
+    }
     let msg;
     try {
-      if (isBinary) throw new Error('binary');
       msg = JSON.parse(data.toString('utf8'));
     } catch {
       send(ws, { type: 'error', error: 'bad_message' });
@@ -422,6 +457,15 @@ export function createApp(config, deps = {}) {
       case 'heartbeat':
         ptt.heartbeat(connId);
         return;
+      case 'subscribe': {
+        const conn = sockets.get(connId);
+        if (!conn) return;
+        if (msg.rxAudio !== undefined && typeof msg.rxAudio !== 'boolean') return send(ws, { type: 'error', error: 'bad_message' });
+        if (msg.spectrum !== undefined && typeof msg.spectrum !== 'boolean') return send(ws, { type: 'error', error: 'bad_message' });
+        setSubscription(conn, 'rx', rxAudio, msg.rxAudio);
+        setSubscription(conn, 'spectrum', spectrumFeed, msg.spectrum);
+        return;
+      }
       case 'turn':
         send(ws, { type: 'result', op: 'turn', ...ptt.requestTurn(actor) });
         return;
@@ -458,6 +502,8 @@ export function createApp(config, deps = {}) {
     ptt,
     station,
     beacon,
+    txAudio,
+    rxAudio,
     /**
      * Start listening on the configured host/port.
      * @returns {Promise<{port: number, url: string}>}
@@ -472,6 +518,10 @@ export function createApp(config, deps = {}) {
             publicUrl = new URL(publicUrl.origin.replace(/:\d+$/, '') + `:${port}`);
           }
           startBeaconLoop();
+          if (!deps.rxAudio) {
+            rxAudio?.start().catch((err) => logger.error('rx audio disabled:', err.message));
+          }
+          if (!deps.spectrum) spectrum?.start();
           resolve({ port, url: publicUrl.origin });
         });
       });
@@ -487,6 +537,9 @@ export function createApp(config, deps = {}) {
       if (holder) await ptt.release(holder, 'shutdown');
       ptt.dispose();
       for (const { ws } of sockets.values()) ws.terminate();
+      if (!deps.rxAudio) await rxAudio?.stop();
+      if (!deps.spectrum) spectrum?.stop();
+      if (!deps.txSink) await txSink?.close?.();
       if (!deps.logStore) logStore?.close();
       await new Promise((resolve) => {
         server.close(() => resolve());

@@ -24,10 +24,23 @@ Station (phase 2): `GET /api/status` and `GET /api/beacon` (any role); `POST /ap
 `POST /api/mode` `{mode}` (operator, CSRF, JSON body; mode change is refused with 409 while TX_ON).
 Invalid input gives 400, an unreachable SDRangel gives 502 `{error:'sdrangel_unavailable', kind}`.
 
-WebSocket messages (client to server): `{type:'heartbeat'|'turn'|'release'}`, `{type:'ptt', down:boolean}`.
-Server to client: `{type:'state', state, txEnabled, holder:{callsign}|null, isHolder, lockoutReason}`,
-`{type:'beacon', status:'locked'|'no-lock', offsetHz, appliedHz, snrDb, reason}`,
-`{type:'result', op, ok, reason?}`, `{type:'error', error}`. Heartbeat must be sent every 500 ms while holding the turn.
+### WebSocket protocol (`/ws/control`)
+
+| Dir | Message | Meaning |
+|---|---|---|
+| C→S | `{type:'heartbeat'}` | Keep-alive; every 500 ms while holding the turn. |
+| C→S | `{type:'turn'}` / `{type:'release'}` | Arm / disarm TX. |
+| C→S | `{type:'ptt', down}` | Key / unkey. |
+| C→S | `{type:'subscribe', rxAudio?, spectrum?}` | Booleans; anything else gives `bad_message`. |
+| C→S | binary kind 1 (MIC) | Mic PCM; accepted only from the turn holder in TX_ON, otherwise dropped and counted. Not a heartbeat. |
+| S→C | `{type:'caps', rxAudio, spectrum, txAudio, totSeconds}` | Sent on connect. |
+| S→C | `{type:'state', state, txEnabled, holder, isHolder, lockoutReason}` | PTT state. |
+| S→C | `{type:'beacon', status, offsetHz, appliedHz, snrDb, reason}` | Beacon lock. |
+| S→C | `{type:'result', op, ok, reason?}`, `{type:'error', error}` | Replies. |
+| S→C | binary kind 2 (RX_AUDIO), 3 (SPECTRUM) | Only to subscribed sockets; formats in `src/webrtc/README.md`. |
+
+Config `audio`: `{enabled (default false), rxUdp{host,port}, txUdp{host,port}, spectrumUrl}`; `ws:` URLs must be loopback.
+`createApp` deps may inject `rxAudio`, `txSink`, `spectrum`, `spectrumSource` for tests.
 
 ## Invariants
 - Plain HTTP only on a loopback listener; HSTS only when `publicUrl` is https.

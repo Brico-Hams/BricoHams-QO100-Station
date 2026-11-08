@@ -11,5 +11,11 @@
   ],
   "tx": { "enabled": false, "totSeconds": 600, "heartbeatTimeoutMs": 2000, "armedTimeoutSeconds": 120 },
   "sdrangel": { "baseUrl": "http://127.0.0.1:8091" },
+  "audio": {
+    "enabled": true,
+    "rxUdp": { "host": "127.0.0.1", "port": 9998 },
+    "txUdp": { "host": "127.0.0.1", "port": 9999 },
+    "spectrumUrl": "ws://127.0.0.1:8887"
+  },
   "auditLogPath": "./data/audit.log"
 }
