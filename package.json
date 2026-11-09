@@ -1,6 +1,6 @@
 {
   "name": "bricohams-qo100-station",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "BricoHams QO-100 station: remote TX/RX web control on top of SDRangel",
   "license": "GPL-3.0-or-later",
   "author": "BricoHams",
