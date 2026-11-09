@@ -1,6 +1,6 @@
 # 0013. RX profile: filter presets, AGC, squelch and noise reduction
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by [0022](0022-sdrangel-api-alignment.md): RX audio comes from a UDPSink, so only `rfBandwidth`, AGC and squelch apply; noise reduction is refused with `dnr_unavailable`)
 - **Date:** 2026-11-08
 
 ## Context

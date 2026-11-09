@@ -21,7 +21,7 @@ a single-operator turn with a fail-safe PTT, beacon-based frequency correction, 
 
 | # | Goal | What you get | Status |
 |---|---|---|---|
-| 1 | Duplex SDR engine | SDRangel device sets: RX through the LNB IF (about 740 MHz), TX on 2400.000-2400.500 MHz. Target hardware: RTL-SDR, SDRplay, Airspy, ADALM-Pluto, USRP B200mini, Hermes Lite 2 with transverter. | SDRangel API paths are **unverified** against a real server |
+| 1 | Duplex SDR engine | SDRangel device sets: RX through the LNB IF (about 740 MHz), TX on 2400.000-2400.500 MHz. Target hardware: RTL-SDR, SDRplay, Airspy, ADALM-Pluto, USRP B200mini, Hermes Lite 2 with transverter. | API checked against the SDRangel swagger; **not yet tried on a real server** |
 | 2 | Frequency correction | Locks on the NB BPSK beacon (10489.750 MHz), filters the drift (median + EMA) and corrects the RX centre. TX correction is opt-in (`station.applyCorrectionToTx`). | Tested with synthetic spectra only |
 | 3 | Modes | USB, CW, FT8, FT4 channel setup and band plan. Built-in pure-JavaScript **CW, FT8 and FT4 decoders** (plus an FT8/FT4 encoder/synthesizer) fed from the RX audio path; decodes are broadcast over WebSocket and listed in the PWA, where a click prefills the log form. | Done |
 | 4 | Log | SQLite logbook, ADIF 3.1.4 export/import with `PROP_MODE=SAT`, `SAT_NAME=QO-100`, `BAND=13CM`, `BAND_RX=3CM`, LoTW upload through TQSL, QRZ Logbook upload with an encrypted API key. | Tested with fakes |
@@ -39,18 +39,20 @@ Advanced operating tools, chosen from a comparison with other SDR programs ([com
 | Frequency memories | Per-user and shared memories in SQLite, QO-100 presets | Tested with fakes |
 | Band plan overlay | Narrow-band transponder segments over the spectrum | Tested statically |
 | RIT / XIT / TX lock | Receive and transmit offsets (±9999 Hz), split, own-signal offset; TX changes never apply while keyed | Tested with the mock SDRangel |
-| Filter presets, AGC, squelch, NR | Per-mode filter widths and RX settings sent to SDRangel | SDRangel field names **unverified** |
+| Filter presets, AGC, squelch | Per-mode filter widths and RX settings sent to SDRangel (noise reduction is not available through the UDP audio path) | Keys checked against the swagger; not tried on a real server |
 | Scope tools | Zoom, averaging, peak hold, waterfall palettes and contrast | Tested statically |
 | Keyboard shortcuts | Documented, can be disabled; Space stays PTT-only and nothing else can transmit | Tested statically |
 | RX audio recording | Server-side WAV with file and user caps; the owner can disable it | Tested with fakes |
-| Notch / auto-notch | Biquad notch and LMS auto-notch in the RX audio worklet; click a carrier to notch it | Tested with synthetic signals |
-| I/Q recording and playback | Driven through SDRangel (off by default); quota and owner switch like WAV | Tested with the mock; verify against SDRangel |
+| Notch / auto-notch | Biquad notch and LMS auto-notch in the browser's RX audio worklet (SDRangel has no notch in its API); click a carrier to notch it | Tested with synthetic signals |
+| I/Q recording and playback | Driven through SDRangel (off by default); quota and owner switch like WAV | Tested with the strict mock; not tried on a real server |
 | DX cluster and activity calendar | QO-100 NB spots on the spectrum (click tunes RX only), `.ics` calendar; off by default | Tested with fakes |
 | Memories import/export | JSON (versioned) and CSV, CHIRP-like columns, dry-run preview | Tested |
 | Plugin API | Frozen client plugin API and signed outgoing webhooks; no server-side code plugins | Tested |
 | Linux USB setup | udev rules and DVB kernel module blacklist in the `.deb` | Not yet tried on real machines |
 
 Safety by design: transmit is **off by default**; the carrier is cut in under 2 s if the operator's connection is lost; see [SECURITY.md](SECURITY.md).
+
+No hardware yet? Seeded, deterministic simulations (beacon drift, FT8/FT4, CW, PTT fail-safe, turn contention, a full QSO against a strict SDRangel mock) run with `npm run sim` and write [docs/testing/sim-report.md](docs/testing/sim-report.md); how to run and read them (Spanish): [docs/help/comprobar-sin-hardware.md](docs/help/comprobar-sin-hardware.md). Design and limits: [ADR 0023](docs/adr/0023-simulation-framework.md). They do not replace on-air tests.
 
 ## Quick start
 
@@ -97,8 +99,8 @@ Desktop shell: `npm run desktop`. Developer guide: [docs/DEVELOPER.md](docs/DEVE
 | Users (Spanish) | [docs/help/index.md](docs/help/index.md) |
 | SDR manual for radio amateurs (Spanish) | [docs/manual/es/README.md](docs/manual/es/README.md) |
 | Build your own station (Spanish) | [docs/help/construir-tu-estacion.md](docs/help/construir-tu-estacion.md), [hardware/](hardware/README.md) |
-| Testers (Spanish) | [docs/testing/CHECKLIST.md](docs/testing/CHECKLIST.md), [REPORT-TEMPLATE.md](docs/testing/REPORT-TEMPLATE.md) |
-| Contributors | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [neural diagram](docs/architecture/README.md), [docs/DEVELOPER.md](docs/DEVELOPER.md), [docs/adr/](docs/adr/README.md), [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Testers (Spanish) | [docs/help/comprobar-sin-hardware.md](docs/help/comprobar-sin-hardware.md), [docs/testing/CHECKLIST.md](docs/testing/CHECKLIST.md), [sim-report.md](docs/testing/sim-report.md), [REPORT-TEMPLATE.md](docs/testing/REPORT-TEMPLATE.md) |
+| Contributors | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [neural diagram](docs/architecture/README.md), [docs/DEVELOPER.md](docs/DEVELOPER.md), [docs/adr/](docs/adr/README.md), [references](docs/references/README.md), [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Security | [SECURITY.md](SECURITY.md) |
 | Design (Spanish) | [docs/superpowers/specs/2026-11-08-qo100-station-design.md](docs/superpowers/specs/2026-11-08-qo100-station-design.md) |
 | Per module | `src/<module>/README.md`, `electron/README.md`, `plugins/openwebrx/README.md`, `packaging/windows/README.md` |

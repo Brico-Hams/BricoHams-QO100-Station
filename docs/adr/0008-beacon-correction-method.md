@@ -21,5 +21,6 @@ LNB local oscillators drift with temperature by kHz. The QO-100 NB beacon (10489
 
 ## Consequences
 - Needs the spectrum WS feed (`audio.enabled`); otherwise status is `no-lock` with reason `no_source`.
-- Accuracy is verified with synthetic spectra only; real spectrum frame layout is unverified.
+- Accuracy is verified with synthetic spectra only ([ADR 0023](0023-simulation-framework.md)). The spectrum frame layout follows SDRangel's `wsspectrum.cpp` (reference copy, [ADR 0022](0022-sdrangel-api-alignment.md)); it has not been seen on a live server.
+- The alternative engine `beacon.engine: "sdrangel-freqtracker"` reads SDRangel's FreqTracker channel instead of the spectrum (ADR 0022).
 - Operators with free-running TX oscillators must watch their own uplink.

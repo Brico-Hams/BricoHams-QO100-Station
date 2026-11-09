@@ -103,9 +103,9 @@ Repite por cada SDR disponible (RTL-SDR, SDRplay, Airspy, ADALM-Pluto, USRP B200
 | ✔ | Acción | Resultado esperado | Resultado / notas |
 |---|---|---|---|
 | [ ] | Modo USB: sintonizar una QSO en SSB | Voz inteligible | |
-| [ ] | Modo CW: sintonizar una señal de CW | Tono audible; sin texto decodificado (no integrado) | |
-| [ ] | Modo FT8 | Cambia de modo y frecuencia; indica que el decodificador no está disponible | |
-| [ ] | Modo FT4 | Igual | |
+| [ ] | Modo CW: sintonizar una señal de CW | Tono audible y texto en la lista Decoded (anota la velocidad y los errores) | |
+| [ ] | Modo FT8 | Cambia de modo y frecuencia; tras un intervalo de 15 s aparecen decodificaciones (anota SNR y dt frente a otro programa) | |
+| [ ] | Modo FT4 | Igual, con intervalos de 7,5 s | |
 | [ ] | Comprobar el plan de banda contra el actual de AMSAT-DL/IARU | Anotar diferencias (segmentos y frecuencias por defecto) | |
 | [ ] | Comprobar la inversión de banda del transpondedor | Anotar si USB es correcto en subida y bajada | |
 
@@ -168,7 +168,7 @@ Confirma antes de empezar:
 | [ ] | Detener SDRangel mientras transmites | El sistema pasa a LOCKOUT o corta; anotar | |
 | [ ] | En LOCKOUT, un `owner` remoto intenta reset | Rechazado; solo funciona desde la máquina local | |
 | [ ] | Parar el TX device: ¿desaparece la portadora en el medidor? | Sí (a verificar) | |
-| [ ] | Probar el audio de TX por la entrada UDP del modulador | El audio sale limpio (punto de mayor riesgo, a verificar) | |
+| [ ] | Probar el audio de TX por el canal UDPSource de SDRangel (`audio.txUdp`) | El audio sale limpio (punto de mayor riesgo, a verificar) | |
 | [ ] | Probar CW con la carga ficticia | Manipulación correcta (a verificar) | |
 | [ ] | Comprobar la frecuencia de subida con el analizador/receptor auxiliar | Coincide con el valor mostrado | |
 | [ ] | `applyCorrectionToTx`: probar con y sin referencia compartida | Anotar comportamiento | |
@@ -231,7 +231,7 @@ Solo el titular de la estación decide pasar a esta sección, con licencia váli
 | [ ] | XIT y split con carga ficticia: medir la frecuencia de TX | Coincide con la calculada; no cambia durante TX | |
 | [ ] | «Mi señal»: comprobar que el desplazamiento mostrado permite oírse | Coincide | |
 | [ ] | Cambiar el ancho de filtro en SSB, CW y FT8 | El ancho cambia en SDRangel; se restablece al cambiar de modo | |
-| [ ] | AGC, squelch y reducción de ruido | SDRangel refleja los ajustes (verificar nombres de campos) | |
+| [ ] | AGC y squelch; pedir reducción de ruido | SDRangel refleja AGC y squelch; la reducción de ruido responde `dnr_unavailable` (no disponible) | |
 | [ ] | Zoom, promedio, retención de picos, paletas y contraste | Se ven bien; se recuerdan al recargar | |
 | [ ] | Probar cada atajo de la tabla; escribir en un campo de texto | No dispara atajos en campos; Espacio sigue siendo solo PTT | |
 | [ ] | Intentar transmitir con cualquier tecla que no sea Espacio | No es posible | |
@@ -240,7 +240,7 @@ Solo el titular de la estación decide pasar a esta sección, con licencia váli
 | [ ] | Grabar hasta el límite configurado | Se detiene sola; la descarga es válida | |
 | [ ] | El propietario desactiva la grabación; un operador intenta grabar | Error `recording_disabled` | |
 | [ ] | Comprobar que otro operador no puede descargar mi grabación | 404 | |
-| [ ] | Notch manual sobre una portadora (clic en el espectro) y auto-notch (`k`, `u`) | La portadora baja claramente; el audio a ±1 kHz no se altera | |
+| [ ] | Notch manual sobre una portadora (clic en el espectro) y auto-notch (`k`, `u`) | La portadora baja claramente; el audio a ±1 kHz no se altera (el notch es solo del navegador) | |
 | [ ] | Con `iq.enabled`, grabar I/Q, parar, reproducir y volver a directo | Archivo en SDRangel; RX vuelve a sintonizar (verificar claves swagger) | |
 | [ ] | Sin `iq.enabled`, intentar grabar I/Q | Error `iq_disabled` | |
 | [ ] | Con `cluster.enabled` y un nodo real, esperar spots | Solo aparecen los del NB; un clic sintoniza el RX | |
@@ -252,6 +252,24 @@ Solo el titular de la estación decide pasar a esta sección, con licencia váli
 | [ ] | Linux: `apt purge` | Se eliminan las reglas udev y la lista negra | |
 | [ ] | Comprobar los IDs USB de tus SDR (`lsusb`) contra `99-bricohams-sdr.rules` | Coinciden | |
 | [ ] | Windows: instalar WinUSB con Zadig en un RTL-SDR | SDRangel lo detecta | |
+
+---
+
+## L. Simulaciones, diagrama y enlaces (no necesitan hardware)
+
+Guía: [comprobar-sin-hardware.md](../help/comprobar-sin-hardware.md). Si el ordenador está ocupado, cierra otros programas antes de las simulaciones.
+
+| ✔ | Acción | Resultado esperado | Resultado / notas |
+|---|---|---|---|
+| [ ] | `npm test` | Termina con `fail 0` | |
+| [ ] | `npm run sim` en un equipo tranquilo (5-10 min). Anota el SO y la CPU | Todos los escenarios pasan; se actualiza `docs/testing/sim-report.md` | |
+| [ ] | Si algún caso falla, repetir solo su fichero (`node --test test/sim/<escenario>.sim.test.js`) | Si pasa al repetir, anota que fue intermitente y la carga del equipo; si falla siempre, adjunta la fila ❌ del informe | |
+| [ ] | Abrir `docs/testing/sim-report.md` | La tabla *Resumen* tiene ✅ en todas las filas; baliza: error máx. < 50 Hz, enganche < 60 s y reenganche < 30 s; FT8 ≥ 90 % a −15 dB y FT4 ≥ 90 % a −12 dB; CW con CER < 5 % a 20 WPM y 6 dB | |
+| [ ] | Comparar con tu hardware real: baliza (sección D) y decodificación (sección E) | Anota si el enganche, el error y el SNR reales son peores que los simulados (las simulaciones no sustituyen a las pruebas reales) | |
+| [ ] | `npm run diagram` y abrir `docs/architecture/neural-diagram.svg` | Se regenera sin errores; muestra todos los módulos; sin cambios en el repositorio si el código no cambió (`git status`) | |
+| [ ] | Comprobar el diagrama en modo claro y oscuro del sistema | Legible en ambos | |
+| [ ] | Revisar que los enlaces de `README.md`, la ayuda y los scripts de instalación apuntan a `https://github.com/Brico-Hams/BricoHams-QO100-Station` (organización **Brico-Hams**, con guion) y `.../BricoHams-QO100-Remote-Listen` | Todos abren sin depender de una redirección; no queda el nombre antiguo `bricohams` | |
+| [ ] | `curl -fsSL https://raw.githubusercontent.com/Brico-Hams/BricoHams-QO100-Station/main/packaging/linux/install.sh` (solo leer, sin ejecutar) | Se descarga el script | |
 
 ---
 

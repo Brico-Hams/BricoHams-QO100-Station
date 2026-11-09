@@ -1,6 +1,6 @@
 # 0020. I/Q recording and playback delegated to SDRangel
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by [0022](0022-sdrangel-api-alignment.md): endpoints and keys now checked against the swagger copy; only the report wrapper names and the `fileRecordName` suffix remain to be confirmed on a real instance)
 - **Date:** 2026-11-08
 
 ## Context

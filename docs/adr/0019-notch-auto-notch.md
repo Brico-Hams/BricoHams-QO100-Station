@@ -1,6 +1,6 @@
 # 0019. Notch and auto-notch in the RX audio path
 
-- **Status:** Accepted
+- **Status:** Accepted (amended by [0022](0022-sdrangel-api-alignment.md): SDRangel has no notch in its API, so the notch is client-side only; the `sdrangel` engine described below does not exist)
 - **Date:** 2026-11-08
 
 ## Context

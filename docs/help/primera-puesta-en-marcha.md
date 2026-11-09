@@ -9,9 +9,9 @@ BricoHams controla SDRangel por su API REST. Debes tener SDRangel funcionando co
 1. Abre SDRangel (o `sdrangelsrv` en servidores) y comprueba que la API REST está activa.
 2. **Conjunto de dispositivos 0 (RX):** tu SDR de recepción (por ejemplo RTL-SDR, SDRplay, Airspy). Frecuencia central cerca de la FI de la baliza (ver paso 2).
 3. **Conjunto de dispositivos 1 (TX):** tu SDR de transmisión (por ejemplo ADALM-Pluto, USRP B200mini, Hermes Lite 2 con transversor), a unos 2400 MHz. Los índices se cambian con `station.rxDeviceSet` y `station.txDeviceSet` (deben ser distintos).
-4. Activa en el canal de recepción «copiar audio a UDP» hacia `127.0.0.1:9998` (`audio.rxUdp`) a 48 kHz.
-5. Configura el modulador SSB de TX para recibir audio por UDP en `127.0.0.1:9999` (`audio.txUdp`). **Este punto está sin verificar** con una instancia real: si falla, ver [solucion-de-problemas.md](solucion-de-problemas.md).
-6. Activa el servidor de espectro de SDRangel en `ws://127.0.0.1:8887` (`audio.spectrumUrl`).
+4. El canal de recepción (un **UDPSink**) envía el audio a `127.0.0.1:9998` (`audio.rxUdp`) a 48 kHz.
+5. El canal de transmisión (un **UDPSource**) recibe el audio de tu micrófono en `127.0.0.1:9999` (`audio.txUdp`). Ambos canales los **crea BricoHams solo** al arrancar y al cambiar de modo (si SDRangel aún no estaba listo, se reintenta); no hace falta configurarlos a mano. Solo debes evitar que otro programa use esos puertos. Detalle y cambio de puertos: [funciones-avanzadas.md](funciones-avanzadas.md#puertos-udp-de-audio). Aún no se ha probado con una instancia real: si falla, ver [solucion-de-problemas.md](solucion-de-problemas.md).
+6. BricoHams pide a SDRangel que active el servidor de espectro; debe quedar en `ws://127.0.0.1:8887` (`audio.spectrumUrl`). Si no lo consigue, actívalo tú en SDRangel.
 7. En `config.json`: `"audio": { "enabled": true }`. Sin esto no hay audio, espectro ni corrección de baliza.
 
 Mantén los puertos de SDRangel **solo en local**; no tienen autenticación.
@@ -45,4 +45,4 @@ La transmisión **está desactivada** (`tx.enabled: false`). Solo el titular de 
 4. Mantén un **corte físico** del amplificador independiente del software.
 5. Irradia solo tras tu decisión, con licencia válida y respetando el plan de banda ([CHECKLIST sección H](../testing/CHECKLIST.md)).
 
-Los decodificadores de FT8/FT4/CW **no están integrados** todavía: el programa ajusta el canal y el plan de banda, pero no muestra texto decodificado.
+Los decodificadores de FT8, FT4 y CW están integrados (JavaScript puro) y muestran el texto en la lista **Decoded**. Se han probado solo con señales sintéticas ([comprobar-sin-hardware.md](comprobar-sin-hardware.md)); los valores de SNR y de desviación de tiempo son estimaciones hasta probarlos con señales reales.
