@@ -3,7 +3,7 @@
 # Downloads the latest .deb for this architecture, verifies its .sha256 and installs it with apt.
 set -euo pipefail
 
-REPO="${BRICOHAMS_REPO:-bricohams/BricoHams-QO100-Station}"
+REPO="${BRICOHAMS_REPO:-Brico-Hams/BricoHams-QO100-Station}"
 
 case "$(dpkg --print-architecture)" in
   amd64) ARCH=amd64 ;;

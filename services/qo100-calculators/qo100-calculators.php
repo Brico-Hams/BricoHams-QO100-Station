@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       BricoHams QO-100 Calculators
- * Plugin URI:        https://github.com/BricoHams/BricoHams-QO100-Station
+ * Plugin URI:        https://github.com/Brico-Hams/BricoHams-QO100-Station
  * Description:       Offline calculators for QO-100 (dish gain, pointing, LNB line-up, 2.4 GHz helix, LNB LO/IF) via shortcodes.
  * Version:           1.0.0
  * Requires at least: 6.0

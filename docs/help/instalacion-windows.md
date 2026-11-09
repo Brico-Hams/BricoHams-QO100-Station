@@ -6,7 +6,7 @@ Requisitos: Windows 10/11 de 64 bits, [SDRangel](https://github.com/f4exb/sdrang
 
 ## Pasos
 
-1. Descarga desde la [última versión](https://github.com/BricoHams/BricoHams-QO100-Station/releases/latest) el instalador `.exe` y su archivo `.sha256`.
+1. Descarga desde la [última versión](https://github.com/Brico-Hams/BricoHams-QO100-Station/releases/latest) el instalador `.exe` y su archivo `.sha256`.
 2. Comprueba la huella. En PowerShell:
    ```powershell
    Get-FileHash .\BricoHams-QO100-Station-Setup.exe -Algorithm SHA256

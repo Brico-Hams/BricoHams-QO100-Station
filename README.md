@@ -55,7 +55,7 @@ Safety by design: transmit is **off by default**; the carrier is cut in under 2 
 ## Quick start
 
 ### Windows (x64)
-1. Download the `.exe` and its `.sha256` from the [latest release](https://github.com/BricoHams/BricoHams-QO100-Station/releases/latest) and check the hash.
+1. Download the `.exe` and its `.sha256` from the [latest release](https://github.com/Brico-Hams/BricoHams-QO100-Station/releases/latest) and check the hash.
 2. Run the installer (Windows SmartScreen warns because the installer is not code-signed).
 3. Start the app, edit `%APPDATA%\BricoHams QO-100 Station\config.json`, put secrets in `secrets.env` next to it, restart.
 Details: [docs/help/instalacion-windows.md](docs/help/instalacion-windows.md).
@@ -66,13 +66,13 @@ Details: [docs/help/instalacion-windows.md](docs/help/instalacion-windows.md).
 
 ### Raspberry Pi (arm64, 64-bit OS)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BricoHams/BricoHams-QO100-Station/main/packaging/linux/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/Brico-Hams/BricoHams-QO100-Station/main/packaging/linux/install.sh | sudo bash
 ```
 The script downloads the latest `.deb` for your architecture, verifies its SHA-256 and installs it. Read it first if you prefer.
 
 ### From source
 ```bash
-git clone https://github.com/BricoHams/BricoHams-QO100-Station.git
+git clone https://github.com/Brico-Hams/BricoHams-QO100-Station.git
 cd BricoHams-QO100-Station
 npm ci
 cp config.example.json config.json      # edit it

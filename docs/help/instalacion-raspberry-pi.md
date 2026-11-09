@@ -7,7 +7,7 @@ Funciona en Raspberry Pi 4 y 5 con **sistema operativo de 64 bits** (arm64), Ras
 ## Instalación con una línea
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BricoHams/BricoHams-QO100-Station/main/packaging/linux/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/Brico-Hams/BricoHams-QO100-Station/main/packaging/linux/install.sh | sudo bash
 ```
 
 El script detecta la arquitectura, descarga el último `.deb`, verifica su SHA-256 e instala con `apt`. Si prefieres revisarlo antes, descárgalo y léelo (`less install.sh`). Si usas un fork, define `BRICOHAMS_REPO=propietario/repositorio`.
