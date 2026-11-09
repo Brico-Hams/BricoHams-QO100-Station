@@ -14,13 +14,13 @@ Las simulaciones son deterministas (PRNG con semilla) y no usan red, hardware ni
 
 | Escenario | Resultado | Casos | Duración |
 | --- | --- | --- | --- |
-| Baliza y deriva del LNB | ✅ pasa | 3 | 363.2 s |
-| FT8 / FT4 de extremo a extremo | ✅ pasa | 3 | 76.6 s |
-| CW con QSB y ruido | ✅ pasa | 1 | 47.0 s |
-| PTT: heartbeat, TOT y desconexiones | ✅ pasa | 1 | 0.6 s |
-| Competencia por el turno (5 operadores) | ✅ pasa | 1 | 2.8 s |
-| Cluster DX (telnet simulado) | ✅ pasa | 1 | 0.7 s |
-| QSO completo con SDRangel estricto | ✅ pasa | 1 | 1.9 s |
+| Baliza y deriva del LNB | ✅ pasa | 3 | 318.9 s |
+| FT8 / FT4 de extremo a extremo | ✅ pasa | 3 | 105.8 s |
+| CW con QSB y ruido | ✅ pasa | 1 | 70.7 s |
+| PTT: heartbeat, TOT y desconexiones | ✅ pasa | 1 | 1.3 s |
+| Competencia por el turno (5 operadores) | ✅ pasa | 1 | 3.5 s |
+| Cluster DX (telnet simulado) | ✅ pasa | 1 | 0.8 s |
+| QSO completo con SDRangel estricto | ✅ pasa | 1 | 2.6 s |
 
 ## Baliza: error de corrección tras el enganche
 
@@ -79,15 +79,15 @@ QSB de 0,1–0,5 Hz y ruido blanco; columnas por SNR en 2500 Hz.
 
 ## Competencia por el turno
 
-5 operadores, 14 intentos cada uno. Máximo de titulares simultáneos: 1. Índice de Jain: 1 (1 = reparto perfecto). Mediana de respuesta a `turn`: 3 ms. Cesión tras desconexión del titular: 28.4 ms.
+5 operadores, 14 intentos cada uno. Máximo de titulares simultáneos: 1. Índice de Jain: 1 (1 = reparto perfecto). Mediana de respuesta a `turn`: 4.7 ms. Cesión tras desconexión del titular: 18.6 ms.
 
 | Operador | Turnos concedidos | Denegados |
 | --- | --- | --- |
-| Operador 1 | 14 | 62 |
-| Operador 2 | 14 | 88 |
-| Operador 3 | 14 | 77 |
-| Operador 4 | 14 | 92 |
-| Operador 5 | 14 | 71 |
+| Operador 1 | 14 | 78 |
+| Operador 2 | 14 | 59 |
+| Operador 3 | 14 | 73 |
+| Operador 4 | 14 | 94 |
+| Operador 5 | 14 | 70 |
 
 ## Cluster DX
 

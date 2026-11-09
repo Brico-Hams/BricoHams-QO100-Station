@@ -14,6 +14,7 @@
     "desktop": "electron .",
     "dist:win": "electron-builder --win --x64 --publish never",
     "dist:linux": "electron-builder --linux AppImage --x64 --arm64 --publish never",
+    "diagram": "node docs/architecture/generate-neural.mjs",
     "test": "node --test \"test/unit/*.test.js\" \"test/functional/*.test.js\"",
     "sim": "node --test \"test/sim/*.sim.test.js\"",
     "test:unit": "node --test \"test/unit/*.test.js\"",

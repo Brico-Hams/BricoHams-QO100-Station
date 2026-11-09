@@ -5,6 +5,8 @@
 BricoHams is one Node.js process (`src/server/index.js`) that sits between browsers and a local SDRangel instance.
 SDRangel does all DSP and talks to the SDR hardware; BricoHams adds authentication, the PTT safety logic, tuning/beacon correction, audio transport and the logbook.
 
+> Neural diagram generated from the real imports: [architecture/README.md](architecture/README.md).
+
 ## Module map
 
 | Path | Responsibility |

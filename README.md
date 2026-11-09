@@ -98,7 +98,7 @@ Desktop shell: `npm run desktop`. Developer guide: [docs/DEVELOPER.md](docs/DEVE
 | SDR manual for radio amateurs (Spanish) | [docs/manual/es/README.md](docs/manual/es/README.md) |
 | Build your own station (Spanish) | [docs/help/construir-tu-estacion.md](docs/help/construir-tu-estacion.md), [hardware/](hardware/README.md) |
 | Testers (Spanish) | [docs/testing/CHECKLIST.md](docs/testing/CHECKLIST.md), [REPORT-TEMPLATE.md](docs/testing/REPORT-TEMPLATE.md) |
-| Contributors | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DEVELOPER.md](docs/DEVELOPER.md), [docs/adr/](docs/adr/README.md), [CONTRIBUTING.md](CONTRIBUTING.md) |
+| Contributors | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [neural diagram](docs/architecture/README.md), [docs/DEVELOPER.md](docs/DEVELOPER.md), [docs/adr/](docs/adr/README.md), [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Security | [SECURITY.md](SECURITY.md) |
 | Design (Spanish) | [docs/superpowers/specs/2026-11-08-qo100-station-design.md](docs/superpowers/specs/2026-11-08-qo100-station-design.md) |
 | Per module | `src/<module>/README.md`, `electron/README.md`, `plugins/openwebrx/README.md`, `packaging/windows/README.md` |

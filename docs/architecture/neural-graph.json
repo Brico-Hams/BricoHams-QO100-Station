@@ -1,0 +1,349 @@
+{
+  "nodes": [
+    {
+      "id": "ext:operator",
+      "layer": 0,
+      "loc": 0,
+      "role": "Navegador / micro HTML5",
+      "kind": "external"
+    },
+    {
+      "id": "ext:listener",
+      "layer": 0,
+      "loc": 0,
+      "role": "Navegador (solo escucha)",
+      "kind": "external"
+    },
+    {
+      "id": "ext:google",
+      "layer": 0,
+      "loc": 0,
+      "role": "Identidad (accounts.google.com)",
+      "kind": "external"
+    },
+    {
+      "id": "ext:sdr",
+      "layer": 0,
+      "loc": 0,
+      "role": "Vía SDRangel (REST, UDP, WS)",
+      "kind": "external"
+    },
+    {
+      "id": "ext:cluster",
+      "layer": 0,
+      "loc": 0,
+      "role": "Telnet DX y feed .ics",
+      "kind": "external"
+    },
+    {
+      "id": "out:rf",
+      "layer": 6,
+      "loc": 0,
+      "role": "SDRangel TX (UDP + PTT REST)",
+      "kind": "external"
+    },
+    {
+      "id": "out:logbook",
+      "layer": 6,
+      "loc": 0,
+      "role": "SQLite, tqsl, logbook.qrz.com",
+      "kind": "external"
+    },
+    {
+      "id": "out:openwebrx",
+      "layer": 6,
+      "loc": 0,
+      "role": "Receptores OpenWebRX+",
+      "kind": "external"
+    },
+    {
+      "id": "out:webhooks",
+      "layer": 6,
+      "loc": 0,
+      "role": "POST firmado (HMAC) a terceros",
+      "kind": "external"
+    },
+    {
+      "id": "out:audit",
+      "layer": 6,
+      "loc": 0,
+      "role": "audit.log (JSON lines, 0600)",
+      "kind": "external"
+    },
+    {
+      "id": "electron",
+      "layer": 1,
+      "loc": 171,
+      "role": "Envoltorio de escritorio",
+      "kind": "core"
+    },
+    {
+      "id": "plugins/openwebrx",
+      "layer": 1,
+      "loc": 98,
+      "role": "Plugin OpenWebRX+ (solo recepción)",
+      "kind": "core"
+    },
+    {
+      "id": "services/qo100-calculators",
+      "layer": 1,
+      "loc": 575,
+      "role": "Calculadoras QO-100 (estáticas)",
+      "kind": "core"
+    },
+    {
+      "id": "src/auth",
+      "layer": 3,
+      "loc": 277,
+      "role": "Login Google OIDC, sesiones, CSRF",
+      "kind": "critical"
+    },
+    {
+      "id": "src/beacon",
+      "layer": 3,
+      "loc": 237,
+      "role": "Estimador y lazo de corrección del faro",
+      "kind": "core"
+    },
+    {
+      "id": "src/cluster",
+      "layer": 3,
+      "loc": 552,
+      "role": "Clúster DX, spots y calendario .ics",
+      "kind": "core"
+    },
+    {
+      "id": "src/log",
+      "layer": 3,
+      "loc": 935,
+      "role": "Libro de guardia, ADIF, LoTW, QRZ",
+      "kind": "core"
+    },
+    {
+      "id": "src/modes",
+      "layer": 5,
+      "loc": 2837,
+      "role": "Frecuencias, modos, decodificadores",
+      "kind": "core"
+    },
+    {
+      "id": "src/plugins",
+      "layer": 3,
+      "loc": 157,
+      "role": "Plugins cliente y webhooks firmados",
+      "kind": "core"
+    },
+    {
+      "id": "src/ptt",
+      "layer": 3,
+      "loc": 426,
+      "role": "Máquina de estados PTT + auditoría",
+      "kind": "critical"
+    },
+    {
+      "id": "src/sdrangel",
+      "layer": 3,
+      "loc": 1076,
+      "role": "Cliente REST y driver PTT de SDRangel",
+      "kind": "core"
+    },
+    {
+      "id": "src/server",
+      "layer": 2,
+      "loc": 1150,
+      "role": "Hub: HTTP, WS, config y cableado",
+      "kind": "core"
+    },
+    {
+      "id": "src/web",
+      "layer": 1,
+      "loc": 2133,
+      "role": "UI web PWA (AudioWorklets)",
+      "kind": "core"
+    },
+    {
+      "id": "src/webrtc",
+      "layer": 4,
+      "loc": 909,
+      "role": "Audio RX/TX y espectro por WSS",
+      "kind": "critical"
+    }
+  ],
+  "edges": [
+    {
+      "from": "electron",
+      "to": "src/server",
+      "weight": 2,
+      "kind": "import"
+    },
+    {
+      "from": "src/beacon",
+      "to": "src/modes",
+      "weight": 1,
+      "kind": "import"
+    },
+    {
+      "from": "src/cluster",
+      "to": "src/modes",
+      "weight": 2,
+      "kind": "import"
+    },
+    {
+      "from": "src/sdrangel",
+      "to": "src/modes",
+      "weight": 1,
+      "kind": "import"
+    },
+    {
+      "from": "src/sdrangel",
+      "to": "src/webrtc",
+      "weight": 1,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/auth",
+      "weight": 1,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/beacon",
+      "weight": 2,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/cluster",
+      "weight": 2,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/log",
+      "weight": 5,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/modes",
+      "weight": 1,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/plugins",
+      "weight": 3,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/ptt",
+      "weight": 3,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/sdrangel",
+      "weight": 4,
+      "kind": "import"
+    },
+    {
+      "from": "src/server",
+      "to": "src/webrtc",
+      "weight": 4,
+      "kind": "import"
+    },
+    {
+      "from": "src/webrtc",
+      "to": "src/modes",
+      "weight": 1,
+      "kind": "import"
+    },
+    {
+      "from": "ext:operator",
+      "to": "src/web",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "ext:listener",
+      "to": "src/web",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "ext:operator",
+      "to": "electron",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "src/web",
+      "to": "src/server",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "ext:google",
+      "to": "src/auth",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "ext:sdr",
+      "to": "src/sdrangel",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "ext:sdr",
+      "to": "src/webrtc",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "ext:cluster",
+      "to": "src/cluster",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "src/webrtc",
+      "to": "out:rf",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "src/sdrangel",
+      "to": "out:rf",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "src/log",
+      "to": "out:logbook",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "plugins/openwebrx",
+      "to": "out:openwebrx",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "src/plugins",
+      "to": "out:webhooks",
+      "weight": 1,
+      "kind": "external"
+    },
+    {
+      "from": "src/ptt",
+      "to": "out:audit",
+      "weight": 1,
+      "kind": "external"
+    }
+  ],
+  "cycles": []
+}
