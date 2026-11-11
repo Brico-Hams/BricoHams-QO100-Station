@@ -21,6 +21,20 @@ QO-100 se escucha a 10,489-10,50 GHz. Un LNB con LO de 9750 MHz entrega la baliz
 
 El LNB se alimenta por el coaxial: 13 V para polarización vertical y 18 V para horizontal en un LNB universal (la banda estrecha se escucha con 13 V según el curso EA5EN, **verificar con tu LNB**). **Nunca conectes la FI del LNB a la entrada de HF de un SDR** y no dejes pasar DC hacia un SDR sin bloquear: usa un inyector de bias-T con bloqueo de DC (ver la cajita [sma_biast_enclosure](../3d/scad/sma_biast_enclosure.scad)).
 
+### Comprobaciones antes de conectar el SDR
+
+Registra el modelo y revisión del LNB, inyector y SDR, y la fuente de cada límite. Mantén la transmisión desactivada durante estas comprobaciones.
+
+| Comprobación | Qué contrastar | Fuente o lectura |
+|---|---|---|
+| LO y frecuencia intermedia | Obtén el LO del modelo exacto y calcula la FI esperada de la baliza. Contrasta la FI con la banda de salida del LNB y el rango de entrada del SDR. | |
+| Alimentación y polarización | Consulta la tensión, corriente y selección de polarización del modelo. Verifica la salida del inyector con el SDR desconectado. | |
+| Bloqueo de DC | Mide entre el conductor central y la masa del puerto que va al SDR con el SDR desconectado. Anota lectura y resolución. Contrasta el resultado con la ficha del SDR antes de conectarlo. | |
+| Cableado y respuesta en FI | Con el inyector apagado, comprueba el cableado según las fichas. Si usas VNA, comprueba primero que su puerto de medida está libre de DC y registra la pérdida y adaptación en la FI. | |
+| Recepción | Tras completar las comprobaciones anteriores, anota la FI observada de la baliza y la diferencia respecto a la esperada. | |
+
+Las casillas vacías corresponden a comprobaciones pendientes.
+
 ## Referencias
 
 - Curso Iniciación QO-100, EA5EN Mateo: diapositivas 18 (LNB), 40 (esquema simple de RX) y 48 (lista de enlaces), resumidas en `docs/references/ea5en/`.

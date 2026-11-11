@@ -69,6 +69,8 @@ Datos del probador: nombre/indicativo ______  Versión ______  Fecha ______  Equ
 
 ## C. Solo recepción con hardware real (cada SDR de la lista)
 
+Antes de conectar un LNB alimentado por coaxial, completa las [comprobaciones de entrada, FI y bloqueo de DC](../../hardware/antennas/lnb-y-referencias.md#comprobaciones-antes-de-conectar-el-sdr).
+
 Repite por cada SDR disponible (RTL-SDR, SDRplay, Airspy, ADALM-Pluto, USRP B200mini, Hermes Lite 2, otros): modelo ______
 
 | ✔ | Acción | Resultado esperado | Resultado / notas |
