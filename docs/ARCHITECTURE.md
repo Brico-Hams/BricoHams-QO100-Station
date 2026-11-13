@@ -270,3 +270,15 @@ Upgrade requires a valid session (else 401), `Origin` equal to the `publicUrl` o
 | server → client | binary kind 3 (SPECTRUM) | 18-byte header + 512 bytes, dB = byte/2 − 140 |
 
 Binary headers (little endian): audio `kind u8, flags u8, seq u16, sampleRate u32`; spectrum `kind u8, flags u8, seq u16, centerHz f64, binHz f32, count u16`.
+
+## Security review (SonarQube 2026-11-13)
+
+### `javascript:S1313` — IP addresses should not be hardcoded (LOW) — `src/server/config.js:27`
+
+- **Why it was flagged:** the rule (CWE-547, OWASP A1 2021 / A3 2017) warns that hardcoded IP addresses couple code to a specific infrastructure and force code changes per environment. Here, `isLoopbackHost()` compared the host against the string literal `'::ffff:127.0.0.1'` (the IPv4-mapped loopback address).
+- **What changed:** nothing. A previous change (string comparison replaced by a regular expression) was reverted because it was cosmetic and did not change anything security-relevant.
+
+### Not changed - requires decision
+
+- `javascript:S1313` at `src/server/config.js:27`: the literal `'::ffff:127.0.0.1'` is the IPv4-mapped loopback address used to detect loopback hosts. It is not a configurable remote address, so hard-coding it is not a security risk. Recommendation: mark the issue as safe / false positive in SonarQube.
+- The other `127.0.0.1` defaults in `config.js` are loopback addresses, which the rule excludes, and were not reported.
