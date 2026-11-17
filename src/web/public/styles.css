@@ -1,74 +1,82 @@
-/* BricoHams palette. Brand constants are theme-independent; the semantic tokens below map them per theme. */
+/* BricoHams palette — Manual de color BricoHams v1.1 (see branding/BRANDING.md).
+   Brand constants are theme-independent; the semantic tokens below map them per theme.
+   Never white text on orange: text on --accent is --accent-text (graphite) in both themes. */
 :root {
-  --bh-navy: #12263f;
-  --bh-orange: #e8871e;
-  --bh-grey: #5b6b7b;
-  --bh-charcoal: #22262b;
-  --bh-light: #f7f8fa;
+  --bh-ink: #23272b;
+  --bh-orange: #f26b1d;
 
-  /* Dark theme: orange accent on navy. */
-  --bg: #0d1c30;
-  --panel: #12263f;
-  --panel-2: #1b3556;
-  --text: #f7f8fa;
-  --muted: #b6c2ce;
-  --line: #3b5473;
-  --accent: #e8871e;
-  --accent-text: #12263f;
-  --wm-brico: #f7f8fa;
-  --wm-hams: #e8871e;
-  --ok: #35d07f;
-  --warn: #ffd23f;
-  --tx: #ff5a4d;
-  --focus: #8fd0ff;
-  --scope-bg: #07111f;
-  --scope-grid: #22405f;
+  /* Dark theme */
+  --bg: #111518;
+  --panel: #1c2329;
+  --panel-2: #111518;
+  --text: #f6f8fa;
+  --muted: #bac4cc;
+  --line: #38434c;
+  --control-line: #bac4cc;
+  --accent: #f26b1d;
+  --accent-text: #23272b;
+  --link: #ffa06a;
+  --plate: #ffffff;
+  --ok: #7bd88f;
+  --warn: #ffc857;
+  --tx: #ff8a80;
+  --on-tx: #111518;
+  --focus: #ffc18f;
+  --scope-bg: #111518;
+  --scope-grid: #38434c;
   --scope-trace: #7cf0a6;
-  --scope-mark: #e8871e;
-  --radius: 10px;
+  --scope-mark: #f26b1d;
   color-scheme: dark;
+  --radius: 10px;
 }
 
 :root[data-theme="light"] {
-  --bg: #f7f8fa;
-  --panel: #ffffff;
-  --panel-2: #eaeef2;
-  --text: #22262b;
-  --muted: #5b6b7b;
-  --line: #a9b4bf;
-  --accent: #a85a00;
-  --accent-text: #ffffff;
-  --wm-brico: #22262b;
-  --wm-hams: #c96f0a;
-  --ok: #0a7a43;
-  --warn: #8a6100;
-  --tx: #c4180d;
-  --focus: #12263f;
-  --scope-bg: #12263f;
-  --scope-grid: #2a4767;
+  --bg: #ffffff;
+  --panel: #f6f7f8;
+  --panel-2: #ffffff;
+  --text: #23272b;
+  --muted: #59636b;
+  --line: #dce1e5;
+  --control-line: #59636b;
+  --accent: #f26b1d;
+  --accent-text: #23272b;
+  --link: #aa410b;
+  --plate: transparent;
+  --ok: #1b5e20;
+  --warn: #7a4f00;
+  --tx: #b3261e;
+  --on-tx: #ffffff;
+  --focus: #f26b1d;
+  --scope-bg: #23272b;
+  --scope-grid: #59636b;
   --scope-trace: #7cf0a6;
-  --scope-mark: #e8871e;
+  --scope-mark: #f26b1d;
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]) {
-    --bg: #f7f8fa;
-    --panel: #ffffff;
-    --panel-2: #eaeef2;
-    --text: #22262b;
-    --muted: #5b6b7b;
-    --line: #a9b4bf;
-    --accent: #a85a00;
-    --accent-text: #ffffff;
-    --wm-brico: #22262b;
-    --wm-hams: #c96f0a;
-    --ok: #0a7a43;
-    --warn: #8a6100;
-    --tx: #c4180d;
-    --focus: #12263f;
-    --scope-bg: #12263f;
-    --scope-grid: #2a4767;
+    --bg: #ffffff;
+    --panel: #f6f7f8;
+    --panel-2: #ffffff;
+    --text: #23272b;
+    --muted: #59636b;
+    --line: #dce1e5;
+    --control-line: #59636b;
+    --accent: #f26b1d;
+    --accent-text: #23272b;
+    --link: #aa410b;
+    --plate: transparent;
+    --ok: #1b5e20;
+    --warn: #7a4f00;
+    --tx: #b3261e;
+    --on-tx: #ffffff;
+  --on-tx: #ffffff;
+    --focus: #f26b1d;
+    --scope-bg: #23272b;
+    --scope-grid: #59636b;
+    --scope-trace: #7cf0a6;
+    --scope-mark: #f26b1d;
     color-scheme: light;
   }
 }
@@ -83,7 +91,7 @@ body {
   font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-a { color: var(--accent); }
+a { color: var(--link); }
 
 :focus-visible {
   outline: 3px solid var(--focus);
@@ -126,10 +134,9 @@ a { color: var(--accent); }
   border-bottom: 3px solid var(--bh-orange);
 }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 1.15rem; }
-.brand strong { color: var(--accent); }
-.wordmark { font-weight: 800; letter-spacing: 0.01em; font-size: 1.3rem; text-decoration: none; }
-.wordmark .wm-brico { color: var(--wm-brico); }
-.wordmark .wm-hams { color: var(--wm-hams); }
+.brand strong { color: var(--text); }
+.logo { display: inline-block; background: var(--plate); border-radius: 10px; padding: 6px 10px; line-height: 0; }
+.logo img { height: 36px; width: auto; }
 .tagline { color: var(--muted); font-size: 0.75rem; display: block; line-height: 1.1; }
 .site-footer {
   max-width: 1180px;
@@ -157,7 +164,7 @@ button, .btn, .tab {
   font: inherit;
   color: var(--text);
   background: var(--panel-2);
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-line);
   border-radius: 8px;
   padding: 8px 14px;
   min-height: 40px;
@@ -171,7 +178,7 @@ button:hover:not(:disabled), .btn:hover, .tab:hover { border-color: var(--accent
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 .primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
 .ghost { background: transparent; }
-.tab[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.tab[aria-pressed="true"] { border-color: var(--accent); color: var(--link); font-weight: 700; }
 .g { background: #fff; color: #1a73e8; border-radius: 50%; width: 22px; height: 22px; display: inline-grid; place-items: center; font-weight: 800; }
 
 main { max-width: 1180px; margin: 0 auto; padding: 16px; }
@@ -205,7 +212,7 @@ main:focus { outline: none; }
 
 .freq-row { display: flex; align-items: baseline; gap: 10px; }
 .freq-row .label { min-width: 8.5em; }
-.big { font-size: 2.1rem; font-weight: 700; color: var(--accent); }
+.big { font-size: 2.1rem; font-weight: 700; color: var(--link); }
 
 .seg { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .seg-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); font-weight: 700; }
@@ -229,11 +236,11 @@ canvas { display: block; width: 100%; background: var(--scope-bg); border-radius
   font-size: 1.4rem;
   padding: 6px 16px;
   border-radius: 8px;
-  border: 2px solid var(--line);
+  border: 2px solid var(--control-line);
   color: var(--muted);
 }
 .txstate.armed { color: var(--warn); border-color: var(--warn); }
-.txstate.tx { background: var(--tx); border-color: var(--tx); color: #fff; animation: pulse 1s steps(2, jump-none) infinite; }
+.txstate.tx { background: var(--tx); border-color: var(--tx); color: var(--on-tx); animation: pulse 1s steps(2, jump-none) infinite; }
 .txstate.lockout { color: var(--tx); border-color: var(--tx); }
 @keyframes pulse { 50% { filter: brightness(0.75); } }
 @media (prefers-reduced-motion: reduce) { .txstate.tx { animation: none; } }
@@ -252,8 +259,8 @@ canvas { display: block; width: 100%; background: var(--scope-bg); border-radius
   -webkit-user-select: none;
 }
 .ptt-btn .sub { font-size: 0.7rem; font-weight: 400; color: var(--muted); }
-.ptt-btn.down { background: var(--tx); color: #fff; border-color: var(--tx); }
-.ptt-btn.down .sub { color: #fff; }
+.ptt-btn.down { background: var(--tx); color: var(--on-tx); border-color: var(--tx); }
+.ptt-btn.down .sub { color: var(--on-tx); }
 #ptt-msg { grid-column: 1 / -1; margin: 0; }
 .meter { grid-column: 1 / -1; height: 6px; background: var(--panel-2); border-radius: 3px; overflow: hidden; }
 .meter-bar { height: 100%; width: 0; background: var(--ok); }
@@ -265,7 +272,7 @@ input, select {
   font: inherit;
   color: var(--text);
   background: var(--bg);
-  border: 1px solid var(--line);
+  border: 1px solid var(--control-line);
   border-radius: 6px;
   padding: 8px 10px;
   min-height: 40px;
