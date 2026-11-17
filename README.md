@@ -1,9 +1,5 @@
-<p align="center"><img src="branding/bricohams_horizontal.svg" alt="BricoHams · Radioafición · Hazlo tú mismo" width="420"></p>
-
-<p align="center"><a href="https://bricohams.org">bricohams.org</a> · Anatol EA5KAO · Diego EA5JEF · Pedro Roca Molina</p>
-
 <p align="center">
-  <a href="https://bricohams.org"><img src="branding/bricohams_horizontal.png" alt="BricoHams" width="360"></a>
+  <a href="https://bricohams.org"><img src="branding/bricohams_horizontal.svg" alt="BricoHams · Radioafición · Hazlo tú mismo" width="360"></a>
 </p>
 
 <p align="center"><strong>Radioafición · Hazlo tú mismo</strong> / Amateur radio · Do it yourself<br>

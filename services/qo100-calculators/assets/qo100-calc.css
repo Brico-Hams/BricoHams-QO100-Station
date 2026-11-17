@@ -1,11 +1,15 @@
 .bh-qo100 {
   --bh-bg: #ffffff;
-  --bh-fg: #22262b;
-  --bh-muted: #5b6b7b;
-  --bh-accent: #12263f;
-  --bh-accent-fg: #ffffff;
-  --bh-highlight: #e8871e;
-  --bh-border: #c9d1dc;
+  /* Manual de color BricoHams v1.1 */
+  --bh-fg: #23272b;
+  --bh-muted: #59636b;
+  --bh-accent: #f26b1d;
+  --bh-accent-fg: #23272b;
+  --bh-highlight: #f26b1d;
+  --bh-border: #dce1e5;
+  --bh-control: #59636b;
+  --bh-link: #aa410b;
+  --bh-focus: #f26b1d;
   --bh-err: #b3261e;
   box-sizing: border-box;
   max-width: 44rem;
@@ -21,12 +25,15 @@
 
 @media (prefers-color-scheme: dark) {
   .bh-qo100 {
-    --bh-bg: #12263f;
-    --bh-fg: #f7f8fa;
-    --bh-muted: #b6c2ce;
-    --bh-accent: #e8871e;
-    --bh-accent-fg: #12263f;
-    --bh-border: #3b5473;
+    --bh-bg: #1c2329;
+    --bh-fg: #f6f8fa;
+    --bh-muted: #bac4cc;
+    --bh-accent: #f26b1d;
+    --bh-accent-fg: #23272b;
+    --bh-border: #38434c;
+    --bh-control: #bac4cc;
+    --bh-link: #ffa06a;
+    --bh-focus: #ffc18f;
     --bh-err: #ff8a80;
   }
 }
@@ -43,11 +50,11 @@
   font: inherit;
   color: inherit;
   background: transparent;
-  border: 1px solid var(--bh-border);
+  border: 1px solid var(--bh-control);
   border-radius: 4px;
 }
 .bh-field input:focus-visible, .bh-field select:focus-visible, .bh-btn:focus-visible, .bh-sources a:focus-visible {
-  outline: 3px solid var(--bh-accent);
+  outline: 3px solid var(--bh-focus);
   outline-offset: 2px;
 }
 
@@ -62,7 +69,7 @@
   border-radius: 4px;
   cursor: pointer;
 }
-.bh-btn-alt { color: var(--bh-fg); background: transparent; border: 1px solid var(--bh-accent); }
+.bh-btn-alt { color: var(--bh-fg); background: transparent; border: 1px solid var(--bh-control); }
 
 .bh-results dl { display: grid; grid-template-columns: 1fr auto; gap: .2rem 1rem; margin: 0; }
 .bh-results dt { color: var(--bh-muted); }
@@ -70,7 +77,7 @@
 .bh-error { color: var(--bh-err); font-weight: 600; }
 .bh-note { color: var(--bh-muted); font-size: .85rem; }
 .bh-sources { margin-top: 1rem; padding-top: .5rem; border-top: 1px solid var(--bh-border); font-size: .85rem; color: var(--bh-muted); }
-.bh-sources a { color: var(--bh-accent); }
+.bh-sources a { color: var(--bh-link); }
 
 @media (max-width: 30rem) {
   .bh-qo100 { padding: .75rem; }

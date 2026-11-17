@@ -6,13 +6,13 @@ import { join } from 'node:path';
 const root = new URL('../../', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 const read = (...p) => readFileSync(join(root, ...p), 'utf8');
 
-test('web styles define the BricoHams palette tokens', () => {
+test('web styles use the Manual de color BricoHams v1.1', () => {
   const css = read('src', 'web', 'public', 'styles.css');
-  assert.match(css, /--bh-navy:\s*#12263f/i);
-  assert.match(css, /--bh-orange:\s*#e8871e/i);
-  assert.match(css, /--bh-grey:\s*#5b6b7b/i);
-  assert.match(css, /--bh-charcoal:\s*#22262b/i);
-  assert.match(css, /--bh-light:\s*#f7f8fa/i);
+  assert.match(css, /--bh-ink:\s*#23272b/i);
+  assert.match(css, /--bh-orange:\s*#f26b1d/i);
+  assert.match(css, /--accent-text:\s*#23272b/i);
+  // Retired palette must not come back in the web UI (figures keep their own palette).
+  for (const old of ['#12263f', '#e8871e', '#0d1c30', '#1b3556']) assert.doesNotMatch(css, new RegExp(old, 'i'), old);
 });
 
 test('every manual figure has viewBox, title, desc and the BricoHams credit', () => {
@@ -29,7 +29,7 @@ test('every manual figure has viewBox, title, desc and the BricoHams credit', ()
 });
 
 test('README and help index link the original logo', () => {
-  assert.match(read('README.md'), /branding\/bricohams_horizontal\.png/);
+  assert.match(read('README.md'), /branding\/bricohams_horizontal\.(svg|png)/);
   assert.match(read('docs', 'help', 'index.md'), /branding\/bricohams_horizontal\.png/);
   assert.match(read('docs', 'manual', 'es', 'README.md'), /branding\/bricohams_horizontal\.png/);
 });
